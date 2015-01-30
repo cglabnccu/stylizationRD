@@ -69,7 +69,7 @@ private:
 	bool render_loop_on;
 	void activateRenderLoop(bool on);
 	void OnStart(wxCommandEvent& event);
-	void OnFill(wxCommandEvent& event);
+	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
@@ -91,6 +91,7 @@ private:
 	void OnEdge2AddB(wxCommandEvent& event);
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
+	void OnOpenPatternPicker(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void onIdle(wxIdleEvent& evt);
@@ -110,6 +111,7 @@ enum
 	ID_ONEdge2AddB,
 	ID_ONOPEN_MASK,
 	ID_ONOPEN_MASK_S,
+	ID_ONOPEN_PATTERN_PICKER,
 
 	ID_WXEDIT1,
 	BUTTON_Start,

@@ -1,20 +1,6 @@
 #include "gui.h"
 #include <ctime>
 
-//static const int NUM_FPS_SAMPLES = 64;
-//float fpsSamples[NUM_FPS_SAMPLES];
-//int currentSample = 0;
-//
-//float CalcFPS(int dt)
-//{
-//	fpsSamples[currentSample % NUM_FPS_SAMPLES] = 1.0f / dt;
-//	float fps = 0;
-//	for (int i = 0; i < NUM_FPS_SAMPLES; i++)
-//		fps += fpsSamples[i];
-//	fps /= NUM_FPS_SAMPLES;
-//	return fps;
-//}
-
 
 bool MyApp::OnInit()
 {
@@ -43,6 +29,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-C", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-C", "Open Mask_s Img.");
+	menuTool->AppendSeparator();
+	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
 
 	wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(wxID_ABOUT);
@@ -338,6 +326,10 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event){
 	if (drawPane->element.SrcLoaded) imshow("Mask_S Img", drawPane->element.Mask_s);
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
+void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
+	wxFrame *patternpicker = new wxFrame(NULL, wxID_ANY, "Pattern Picker", wxPoint(100,100), wxSize(500,300));
+	patternpicker->Show();
+}
 
 void MyFrame::OnStart(wxCommandEvent& event)
 {
@@ -349,8 +341,9 @@ void MyFrame::OnStart(wxCommandEvent& event)
 }
 void MyFrame::OnFill(wxCommandEvent& event)
 {
-	for (int x = 0; x < drawPane->element.c_B->cols; x += drawPane->element.c_B->cols / 10){
-		for (int y = 0; y < drawPane->element.c_B->rows; y += drawPane->element.c_B->rows / 10){
+	for (int i = 0; i < drawPane->element.c_B->cols/10; i ++){
+		//for (int y = 0; y < drawPane->element.c_B->rows; y += drawPane->element.c_B->rows / 10){
+		int x = rand() % drawPane->element.c_B->cols, y = rand() % drawPane->element.c_B->rows;
 			ellipse(
 				*drawPane->element.c_B, // img - Image.
 				Point(x , y),           // center - Center of the ellipse.
@@ -362,7 +355,7 @@ void MyFrame::OnFill(wxCommandEvent& event)
 				3,                      // thickness - Thickness of the ellipse arc outline
 				8                       // lineType - Type of the ellipse boundary. See the line() description.
 				);
-		}
+		//}
 	}
 }
 void MyFrame::OnClean(wxCommandEvent& event)

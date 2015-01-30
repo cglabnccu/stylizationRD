@@ -270,3 +270,133 @@ void RD::FastGrayScott(){
 		//inter finish
 	}
 }
+
+void RD::GrayScottModel(int l){
+	int nRows = 300;
+	int nCols = 300;
+	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
+
+	array_view< float, 1 > alpha_A(nRows*nCols, (float*)alpha_A.data);
+	//array_view< float, 1 > alpha_B( nRows*nCols, (float*)e.alpha_B.data );
+	array_view< float, 1 > c_A(nRows*nCols, (float*)c_A->data);
+	array_view< float, 1 > c_B(nRows*nCols, (float*)c_B->data);
+	array_view< float, 1 > p_A(nRows*nCols, (float*)p_A->data);
+	array_view< float, 1 > p_B(nRows*nCols, (float*)p_B->data);
+	array_view< float, 1 > a_A(nRows*nCols, (float*)Addition_A.data);
+	array_view< float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
+	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
+	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
+
+	float theta0 = 0;
+
+	// Gray-Scott models' paramaters
+	float f = 0.375;
+	float k = 0.0;
+
+	// Coefficient(weight)
+	float addA = this->addA;
+	float addB = this->addB;
+
+	// Scaling factors: Sd, Sr  (Refer to Section 3.2.1 in Paper)
+	float sd = 0.5;	//speed of diffusion
+	float sr = 0.5; //speed of reaction
+
+	int kh = 3;
+	int kw = 3;
+	//inter start
+	int t = 0;
+	const int innerAMPloopsize = 4;
+	while (t < innerAMPloopsize){
+		t++;
+		parallel_for_each(alpha_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+			index<1> x = idx / nCols;
+			index<1> y = idx%nCols;
+			//Gradient
+			float sx = 0;
+			float sy = 0;
+			for (int i = -1; i <= 1; i++){
+				index<1> j1 = ((x + 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
+				index<1> j2 = ((x - 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
+				index<1> j3 = ((x + i + nRows) % nRows)*nCols + (y + 1 + nCols) % nCols;
+				index<1> j4 = ((x + i + nRows) % nRows)*nCols + (y - 1 + nCols) % nCols;
+				sx += c_A[j1] - c_A[j2];
+				sy += c_A[j3] - c_A[j4];
+			}
+
+			//anisotropic function
+			index<1> ix3 = idx * 3;
+			float axb = sqrt(sx*sx + sy*sy) * sqrt(p_flowfield[ix3] * p_flowfield[ix3] + p_flowfield[ix3 + 1] * p_flowfield[ix3 + 1]);
+			float cos_theta = 0;
+			float cross_product = 0;
+			if (axb == 0){
+				cos_theta = 0;
+				cross_product = 0;
+			}
+			else{
+				cos_theta = (sx*p_flowfield[ix3] + sy*p_flowfield[ix3 + 1]) / axb;
+				cross_product = (sx*p_flowfield[ix3 + 1] - sy*p_flowfield[ix3]) / axb;
+			}
+			if (cos_theta >= 1.0){
+				cos_theta = 1.0;
+			}
+			else if (cos_theta <= -1.0){
+				cos_theta = -1.0;
+			}
+			float theta = acos(cos_theta);
+			if (cross_product < 0){
+				theta = 2 * M_PI - theta;
+			}
+			float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+			float temp2 = 1 / temp*0.1;
+			alpha_A[idx] = temp2;
+		}
+		);
+
+		parallel_for_each(p_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+
+			//anisotropic diffusion
+			index<1> x = idx / nCols;
+			index<1> y = idx%nCols;
+			float da = 0;
+			float db = 0;
+			for (int q = -kh / 2; q <= kh / 2; q++){
+				for (int p = -kw / 2; p <= kw / 2; p++){
+					//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
+					//	continue;
+					index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
+					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+				}
+			}
+			da /= (kw*kh - 1);
+			db /= (kw*kh - 1);
+
+			//reaction diffusion
+			float a = c_A[idx];
+			float b = c_B[idx];
+			float DA = sd*1.0*da;
+			float DB = sd*0.5*db;
+			float RA = sr*(-a*b*b + f*(1 - a));
+			float RB = sr*(a*b*b - (k + f)*b);
+			float AA = addA*a_A[idx];
+			float AB = addB*a_B[idx];
+			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
+			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
+		}
+		);
+		//--------------------------------------------- SWAP-------------------------------------------------------
+		parallel_for_each(c_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+			c_A[idx] = p_A[idx];
+			c_B[idx] = p_B[idx];
+		}
+		);
+		//inter finish
+	}
+
+}

@@ -21,6 +21,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_MENU(ID_ONEdge2AddB, MyFrame::OnEdge2AddB)
 	EVT_MENU(ID_ONOPEN_MASK, MyFrame::OnOpenMask)
 	EVT_MENU(ID_ONOPEN_MASK_S, MyFrame::OnOpenMaskS)
+	EVT_MENU(ID_ONOPEN_PATTERN_PICKER, MyFrame::OnOpenPatternPicker)
 
 	// Menu - Help
 	EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
