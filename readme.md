@@ -5,9 +5,10 @@
 
 
 ### [Required]
- * [CMake](www.cmake.org/)(3.0 or higher)
- * [wxWidgets](https://www.wxwidgets.org/)(3.0.2 or higher)
- * [OpenCV](http://opencv.org/)(2.9.7 or higher)
+
+ * <a href="http://www.cmake.org/" target="_blank">CMake</a>(3.0 or higher)
+ * <a href="https://www.wxwidgets.org/" target="_blank">wxWidgets</a>(3.0.2 or higher)
+ * <a href="http://opencv.org/" target="_blank">OpenCV</a>(2.9.7 or higher)
  * amp(C++ Accelerated Massive Parallelism)  visual studio 2013
 
 
