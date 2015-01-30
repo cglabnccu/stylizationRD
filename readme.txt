@@ -1,45 +1,48 @@
-[Required]
-CMake
-amp(C++ Accelerated Massive Parallelism)  visual studio 2013
-wxWidgets 3.0.2
-OpenCV 2.9.7 
+# stylizationRD 
+ Image stylization using anisotropic reaction diffusion
+
+---
 
 
-[workflow]
-Open src:  load image into MASK, and generate sobel edge image into MASK_s
-Flowfield Option: 
-1. Open ETF: use the ETF of load image as flowfield
-2. Open Flow: there are some vfb in /data/
+### [Required]
+ * [CMake](www.cmake.org/)(3.0 or higher)
+ * [wxWidgets](https://www.wxwidgets.org/)(3.0.2 or higher)
+ * [OpenCV](http://opencv.org/)(2.9.7 or higher)
+ * amp(C++ Accelerated Massive Parallelism)  visual studio 2013
 
 
-Start
-use mouse left button to draw patten into current_B
+### [workflow]
+ * Open src: Load image into MASK, and generate sobel edge image into MASK_s
+ * Flowfield Option: 
+  1. Open ETF: use the ETF of load image as flowfield
+  2. Open Flow: there are some vfb in /data/
 
-use tool->Edge2addB and slide addB large than 0, can add edge of input image to result of reaction diffusion.
+ * Start: use mouse left button to draw patten into current_B, use tool->Edge2addB and slide addB large than 0, can add edge of input image to result of reaction diffusion.
 
 
-[in post process]
+### [in post process]
 beta to threshold the density to black and white
 
 
 ---
 
-[¹ïÀ³table 1ªºfig.5 6ªº²£¥Í]
-fig5(a)(b)(c)(d): source.vfb, F k l·Óªí³]©w(Size½Õ¨ì0.5¥ª¥k)¡A¥Îseed§¡¤ÃÅxÃC®Æ¡AÃ­©w«á¥Îadathresholding(beta=0.8¥ª¥k)
-*fig5(d)theta0½Õ¦¨220«×
+### [å°æ‡‰table 1çš„fig.5 6çš„ç”¢ç”Ÿ]
+fig5(a)(b)(c)(d): source.vfb, F k lç…§è¡¨è¨­å®š(Sizeèª¿åˆ°0.5å·¦å³)ï¼Œç”¨seedå‡å‹»ç‘é¡æ–™ï¼Œç©©å®šå¾Œç”¨adathresholding(beta=0.8å·¦å³)
+*fig5(d)theta0èª¿æˆ220åº¦
 
 ---
 
+###[Useful Tutorials]
+#####[wxWidgets]
+ * [How to compile a wxWidgets application in Visual Studio 2008?](
+http://www.rhyous.com/2009/12/16/how-to-compile-a-wxwidgets-application-in-visual-studio-2008/)
+ * [wxWidgetsæ•™å­¸ï¼šç·¨è­¯éœæ…‹LIBæª”åŠç¬¬ä¸€å€‹Hello Worldç¨‹å¼](
+http://changyang319.pixnet.net/blog/post/26984931-wxwidgets%E6%95%99%E5%AD%B8%EF%BC%9A%E7%B7%A8%E8%AD%AF%E9%9D%9C%E6%85%8Blib%E6%AA%94%E5%8F%8A%E7%AC%AC%E4%B8%80%E5%80%8Bhello-world)
 
-[wxWidgets]
-http://www.rhyous.com/2009/12/16/how-to-compile-a-wxwidgets-application-in-visual-studio-2008/
-http://changyang319.pixnet.net/blog/post/26984931-wxwidgets%E6%95%99%E5%AD%B8%EF%BC%9A%E7%B7%A8%E8%AD%AF%E9%9D%9C%E6%85%8Blib%E6%AA%94%E5%8F%8A%E7%AC%AC%E4%B8%80%E5%80%8Bhello-world
+#####[OpenCV]
+ * [Set the OpenCV enviroment variable and add it to the systems path](http://docs.opencv.org/doc/tutorials/introduction/windows_install/windows_install.html#windowssetpathandenviromentvariable)
+ * [How to build applications with OpenCV inside the Microsoft Visual Studio](http://docs.opencv.org/doc/tutorials/introduction/windows_visual_studio_Opencv/windows_visual_studio_Opencv.html#windows-visual-studio-how-to)
 
-[OpenCV]
-http://docs.opencv.org/doc/tutorials/introduction/windows_install/windows_install.html#windowssetpathandenviromentvariable
-http://docs.opencv.org/doc/tutorials/introduction/windows_visual_studio_Opencv/windows_visual_studio_Opencv.html#windows-visual-studio-how-to
-
-
-[Others]
-Q:error LNK2019
-A:Windows, Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows"
+#####[Others]
+ - Q:error LNK2019
+ - A:Windows, Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows"
