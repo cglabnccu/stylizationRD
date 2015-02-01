@@ -35,11 +35,37 @@ private:
 	bool activateDraw;
 };
 
+class Picker : public wxPanel
+{
+public:
+	Picker(wxFrame* parent);
+	void MouseLDown(wxMouseEvent &event);
+	DECLARE_EVENT_TABLE()
+
+};
+
+class MyPatternPicker : public wxFrame
+{
+public:
+	MyPatternPicker(const wxString& title);
+	BasicDrawPane *preview;
+	Picker *picker;
+	void StartPreview();
+private:
+	void onIdle(wxIdleEvent& evt);
+	void OnSelect(wxCommandEvent& event);
+	void MouseLDown(wxMouseEvent &event);
+	void OnExit(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
+};
+
+
 class MyFrame: public wxFrame
 {
 public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	void addlog(wxString info, wxColour& color);
+	MyPatternPicker *patternpicker;
 private:
 	BasicDrawPane *drawPane;
 	wxTextCtrl *log; // Show the log
@@ -137,5 +163,7 @@ enum
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,
 	SLIDER_Beta,
-	SLIDER_Beta_T
+	SLIDER_Beta_T,
+
+	BUTTON_Select //pattern picker
 };

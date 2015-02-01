@@ -7,6 +7,20 @@ BEGIN_EVENT_TABLE(BasicDrawPane, wxPanel)
 	EVT_LEFT_UP(BasicDrawPane::MouseLUp)
 END_EVENT_TABLE()
 
+// Pattern Picker Window
+BEGIN_EVENT_TABLE(MyPatternPicker, wxFrame)
+	//EVT_LEFT_DOWN(MyPatternPicker::MouseLDown)
+	EVT_BUTTON(BUTTON_Select, MyPatternPicker::OnSelect)
+	//EVT_MENU(wxID_EXIT, MyPatternPicker::OnExit)
+END_EVENT_TABLE()
+
+// Pattern Picker region
+BEGIN_EVENT_TABLE(Picker, wxPanel)
+	EVT_LEFT_DOWN(Picker::MouseLDown)
+END_EVENT_TABLE()
+
+
+
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	// Menu - File
     EVT_MENU(ID_ONOPENSRC,   MyFrame::OnOpenSrc)

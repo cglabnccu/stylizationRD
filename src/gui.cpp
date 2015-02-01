@@ -6,10 +6,13 @@ bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 600));
 	frame->Show(true);
+
+	frame->patternpicker = new MyPatternPicker(wxT("CustomDialog"));
+//	frame->patternpicker->Show(true);
 	return true;
 }
 
-//-------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
@@ -49,7 +52,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 
 	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
-	drawPane = new BasicDrawPane(this, Size(256, 256));
+	drawPane = new BasicDrawPane(this, Size(500, 500));
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2|wxTE_MULTILINE|wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
@@ -151,6 +154,86 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	render_loop_on = false;
 	//activateRenderLoop(render_loop_on);
 }
+MyPatternPicker::MyPatternPicker(const wxString & title)
+	: wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(500, 200)){
+	wxPanel *panel = new wxPanel(this, -1);
+	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
+
+	//left 
+	picker = new Picker(this);
+	left->Add(picker, 1, wxEXPAND);
+
+	//right
+	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(s, 0, wxEXPAND);
+	preview = new BasicDrawPane(this, Size(100, 100));
+	right->Add(preview, 1, wxEXPAND);
+	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(select, 0, 0);
+
+	sizer->Add(left, 4, wxEXPAND);
+	sizer->Add(right, 1, wxEXPAND);
+	SetSizer(sizer);
+	Centre();
+}
+
+void MyPatternPicker::OnSelect(wxCommandEvent& event){
+	Close(true);
+
+}
+void MyPatternPicker::StartPreview(){
+	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
+
+}
+void MyPatternPicker::onIdle(wxIdleEvent& evt)
+{
+	preview->paintNow(true);
+	evt.RequestMore(); // render continuously, not only once on idle
+}
+//-----------------------------------------------------------------------------------------------------------------------------------
+
+Picker::Picker(wxFrame* parent) :
+	wxPanel(parent)
+{
+}
+void Picker::MouseLDown(wxMouseEvent &event){
+	//wxString s;
+	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x, event.m_y);
+	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
+
+	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.000025*event.m_x;
+	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
+
+	// clean preview
+	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.c_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.p_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.p_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	((MyPatternPicker *)GetParent())->preview->element.Addition_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+
+	// fill preview with ink
+	for (int i = 0; i < 25; i++){
+		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols, y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
+		ellipse(
+			*((MyPatternPicker *)GetParent())->preview->element.c_B, // img - Image.
+			Point(x, y),           // center - Center of the ellipse.
+			Size(5, 5),             // axes - Half of the size of the ellipse main axes.
+			0,                      // angle - Ellipse rotation angle in degrees.
+			0,                      // startAngle - Starting angle of the elliptic arc in degrees.
+			360,                    // endAngle - Ending angle of the elliptic arc in degrees.
+			Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
+			3,                     // thickness - Thickness of the ellipse arc outline
+			8                       // lineType - Type of the ellipse boundary. See the line() description.
+			);
+	}
+
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 void MyFrame::addlog(wxString info, wxColour& color){
 	time_t currentTime;// for logging current time
@@ -327,8 +410,8 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event){
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
 void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
-	wxFrame *patternpicker = new wxFrame(NULL, wxID_ANY, "Pattern Picker", wxPoint(100,100), wxSize(500,300));
 	patternpicker->Show();
+	patternpicker->StartPreview();
 }
 
 void MyFrame::OnStart(wxCommandEvent& event)
@@ -341,18 +424,18 @@ void MyFrame::OnStart(wxCommandEvent& event)
 }
 void MyFrame::OnFill(wxCommandEvent& event)
 {
-	for (int i = 0; i < drawPane->element.c_B->cols/10; i ++){
+	for (int i = 0; i < drawPane->element.c_B->cols/5; i ++){
 		//for (int y = 0; y < drawPane->element.c_B->rows; y += drawPane->element.c_B->rows / 10){
 		int x = rand() % drawPane->element.c_B->cols, y = rand() % drawPane->element.c_B->rows;
 			ellipse(
 				*drawPane->element.c_B, // img - Image.
 				Point(x , y),           // center - Center of the ellipse.
-				Size(1, 1),             // axes - Half of the size of the ellipse main axes.
+				Size(5, 5),             // axes - Half of the size of the ellipse main axes.
 				0,                      // angle - Ellipse rotation angle in degrees.
 				0,                      // startAngle - Starting angle of the elliptic arc in degrees.
 				360,                    // endAngle - Ending angle of the elliptic arc in degrees.
 				Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
-				3,                      // thickness - Thickness of the ellipse arc outline
+				3,                     // thickness - Thickness of the ellipse arc outline
 				8                       // lineType - Type of the ellipse boundary. See the line() description.
 				);
 		//}
@@ -381,7 +464,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		processingBox->SetSelection(0);
 	}
 
-	if (processingBox->GetValue() == "none" || processingBox->GetValue() == "dirTexture"){
+	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" || processingBox->GetValue() == "dirTexture"){
 		slider_alpha->Disable();
 		slider_beta->Disable();
 	}
@@ -484,7 +567,7 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 	evt.RequestMore(); // render continuously, not only once on idle
 }
 
-//-------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s) :
 processing(s),
@@ -534,10 +617,11 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 				3,
 				8);
 	activateDraw = true;
+	//wxString s;
+	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x%element.c_B->cols, event.m_y%element.c_B->rows);
+	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
 
-	wxString s;
-	s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x%element.c_B->cols, event.m_y%element.c_B->rows);
-	((MyFrame *)GetParent())->addlog(s, wxColour(*wxBLACK));
+	//((MyFrame *)GetParent())->addlog(s, wxColour(*wxBLACK));
 }
 void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 {
@@ -580,6 +664,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	static int counter = 0;
 	if (render_loop_on){
 		element.FastGrayScott();
+		//element.GrayScottModel(3);
 		counter++;
 	}
 
@@ -615,5 +700,5 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	dc.DrawBitmap(bmp, 0, 0);
 
 
-	((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);
+	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);
 }

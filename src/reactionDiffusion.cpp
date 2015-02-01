@@ -272,8 +272,8 @@ void RD::FastGrayScott(){
 }
 
 void RD::GrayScottModel(int l){
-	int nRows = 300;
-	int nCols = 300;
+	int nRows = 100;
+	int nCols = 500;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
 
 	array_view< float, 1 > alpha_A(nRows*nCols, (float*)alpha_A.data);
@@ -290,8 +290,17 @@ void RD::GrayScottModel(int l){
 	float theta0 = 0;
 
 	// Gray-Scott models' paramaters
-	float f = 0.375;
-	float k = 0.0;
+	//float farray[501];
+	float f = 0.0375;
+	float karray[500];
+	for (int i = 0; i < 500; i++){
+		int bias = (i + 1) / 25;
+		karray[i] = 0.056 + ((float)bias / 2000.0);
+	}
+	//for (int i = 0; i < 501; i++) farray[i] = 0.0 + ((float)(i + 1) / 8333.3);
+	array_view< float, 1 > k(nCols, karray);
+	//array_view< float, 1 > f(nRows, farray);
+	//float k;
 
 	// Coefficient(weight)
 	float addA = this->addA;
@@ -360,7 +369,7 @@ void RD::GrayScottModel(int l){
 
 			//anisotropic diffusion
 			index<1> x = idx / nCols;
-			index<1> y = idx%nCols;
+			index<1> y = idx % nCols;
 			float da = 0;
 			float db = 0;
 			for (int q = -kh / 2; q <= kh / 2; q++){
@@ -374,14 +383,14 @@ void RD::GrayScottModel(int l){
 			}
 			da /= (kw*kh - 1);
 			db /= (kw*kh - 1);
-
+			
 			//reaction diffusion
 			float a = c_A[idx];
 			float b = c_B[idx];
 			float DA = sd*1.0*da;
 			float DB = sd*0.5*db;
 			float RA = sr*(-a*b*b + f*(1 - a));
-			float RB = sr*(a*b*b - (k + f)*b);
+			float RB = sr*(a*b*b - (k[y] + f)*b);
 			float AA = addA*a_A[idx];
 			float AB = addB*a_B[idx];
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
