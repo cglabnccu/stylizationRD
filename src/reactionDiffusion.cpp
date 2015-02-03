@@ -23,9 +23,9 @@ RD::RD(Size s){
 	c_B = &B1;
 	p_B = &B2;
 
-	this->s = 0.1;
+	this->s = 0.3;
 	this->v = 0.0;
-	this->l = 0;
+	this->l = 1;
 	this->f = 0.0375;
 	this->k = 0.05775;
 	this->theta0 = 0;
@@ -271,8 +271,8 @@ void RD::FastGrayScott(){
 	}
 }
 
-void RD::GrayScottModel(int l){
-	int nRows = 100;
+void RD::GrayScottModel(){
+	int nRows = 500;
 	int nCols = 500;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
 
@@ -289,16 +289,25 @@ void RD::GrayScottModel(int l){
 
 	float theta0 = 0;
 
+	int larray[501];// = this->l;
+	for (int i = 0; i < 501; i++) larray[i] = i / 70;
+	array_view<int, 1> l(500, larray);
 	// Gray-Scott models' paramaters
 	//float farray[501];
-	float f = 0.0375;
+	//float farray[501];// = 0.0375;
 	float karray[500];
+	//for (int i = 0; i < 500; i++){
+	//	int kbias = (i + 1) / 25;
+	//	karray[i] = 0.056 + ((float)kbias / 2000.0);
+	//}
+	//farray[500] = 0.0375;
 	for (int i = 0; i < 500; i++){
-		int bias = (i + 1) / 25;
-		karray[i] = 0.056 + ((float)bias / 2000.0);
+		karray[i] = 0.056+(float)(i + 1) / 50000.0;
+		//farray[i] = (float)(i + 1) / 8334.0;
 	}
 	//for (int i = 0; i < 501; i++) farray[i] = 0.0 + ((float)(i + 1) / 8333.3);
-	array_view< float, 1 > k(nCols, karray);
+	array_view< float, 1 > k(500, karray);
+	//array_view< float, 1 > f(501, farray);
 	//array_view< float, 1 > f(nRows, farray);
 	//float k;
 
@@ -307,8 +316,8 @@ void RD::GrayScottModel(int l){
 	float addB = this->addB;
 
 	// Scaling factors: Sd, Sr  (Refer to Section 3.2.1 in Paper)
-	float sd = 0.5;	//speed of diffusion
-	float sr = 0.5; //speed of reaction
+	float sd = 0.7;	//speed of diffusion
+	float sr = 0.3; //speed of reaction
 
 	int kh = 3;
 	int kw = 3;
@@ -321,7 +330,7 @@ void RD::GrayScottModel(int l){
 			[=](index<1> idx) restrict(amp)
 		{
 			index<1> x = idx / nCols;
-			index<1> y = idx%nCols;
+			index<1> y = idx % nCols;
 			//Gradient
 			float sx = 0;
 			float sy = 0;
@@ -357,7 +366,8 @@ void RD::GrayScottModel(int l){
 			if (cross_product < 0){
 				theta = 2 * M_PI - theta;
 			}
-			float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+			int ll = l[x];
+			float temp = 0.5*(1 + cos(ll*(theta + theta0)))*0.9 + 0.1;
 			float temp2 = 1 / temp*0.1;
 			alpha_A[idx] = temp2;
 		}
@@ -389,8 +399,9 @@ void RD::GrayScottModel(int l){
 			float b = c_B[idx];
 			float DA = sd*1.0*da;
 			float DB = sd*0.5*db;
-			float RA = sr*(-a*b*b + f*(1 - a));
-			float RB = sr*(a*b*b - (k[y] + f)*b);
+			float ff = 0.0375;
+			float RA = sr*(-a*b*b + ff*(1 - a));
+			float RB = sr*(a*b*b - (k[y] + ff)*b);
 			float AA = addA*a_A[idx];
 			float AB = addB*a_B[idx];
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);

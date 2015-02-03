@@ -7,7 +7,7 @@ bool MyApp::OnInit()
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 600));
 	frame->Show(true);
 
-	frame->patternpicker = new MyPatternPicker(wxT("CustomDialog"));
+	frame->patternpicker = new MyPatternPicker(frame, wxT("CustomDialog"));
 //	frame->patternpicker->Show(true);
 	return true;
 }
@@ -154,15 +154,20 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	render_loop_on = false;
 	//activateRenderLoop(render_loop_on);
 }
-MyPatternPicker::MyPatternPicker(const wxString & title)
-	: wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(500, 200)){
+MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
+	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550)){
 	wxPanel *panel = new wxPanel(this, -1);
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
 
+	char cCurrentPath[FILENAME_MAX];
+	getcwd(cCurrentPath, sizeof(cCurrentPath));
+	string path = "";
+	path.append(cCurrentPath).append("\\l_all.png");
+
 	//left 
-	picker = new Picker(this);
+	picker = new Picker(this, path, wxBITMAP_TYPE_PNG);
 	left->Add(picker, 1, wxEXPAND);
 
 	//right
@@ -173,19 +178,42 @@ MyPatternPicker::MyPatternPicker(const wxString & title)
 	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(select, 0, 0);
 
-	sizer->Add(left, 4, wxEXPAND);
+	sizer->Add(left, 5, wxEXPAND);
 	sizer->Add(right, 1, wxEXPAND);
 	SetSizer(sizer);
 	Centre();
 }
 
 void MyPatternPicker::OnSelect(wxCommandEvent& event){
-	Close(true);
+	((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
+	((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
+	((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
 
+	wxString s;
+	s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
+	((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
+	s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
+	((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
+	s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
+	((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
+
+	((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
+	((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
+	((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+
+
+	((MyFrame *)GetParent())->activateRenderLoop(true);
+	Close(true);
 }
 void MyPatternPicker::StartPreview(){
-	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
+	char cCurrentPath[FILENAME_MAX];
+	getcwd(cCurrentPath, sizeof(cCurrentPath));
+	string path = "";
+	path.append(cCurrentPath).append("\\512source.vfb");
 
+	preview->element.ReadFlow(path);
+	preview->processingS = "Thresholding";
+	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
 }
 void MyPatternPicker::onIdle(wxIdleEvent& evt)
 {
@@ -194,17 +222,21 @@ void MyPatternPicker::onIdle(wxIdleEvent& evt)
 }
 //-----------------------------------------------------------------------------------------------------------------------------------
 
-Picker::Picker(wxFrame* parent) :
+Picker::Picker(wxFrame* parent, wxString file, wxBitmapType format) :
 	wxPanel(parent)
 {
+	wxInitAllImageHandlers();
+	image.LoadFile(file, format);
 }
 void Picker::MouseLDown(wxMouseEvent &event){
 	//wxString s;
 	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x, event.m_y);
 	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
 
-	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.000025*event.m_x;
+	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.00002*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
+	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
+	((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
 
 	// clean preview
 	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
@@ -215,8 +247,9 @@ void Picker::MouseLDown(wxMouseEvent &event){
 	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
 
 	// fill preview with ink
-	for (int i = 0; i < 25; i++){
-		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols, y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
+	for (int i = 0; i < 15; i++){
+		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols;
+		int y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
 		ellipse(
 			*((MyPatternPicker *)GetParent())->preview->element.c_B, // img - Image.
 			Point(x, y),           // center - Center of the ellipse.
@@ -230,6 +263,22 @@ void Picker::MouseLDown(wxMouseEvent &event){
 			);
 	}
 
+}
+void Picker::paintEvent(wxPaintEvent & evt)
+{
+	// depending on your system you may need to look at double-buffered dcs
+	wxPaintDC dc(this);
+	render(dc);
+}
+void Picker::paintNow()
+{
+	// depending on your system you may need to look at double-buffered dcs
+	wxClientDC dc(this);
+	render(dc);
+}
+void Picker::render(wxDC&  dc)
+{
+	dc.DrawBitmap(image, 0, 0, false);
 }
 
 
@@ -410,6 +459,7 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event){
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
 void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
+	activateRenderLoop(false);
 	patternpicker->Show();
 	patternpicker->StartPreview();
 }
@@ -494,7 +544,7 @@ void MyFrame::OnSliderF(wxCommandEvent& event)
 	slider_f_t->SetLabel(s);
 }
 void MyFrame::OnSliderK(wxCommandEvent& event)
-{
+{ 
 	drawPane->element.k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
 	wxString s;
 	s.Printf("k : %.4f", drawPane->element.k);
@@ -664,7 +714,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	static int counter = 0;
 	if (render_loop_on){
 		element.FastGrayScott();
-		//element.GrayScottModel(3);
+		//element.GrayScottModel();
 		counter++;
 	}
 
