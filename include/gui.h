@@ -38,7 +38,15 @@ private:
 class Picker : public wxPanel
 {
 public:
-	Picker(wxFrame* parent);
+	Picker(wxFrame* parent, wxString file, wxBitmapType format);
+	wxBitmap image;
+	void paintEvent(wxPaintEvent & evt);
+	void paintNow();
+
+	void render(wxDC& dc);
+
+//public:
+	//Picker(wxFrame* parent);
 	void MouseLDown(wxMouseEvent &event);
 	DECLARE_EVENT_TABLE()
 
@@ -47,7 +55,7 @@ public:
 class MyPatternPicker : public wxFrame
 {
 public:
-	MyPatternPicker(const wxString& title);
+	MyPatternPicker(wxWindow* parent, const wxString& title);
 	BasicDrawPane *preview;
 	Picker *picker;
 	void StartPreview();
@@ -64,24 +72,25 @@ class MyFrame: public wxFrame
 {
 public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
-	void addlog(wxString info, wxColour& color);
 	MyPatternPicker *patternpicker;
-private:
 	BasicDrawPane *drawPane;
+	wxSlider *slider_f;
+	wxSlider *slider_k;
+	wxSlider *slider_l;
+	wxStaticText *slider_f_t;
+	wxStaticText *slider_k_t;
+	wxStaticText *slider_l_t;
+	void addlog(wxString info, wxColour& color);
+	void activateRenderLoop(bool on);
+protected:
 	wxTextCtrl *log; // Show the log
 	wxButton *start;
 	wxButton *fill;
 	wxButton *clean;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
-	wxSlider *slider_s;
 	wxStaticText *slider_s_t;
-	wxSlider *slider_f;
-	wxStaticText *slider_f_t;
-	wxSlider *slider_k;
-	wxStaticText *slider_k_t;
-	wxSlider *slider_l;
-	wxStaticText *slider_l_t;
+	wxSlider *slider_s;
 	wxSlider *slider_theta0;
 	wxStaticText *slider_theta0_t;
 	wxSlider *slider_addA;
@@ -93,7 +102,6 @@ private:
 	wxSlider *slider_beta;
 	wxStaticText *slider_beta_t;
 	bool render_loop_on;
-	void activateRenderLoop(bool on);
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);

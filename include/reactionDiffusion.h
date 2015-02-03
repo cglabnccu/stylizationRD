@@ -16,7 +16,7 @@ public:
 	void ReadFlow(string);
 	void ETF(string);
 	void FastGrayScott();
-	void GrayScottModel(int);
+	void GrayScottModel();
 	Mat *c_A;        // Current element of A
 	Mat *p_A;        // Previous element of A
 	Mat *c_B;

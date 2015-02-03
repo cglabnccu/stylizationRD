@@ -3,7 +3,7 @@
 PP::PP(Size s){
 	texture = Mat::ones(s, CV_32FC3);  //why
 
-	alpha = 0.0;
+	alpha = 0.5;
 	beta = 0.5;
 
 	float m_alpha = 0.0; //why
