@@ -260,7 +260,12 @@ void RD::FastGrayScott(){
 		}
 		);
 		//--------------------------------------------- SWAP-------------------------------------------------------
-		parallel_for_each(c_A.extent,
+
+		//slower than parallel_for_each()
+		//p_A.copy_to(c_A);
+		//p_B.copy_to(c_B);
+		parallel_for_each(
+			c_A.extent,
 			[=](index<1> idx) restrict(amp)
 		{
 			c_A[idx] = p_A[idx];
@@ -271,6 +276,7 @@ void RD::FastGrayScott(){
 	}
 }
 
+// generate GS-Model
 void RD::GrayScottModel(){
 	int nRows = 500;
 	int nCols = 500;

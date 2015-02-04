@@ -5,6 +5,7 @@ BEGIN_EVENT_TABLE(BasicDrawPane, wxPanel)
 	EVT_MOTION(BasicDrawPane::MouseMove)
 	EVT_LEFT_DOWN(BasicDrawPane::MouseLDown)
 	EVT_LEFT_UP(BasicDrawPane::MouseLUp)
+	EVT_KEY_DOWN(BasicDrawPane::OnKeyDown)
 END_EVENT_TABLE()
 
 // Pattern Picker Window

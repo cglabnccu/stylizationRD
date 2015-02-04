@@ -4,10 +4,10 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 600));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 700));
 	frame->Show(true);
 
-	frame->patternpicker = new MyPatternPicker(frame, wxT("CustomDialog"));
+	frame->patternpicker = new MyPatternPicker(frame, wxT("Pattern Picker"));
 //	frame->patternpicker->Show(true);
 	return true;
 }
@@ -57,7 +57,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2|wxTE_MULTILINE|wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
-	leftside->Add(drawPane, 4, wxEXPAND);
+	leftside->Add(drawPane, 5, wxEXPAND);
 	leftside->Add(log, 1, wxEXPAND);
 
 
@@ -72,14 +72,16 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	processingBox = new wxComboBox(this, COMBOBOX_Processing, "distribution_A", wxDefaultPosition, wxDefaultSize, 0);
 	processingBox->Append("distribution_A");
+	processingBox->Append("distribution_B");
 	processingBox->Append("Motion_Illusion");
 	processingBox->Append("dirTexture");
 	processingBox->Append("adaThresholding");
 	processingBox->Append("Thresholding");
 	control->Add(processingBox, 0, wxEXPAND);
 
-	controllingBox = new wxComboBox(this, COMBOBOX_Controlling, "seeds", wxDefaultPosition, wxDefaultSize, 0);
-	controllingBox->Append("seeds");
+	controllingBox = new wxComboBox(this, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
+	controllingBox->Append("paint_to_B");
+	//controllingBox->Append("seeds");
 	controllingBox->Append("addA");
 	controllingBox->Append("addB");
 	control->Add(controllingBox, 0, wxEXPAND);
@@ -474,22 +476,7 @@ void MyFrame::OnStart(wxCommandEvent& event)
 }
 void MyFrame::OnFill(wxCommandEvent& event)
 {
-	for (int i = 0; i < drawPane->element.c_B->cols/5; i ++){
-		//for (int y = 0; y < drawPane->element.c_B->rows; y += drawPane->element.c_B->rows / 10){
-		int x = rand() % drawPane->element.c_B->cols, y = rand() % drawPane->element.c_B->rows;
-			ellipse(
-				*drawPane->element.c_B, // img - Image.
-				Point(x , y),           // center - Center of the ellipse.
-				Size(5, 5),             // axes - Half of the size of the ellipse main axes.
-				0,                      // angle - Ellipse rotation angle in degrees.
-				0,                      // startAngle - Starting angle of the elliptic arc in degrees.
-				360,                    // endAngle - Ending angle of the elliptic arc in degrees.
-				Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
-				3,                     // thickness - Thickness of the ellipse arc outline
-				8                       // lineType - Type of the ellipse boundary. See the line() description.
-				);
-		//}
-	}
+	drawPane->Seeds(25, true, .5);
 }
 void MyFrame::OnClean(wxCommandEvent& event)
 {
@@ -510,7 +497,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 	
 	if (drawPane->processingS == "dirTexture" && !drawPane->processing.TextureLoaded){
 		addlog("Must Loaded Texture First! (dirTexture)", wxColour(*wxRED));
-		drawPane->processingS = "none";
+		drawPane->processingS = "distribution_A";
 		processingBox->SetSelection(0);
 	}
 
@@ -627,6 +614,53 @@ wxPanel(parent)
 	activateDraw = false;
 }
 
+void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
+{
+	int w = element.c_A->cols, h = element.c_A->rows;
+	int hr = r * ratio;
+	int w_offset = w % (int(2 * r)) / 2;
+	int h_offset = h % (int(2 * r)) / 2;
+
+	Point2i temp;
+	for (int j = h_offset + hr, k = 0; j < h; j += 2 * hr, k++){
+		if (isoffset && k % 2 == 1) {
+			for (int i = w_offset - r; i < w; i += 2 * r){
+				temp.x = i + r + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
+				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
+				int thickness = 3;
+				int lineType = 8;
+				ellipse(*element.c_B,
+					Point(temp.x%element.c_B->cols, temp.y%element.c_B->rows),
+					Size(1, 1),
+					0,
+					0,
+					360,
+					Scalar(0.5, 0.5, 0.5),
+					thickness,
+					lineType);
+			}
+		}
+		else{
+			for (int i = w_offset + r; i < w; i += 2 * r){
+				temp.x = i + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
+				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
+				int thickness = 3;
+				int lineType = 8;
+				ellipse(*element.c_B,
+					Point(temp.x%element.c_B->cols, temp.y%element.c_B->rows),
+					Size(1, 1),
+					0,
+					0,
+					360,
+					Scalar(0.5, 0.5, 0.5),
+					thickness,
+					lineType);
+			}
+		}
+	}
+}
+
+
 void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
 	if (activateDraw)
@@ -652,30 +686,56 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
-	if (controllingS == "addA")
-		element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
-	else if (controllingS == "addB")
+	if (controllingS == "addA") {
+		//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+		ellipse(element.Addition_A,
+			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+			Size(1, 1),
+			0,
+			0,
+			360,
+			Scalar(1, 1, 1),
+			3,
+			8);
+	}
+	else if (controllingS == "addB") {
 		element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
-	else
+	}
+	//else if (controllingS == "seeds") {
+	//	Seeds(25, true, .5);
+	//}
+	else {
 		ellipse(*element.c_B,
-				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-				Size(1, 1),
-				0,
-				0,
-				360,
-				Scalar(0.5, 0.5, 0.5),
-				3,
-				8);
-	activateDraw = true;
-	//wxString s;
-	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x%element.c_B->cols, event.m_y%element.c_B->rows);
-	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
+			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+			Size(1, 1),
+			0,
+			0,
+			360,
+			Scalar(0.5, 0.5, 0.5),
+			3,
+			8);
+	}
 
-	//((MyFrame *)GetParent())->addlog(s, wxColour(*wxBLACK));
+	activateDraw = true;
 }
 void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 {
 	activateDraw = false;
+}
+
+//Note: if not all characters are being intercepted by your OnKeyDown or OnChar handler, 
+//it may be because you are using the wxTAB_TRAVERSAL style, which grabs some keypresses for use by child controls.
+void BasicDrawPane::OnKeyDown(wxKeyEvent &event)
+{
+	switch (event.GetKeyCode()) {
+	case 'a':
+		((MyFrame *)GetParent())->SetStatusText(wxString::Format("UP %i", 555), 0);
+		break;
+
+	case WXK_DOWN:
+		break;
+
+	}
 }
 
 //first frame
@@ -725,8 +785,14 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
+	else if (processingS == "distribution_B"){
+		dis = element.c_B->clone();
+		dis.convertTo(dis, CV_8UC1, 255);
+		cvtColor(dis, dis, CV_GRAY2BGR);
+	}
 	else if (processingS == "dirTexture"){
 		processing.dirTexture(*element.c_A, element.Flowfield, dis);
+		//processing.LIC(element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}

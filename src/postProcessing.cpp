@@ -10,6 +10,8 @@ PP::PP(Size s){
 	float m_beta = 0.0;
 	float t_alpha = 0.0;
 	float t_beta = 0.0;
+
+	TextureLoaded = false;
 }
 
 void PP::SeedGradient(Mat &src, Mat &Gradient){
@@ -21,6 +23,55 @@ void PP::SeedGradient(Mat &src, Mat &Gradient){
 	channel.push_back(sobel_x);
 	channel.push_back(Mat::zeros(src.size(), CV_32F));
 	merge(channel, Gradient);
+}
+
+//bug
+void PP::LIC(Mat &flowfield, Mat &dis)
+{
+	const float M_PI = 3.14159265358979323846;
+	Mat noise = Mat::zeros(flowfield.size(), CV_32F);
+	dis = Mat::zeros(flowfield.size(), CV_32F);
+	randu(noise, 0, 255);
+	noise = noise / 255.0;
+
+
+	int s = 10;
+	int nRows = noise.rows;
+	int nCols = noise.cols;
+	float sigma = 2 * s*s;
+#pragma omp parallel for
+	for (int i = 0; i < nRows; i++){
+		for (int j = 0; j < nCols; j++){
+			float w_sum = 0.0;
+			float x = i;
+			float y = j;
+			for (int k = 0; k < s; k++){
+				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
+				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
+				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
+
+				float r2 = k*k;
+				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
+				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
+				w_sum += w;
+			}
+
+			x = i;
+			y = j;
+			for (int k = 0; k < s; k++){
+				Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
+				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
+				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
+
+				float r2 = k*k;
+				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
+				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
+				w_sum += w;
+			}
+			dis.at<float>(i, j) /= w_sum;
+		}
+	}
+	//imshow("LIC Image", LIC);
 }
 
 void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis){

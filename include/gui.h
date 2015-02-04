@@ -24,12 +24,14 @@ public:
 	string processingS;
 	string controllingS;
 	BasicDrawPane(wxFrame* parent,Size);
+	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow(bool);
 	void render( wxDC& dc,bool );
 	void MouseMove(wxMouseEvent &event);
 	void MouseLDown(wxMouseEvent &event);
-	void MouseLUp(wxMouseEvent &event);
+	void MouseLUp(wxMouseEvent &event);	
+	void OnKeyDown(wxKeyEvent& event);
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
