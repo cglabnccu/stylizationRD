@@ -7,7 +7,6 @@ bool MyApp::OnInit()
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 700));
 	frame->Show(true);
 
-	frame->patternpicker = new MyPatternPicker(frame, wxT("Pattern Picker"));
 //	frame->patternpicker->Show(true);
 	return true;
 }
@@ -211,7 +210,8 @@ void MyPatternPicker::StartPreview(){
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
 	string path = "";
-	path.append(cCurrentPath).append("\\512source.vfb");
+	path.append(cCurrentPath).append("\\x.vfb");
+	//path.append(cCurrentPath).append("\\512source.vfb");
 
 	preview->element.ReadFlow(path);
 	preview->processingS = "Thresholding";
@@ -462,6 +462,7 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event){
 }
 void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
 	activateRenderLoop(false);
+	patternpicker = new MyPatternPicker(this, wxT("Pattern Picker"));
 	patternpicker->Show();
 	patternpicker->StartPreview();
 }
