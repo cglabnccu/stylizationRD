@@ -472,8 +472,8 @@ void MyFrame::OnStart(wxCommandEvent& event)
 	render_loop_on = !render_loop_on;
 	activateRenderLoop(render_loop_on);
 	
-	if (render_loop_on) fill->Enable();
-	else fill->Disable();
+	//if (render_loop_on) fill->Enable();
+	//else fill->Disable();
 }
 void MyFrame::OnFill(wxCommandEvent& event)
 {
@@ -583,20 +583,22 @@ void MyFrame::OnSliderBeta(wxCommandEvent& event)
 
 void MyFrame::activateRenderLoop(bool on)
 {
-	if (on )
+	if (on)
 	{
 		start->SetLabel("Stop");
 		Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		render_loop_on = true;
 		addlog("-------Start iteration-------", wxColour(*wxBLACK));
+		fill->Enable();
 	}
-	else 
+	else
 	{
 		start->SetLabel("Start");
 		Disconnect(wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		//Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		render_loop_on = false;
 		addlog("-------Stop iteration-------", wxColour(*wxBLACK));
+		fill->Disable();
 	}
 }
 void MyFrame::onIdle(wxIdleEvent& evt)
