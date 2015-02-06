@@ -4,7 +4,7 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 700));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(700, 700));
 	frame->Show(true);
 
 //	frame->patternpicker->Show(true);
@@ -232,9 +232,6 @@ Picker::Picker(wxFrame* parent, wxString file, wxBitmapType format) :
 	image.LoadFile(file, format);
 }
 void Picker::MouseLDown(wxMouseEvent &event){
-	//wxString s;
-	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x, event.m_y);
-	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
 
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
