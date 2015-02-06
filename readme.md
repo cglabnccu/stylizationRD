@@ -33,11 +33,11 @@
 ### [Papers' Examples]
 |Papers' fig.|Workflow|
 |------------|--------|
-|fig. 5(a)| *Load Flow* `source.vfb`, Parameters F k l can reference to Table 1, Press *Start* and click *Fill Ink*, after its being stable, select *adathresholding* (beta=0.8)|
+|fig. 5(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|
 |fig. 5(b)| as above |
 |fig. 5(c)| as above |
-|fig. 5(d)| as above, adjust *theta0* roughly to 220 degrees|
-|fig. 12| *Load SrcImg* `cat-source.png`, *Load ETF* `cat-source.png`, The Parameters can use *Pattern Picker(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press *Start* and click *Fill Ink*, after its being stable, select *adathresholding* (alpha=0.4 beta=0.0)|
+|fig. 5(d)| as above, adjust **theta0** roughly to 220 degrees|
+|fig. 12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
 
 
 ---
