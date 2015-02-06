@@ -72,6 +72,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox = new wxComboBox(this, COMBOBOX_Processing, "distribution_A", wxDefaultPosition, wxDefaultSize, 0);
 	processingBox->Append("distribution_A");
 	processingBox->Append("distribution_B");
+	processingBox->Append("LIC");
 	processingBox->Append("Motion_Illusion");
 	processingBox->Append("dirTexture");
 	processingBox->Append("adaThresholding");
@@ -790,6 +791,12 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "distribution_B"){
 		dis = element.c_B->clone();
+		//processing.LIC(element.Flowfield, dis);
+		dis.convertTo(dis, CV_8UC1, 255);
+		cvtColor(dis, dis, CV_GRAY2BGR);
+	}
+	else if (processingS == "LIC"){
+		processing.LIC(element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}

@@ -34,18 +34,17 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 	randu(noise, 0, 255);
 	noise = noise / 255.0;
 
-
 	int s = 10;
 	int nRows = noise.rows;
 	int nCols = noise.cols;
 	float sigma = 2 * s*s;
 #pragma omp parallel for
-	for (int i = 0; i < nRows; i++){
-		for (int j = 0; j < nCols; j++){
+	for (int i = 0; i<nRows; i++){
+		for (int j = 0; j<nCols; j++){
 			float w_sum = 0.0;
 			float x = i;
 			float y = j;
-			for (int k = 0; k < s; k++){
+			for (int k = 0; k<s; k++){
 				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
 				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
 				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
@@ -56,18 +55,17 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 				w_sum += w;
 			}
 
-			x = i;
-			y = j;
-			for (int k = 0; k < s; k++){
-				Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
-				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
-				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
-
-				float r2 = k*k;
-				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
-				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
-				w_sum += w;
-			}
+			//x = i;
+			//y = j;
+			//for (int k = 0; k<s; k++){
+			//	Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
+			//	x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
+			//	y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
+			//	float r2 = k*k;
+			//	float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
+			//	dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
+			//	w_sum += w;
+			//}
 			dis.at<float>(i, j) /= w_sum;
 		}
 	}

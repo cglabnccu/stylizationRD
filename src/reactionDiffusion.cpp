@@ -92,9 +92,18 @@ void RD::ReadFlow(string file){
 	fread((void *)(data), sfloat, vf_w*vf_h * 2, stream);
 
 	resize(Flowfield, Flowfield, Size(vf_w, vf_h), 0, 0, CV_INTER_LINEAR);
-	for (int i = 0; i < vf_w; i++){
-		for (int j = 0; j < vf_h; j++){
-			Flowfield.at<Vec3f>(i, j) = Vec3f(data[(i*vf_h + j) * 2 + 1], data[(i*vf_h + j) * 2], 0.0);
+	//for (int i =0; i<vf_w; i++){
+	//	for (int j = 0; j<vf_h; j++){
+	//		Flowfield.at<Vec3f>(i,j) = Vec3f(data[(i*vf_h+j)*2+1],data[(i*vf_h+j)*2],0.0);
+	//	}
+	//}
+
+	for (int j = 0; j<vf_h; j++){
+		for (int i = 0; i<vf_w; i++){
+			int index = j*vf_w + i;
+			float dx = data[index * 2 + 1];
+			float dy = data[index * 2];
+			Flowfield.at<Vec3f>(j, i) = Vec3f(dx, dy, 0.0);  //x,y swap??
 		}
 	}
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
