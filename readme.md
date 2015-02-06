@@ -45,5 +45,7 @@ http://changyang319.pixnet.net/blog/post/26984931-wxwidgets%E6%95%99%E5%AD%B8%EF
  * [How to build applications with OpenCV inside the Microsoft Visual Studio](http://docs.opencv.org/doc/tutorials/introduction/windows_visual_studio_Opencv/windows_visual_studio_Opencv.html#windows-visual-studio-how-to)
 
 #####[Others]
- - Q:error LNK2019
- - A:Windows, Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows"
+ - Q1:[Build Error] Error LNK2019
+ - A1:Windows, Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows"
+ - Q2:[Build Error] Unable to startup program (The system cannot find the file specified 系統找不到指定的檔案)
+ - A2:Solution Explorer -> Select "FlowBase" -> Right Click and "Set as StartUp Project"
