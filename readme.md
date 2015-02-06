@@ -25,15 +25,20 @@
 ### [in post process]
   1. Segmentation
   2. size of brush (addA, addB)
-  3. Pattern Picker use x.vfb
-  4. Demo Film
+  3. Demo Film
 
 
 ---
 
-### [對應table 1的fig.5 6的產生]
-fig5(a)(b)(c)(d): source.vfb, F k l照表設定(Size調到0.5左右)，用seed均勻灑顏料，穩定後用adathresholding(beta=0.8左右)
-*fig5(d)theta0調成220度
+### [Papers' Examples]
+|Papers' fig.|Workflow|
+|------------|--------|
+|fig. 5(a)| *Load Flow* `source.vfb`, Parameters F k l can reference to Table 1, Press *Start* and click *Fill Ink*, after its being stable, select *adathresholding* (beta=0.8)|
+|fig. 5(b)| as above |
+|fig. 5(c)| as above |
+|fig. 5(d)| as above, adjust *theta0* roughly to 220 degrees|
+|fig. 12| *Load SrcImg* `cat-source.png`, *Load ETF* `cat-source.png`, The Parameters can use *Pattern Picker(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press *Start* and click *Fill Ink*, after its being stable, select *adathresholding* (alpha=0.4 beta=0.0)|
+
 
 ---
 
