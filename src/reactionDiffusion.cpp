@@ -317,7 +317,7 @@ void RD::GrayScottModel(){
 	//}
 	//farray[500] = 0.0375;
 	for (int i = 0; i < 500; i++){
-		karray[i] = 0.056+(float)(i + 1) / 50000.0;
+		karray[i] = 0.056+(float)(i + 1) / 42000.0;
 		//farray[i] = (float)(i + 1) / 8334.0;
 	}
 	//for (int i = 0; i < 501; i++) farray[i] = 0.0 + ((float)(i + 1) / 8333.3);

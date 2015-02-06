@@ -236,7 +236,7 @@ void Picker::MouseLDown(wxMouseEvent &event){
 	//s.Printf("Panit event - Mouse Down at (%d, %d)", event.m_x, event.m_y);
 	//wxMessageBox(s, "About CRD", wxOK | wxICON_INFORMATION);
 
-	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.00002*event.m_x;
+	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
 	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
 	((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
@@ -283,7 +283,6 @@ void Picker::render(wxDC&  dc)
 {
 	dc.DrawBitmap(image, 0, 0, false);
 }
-
 
 //-----------------------------------------------------------------------------------------------------------------------------------
 
@@ -587,19 +586,19 @@ void MyFrame::activateRenderLoop(bool on)
 	if (on)
 	{
 		start->SetLabel("Stop");
+		fill->Enable();
 		Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		render_loop_on = true;
 		addlog("-------Start iteration-------", wxColour(*wxBLACK));
-		fill->Enable();
 	}
 	else
 	{
 		start->SetLabel("Start");
+		fill->Disable();
 		Disconnect(wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		//Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyFrame::onIdle));
 		render_loop_on = false;
 		addlog("-------Stop iteration-------", wxColour(*wxBLACK));
-		fill->Disable();
 	}
 }
 void MyFrame::onIdle(wxIdleEvent& evt)
