@@ -1,18 +1,142 @@
 #include "gui.h"
 #include <ctime>
 
-
 bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 720));
 	frame->Show(true);
 
-//	frame->patternpicker->Show(true);
 	return true;
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------------
+#pragma region MyPatternPicker
+MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
+	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550)){
+	wxPanel *panel = new wxPanel(this, -1);
+	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
 
+	char cCurrentPath[FILENAME_MAX];
+	getcwd(cCurrentPath, sizeof(cCurrentPath));
+	string path = "";
+	path.append(cCurrentPath).append("\\l_all.png");
+
+	//left 
+	picker = new Picker(this, path, wxBITMAP_TYPE_PNG);
+	left->Add(picker, 1, wxEXPAND);
+
+	//right
+	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(s, 0, wxEXPAND);
+	preview = new BasicDrawPane(this, Size(100, 100));
+	right->Add(preview, 1, wxEXPAND);
+	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(select, 0, 0);
+
+	sizer->Add(left, 5, wxEXPAND);
+	sizer->Add(right, 1, wxEXPAND);
+	SetSizer(sizer);
+	Centre();
+}
+void MyPatternPicker::OnSelect(wxCommandEvent& event){
+	((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
+	((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
+	((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
+
+	wxString s;
+	s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
+	((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
+	s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
+	((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
+	s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
+	((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
+
+	((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
+	((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
+	((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+
+
+	((MyFrame *)GetParent())->activateRenderLoop(true);
+	Close(true);
+}
+void MyPatternPicker::StartPreview(){
+	char cCurrentPath[FILENAME_MAX];
+	getcwd(cCurrentPath, sizeof(cCurrentPath));
+	string path = "";
+	path.append(cCurrentPath).append("\\x.vfb");
+	//path.append(cCurrentPath).append("\\512source.vfb");
+
+	preview->element.ReadFlow(path);
+	preview->processingS = "Thresholding";
+	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
+}
+void MyPatternPicker::onIdle(wxIdleEvent& evt)
+{
+	preview->paintNow(true);
+	evt.RequestMore(); // render continuously, not only once on idle
+}
+#pragma endregion 
+
+#pragma region Picker
+Picker::Picker(wxFrame* parent, wxString file, wxBitmapType format) :
+	wxPanel(parent)
+{
+	wxInitAllImageHandlers();
+	image.LoadFile(file, format);
+}
+void Picker::MouseLDown(wxMouseEvent &event){
+
+	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
+	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
+	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
+	((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
+
+	// clean preview
+	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.c_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.p_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	*((MyPatternPicker *)GetParent())->preview->element.p_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	((MyPatternPicker *)GetParent())->preview->element.Addition_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
+
+	// fill preview with ink
+	for (int i = 0; i < 15; i++){
+		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols;
+		int y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
+		ellipse(
+			*((MyPatternPicker *)GetParent())->preview->element.c_B, // img - Image.
+			Point(x, y),           // center - Center of the ellipse.
+			Size(5, 5),             // axes - Half of the size of the ellipse main axes.
+			0,                      // angle - Ellipse rotation angle in degrees.
+			0,                      // startAngle - Starting angle of the elliptic arc in degrees.
+			360,                    // endAngle - Ending angle of the elliptic arc in degrees.
+			Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
+			3,                     // thickness - Thickness of the ellipse arc outline
+			8                       // lineType - Type of the ellipse boundary. See the line() description.
+			);
+	}
+
+}
+void Picker::paintEvent(wxPaintEvent & evt)
+{
+	// depending on your system you may need to look at double-buffered dcs
+	wxPaintDC dc(this);
+	render(dc);
+}
+void Picker::paintNow()
+{
+	// depending on your system you may need to look at double-buffered dcs
+	wxClientDC dc(this);
+	render(dc);
+}
+void Picker::render(wxDC&  dc)
+{
+	dc.DrawBitmap(image, 0, 0, false);
+}
+#pragma endregion 
+
+#pragma region MyFrame
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
@@ -101,7 +225,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	s.Printf("Brush Size : %d", drawPane->brushSize);
 	slider_brushSize_t = new wxStaticText(this, SLIDER_BRUSH_SIZE_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_brushSize_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_brushSize = new wxSlider(this, SLIDER_BRUSH_SIZE, drawPane->brushSize, 0, 10, wxDefaultPosition, wxDefaultSize, 0);
+	slider_brushSize = new wxSlider(this, SLIDER_BRUSH_SIZE, drawPane->brushSize, 1, 10, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_brushSize, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("addA : %.4f", drawPane->element.addA);
@@ -186,145 +310,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	render_loop_on = false;
 }
-MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
-	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550)){
-	wxPanel *panel = new wxPanel(this, -1);
-	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
-
-	char cCurrentPath[FILENAME_MAX];
-	getcwd(cCurrentPath, sizeof(cCurrentPath));
-	string path = "";
-	path.append(cCurrentPath).append("\\l_all.png");
-
-	//left 
-	picker = new Picker(this, path, wxBITMAP_TYPE_PNG);
-	left->Add(picker, 1, wxEXPAND);
-
-	//right
-	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(this, Size(100, 100));
-	right->Add(preview, 1, wxEXPAND);
-	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(select, 0, 0);
-
-	sizer->Add(left, 5, wxEXPAND);
-	sizer->Add(right, 1, wxEXPAND);
-	SetSizer(sizer);
-	Centre();
-}
-
-void MyPatternPicker::OnSelect(wxCommandEvent& event){
-	((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
-	((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
-	((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
-
-	wxString s;
-	s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
-	((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
-	s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
-	((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
-	s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
-	((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
-
-	((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
-	((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
-	((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
-
-
-	((MyFrame *)GetParent())->activateRenderLoop(true);
-	Close(true);
-}
-void MyPatternPicker::StartPreview(){
-	char cCurrentPath[FILENAME_MAX];
-	getcwd(cCurrentPath, sizeof(cCurrentPath));
-	string path = "";
-	path.append(cCurrentPath).append("\\x.vfb");
-	//path.append(cCurrentPath).append("\\512source.vfb");
-
-	preview->element.ReadFlow(path);
-	preview->processingS = "Thresholding";
-	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
-}
-void MyPatternPicker::onIdle(wxIdleEvent& evt)
-{
-	preview->paintNow(true);
-	evt.RequestMore(); // render continuously, not only once on idle
-}
-//-----------------------------------------------------------------------------------------------------------------------------------
-
-Picker::Picker(wxFrame* parent, wxString file, wxBitmapType format) :
-	wxPanel(parent)
-{
-	wxInitAllImageHandlers();
-	image.LoadFile(file, format);
-}
-void Picker::MouseLDown(wxMouseEvent &event){
-
-	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
-	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
-	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
-	((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
-
-	// clean preview
-	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-	*((MyPatternPicker *)GetParent())->preview->element.c_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-	*((MyPatternPicker *)GetParent())->preview->element.p_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-	*((MyPatternPicker *)GetParent())->preview->element.p_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-	((MyPatternPicker *)GetParent())->preview->element.Addition_B = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
-
-	// fill preview with ink
-	for (int i = 0; i < 15; i++){
-		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols;
-		int y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
-		ellipse(
-			*((MyPatternPicker *)GetParent())->preview->element.c_B, // img - Image.
-			Point(x, y),           // center - Center of the ellipse.
-			Size(5, 5),             // axes - Half of the size of the ellipse main axes.
-			0,                      // angle - Ellipse rotation angle in degrees.
-			0,                      // startAngle - Starting angle of the elliptic arc in degrees.
-			360,                    // endAngle - Ending angle of the elliptic arc in degrees.
-			Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
-			3,                     // thickness - Thickness of the ellipse arc outline
-			8                       // lineType - Type of the ellipse boundary. See the line() description.
-			);
-	}
-
-}
-void Picker::paintEvent(wxPaintEvent & evt)
-{
-	// depending on your system you may need to look at double-buffered dcs
-	wxPaintDC dc(this);
-	render(dc);
-}
-void Picker::paintNow()
-{
-	// depending on your system you may need to look at double-buffered dcs
-	wxClientDC dc(this);
-	render(dc);
-}
-void Picker::render(wxDC&  dc)
-{
-	dc.DrawBitmap(image, 0, 0, false);
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------
-
-void MyFrame::addlog(wxString info, wxColour& color){
-	time_t currentTime;// for logging current time
-	struct tm *localTime;// for logging current time
-	time(&currentTime);                   // Get the current time
-	localTime = localtime(&currentTime);  // Convert the current time to the local time
-	wxString s;
-	s.Printf("\n%02d : %02d : %02d  |  %s", localTime->tm_hour, localTime->tm_min, localTime->tm_sec, info);
-	log->SetDefaultStyle(wxTextAttr(color));
-	log->AppendText(s);
-
-}
-
 void MyFrame::OnExit(wxCommandEvent& event)
 {
 	Close(true);
@@ -494,6 +479,7 @@ void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
 	patternpicker->StartPreview();
 }
 
+//Buttons
 void MyFrame::OnStart(wxCommandEvent& event)
 {
 	render_loop_on = !render_loop_on;
@@ -519,6 +505,7 @@ void MyFrame::OnClean(wxCommandEvent& event)
 	addlog("Draw Panel Cleaned.", wxColour(*wxBLACK));
 }
 
+//Comboboxes
 void MyFrame::OnProcessingBox(wxCommandEvent& event)
 {
 	drawPane->processingS = processingBox->GetValue();
@@ -544,6 +531,7 @@ void MyFrame::OnControllingBox(wxCommandEvent& event)
 	drawPane->controllingS = controllingBox->GetValue();
 }
 
+//Slides: Pattern Parameter
 void MyFrame::OnSliderS(wxCommandEvent& event)
 {
 	drawPane->element.s = slider_s->GetValue() / 1000.0;
@@ -572,19 +560,21 @@ void MyFrame::OnSliderL(wxCommandEvent& event)
 	s.Printf("l : %d", drawPane->element.l);
 	slider_l_t->SetLabel(s);
 }
-void MyFrame::OnSliderBrushSize(wxCommandEvent& event)
-{
-	drawPane->brushSize= slider_brushSize->GetValue();
-	wxString s;
-	s.Printf("Brush Size : %d", drawPane->brushSize);
-	slider_brushSize_t->SetLabel(s);
-}
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
 	drawPane->element.theta0 = slider_theta0->GetValue();
 	wxString s;
 	s.Printf("theta0 : %d", drawPane->element.theta0);
 	slider_theta0_t->SetLabel(s);
+}
+
+//Slides: Paint Parameter
+void MyFrame::OnSliderBrushSize(wxCommandEvent& event)
+{
+	drawPane->brushSize= slider_brushSize->GetValue();
+	wxString s;
+	s.Printf("Brush Size : %d", drawPane->brushSize);
+	slider_brushSize_t->SetLabel(s);
 }
 void MyFrame::OnSliderAddA(wxCommandEvent& event)
 {
@@ -600,6 +590,8 @@ void MyFrame::OnSliderAddB(wxCommandEvent& event)
 	s.Printf("addB : %.4f", drawPane->element.addB);
 	slider_addB_t->SetLabel(s);
 }
+
+//Slides: Post Processing Parameter
 void MyFrame::OnSliderAlpha(wxCommandEvent& event)
 {
 	drawPane->processing.alpha = slider_alpha->GetValue() / 1000.0;
@@ -615,6 +607,17 @@ void MyFrame::OnSliderBeta(wxCommandEvent& event)
 	slider_beta_t->SetLabel(s);
 }
 
+void MyFrame::addlog(wxString info, wxColour& color){
+	time_t currentTime;// for logging current time
+	struct tm *localTime;// for logging current time
+	time(&currentTime);                   // Get the current time
+	localTime = localtime(&currentTime);  // Convert the current time to the local time
+	wxString s;
+	s.Printf("\n%02d : %02d : %02d  |  %s", localTime->tm_hour, localTime->tm_min, localTime->tm_sec, info);
+	log->SetDefaultStyle(wxTextAttr(color));
+	log->AppendText(s);
+
+}
 void MyFrame::activateRenderLoop(bool on)
 {
 	if (on)
@@ -640,9 +643,9 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 	drawPane->paintNow(render_loop_on);
 	evt.RequestMore(); // render continuously, not only once on idle
 }
+#pragma endregion 
 
-//-----------------------------------------------------------------------------------------------------------------------------------
-
+#pragma region BasicDrawPane
 BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s) :
 processing(s),
 element(s),
@@ -651,7 +654,6 @@ wxPanel(parent)
 	activateDraw = false;
 	brushSize = 1;
 }
-
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {
 	int w = element.c_A->cols, h = element.c_A->rows;
@@ -786,21 +788,6 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 	activateDraw = false;
 }
 
-//Note: if not all characters are being intercepted by your OnKeyDown or OnChar handler, 
-//it may be because you are using the wxTAB_TRAVERSAL style, which grabs some keypresses for use by child controls.
-//void BasicDrawPane::OnKeyDown(wxKeyEvent &event)
-//{
-//	switch (event.GetKeyCode()) {
-//	case 'a':
-//		((MyFrame *)GetParent())->SetStatusText(wxString::Format("UP %i", 555), 0);
-//		break;
-//
-//	case WXK_DOWN:
-//		break;
-//
-//	}
-//}
-
 //first frame
 void BasicDrawPane::paintEvent(wxPaintEvent& evt)
 {
@@ -824,7 +811,6 @@ void BasicDrawPane::paintNow(bool render_loop_on)
 //Global variables for measuring time (in milli-seconds)
 int	startTime;
 int	prevTime;
-int	updateInterval = 20;
 //Main Render(iteration) Section
 void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
@@ -884,6 +870,6 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	wxBitmap bmp(img);
 	dc.DrawBitmap(bmp, 0, 0);
 
-
 	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);
 }
+#pragma endregion 
