@@ -23,6 +23,7 @@ public:
 	Mat temp;
 	string processingS;
 	string controllingS;
+	int brushSize;
 	BasicDrawPane(wxFrame* parent,Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
@@ -31,7 +32,7 @@ public:
 	void MouseMove(wxMouseEvent &event);
 	void MouseLDown(wxMouseEvent &event);
 	void MouseLUp(wxMouseEvent &event);	
-	void OnKeyDown(wxKeyEvent& event);
+	//void OnKeyDown(wxKeyEvent& event);
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
@@ -95,6 +96,8 @@ protected:
 	wxSlider *slider_s;
 	wxSlider *slider_theta0;
 	wxStaticText *slider_theta0_t;
+	wxSlider *slider_brushSize;
+	wxStaticText *slider_brushSize_t;
 	wxSlider *slider_addA;
 	wxStaticText *slider_addA_t;
 	wxSlider *slider_addB;
@@ -114,6 +117,7 @@ protected:
 	void OnSliderK(wxCommandEvent& event);
 	void OnSliderL(wxCommandEvent& event);
 	void OnSliderTheta0(wxCommandEvent& event);
+	void OnSliderBrushSize(wxCommandEvent& event);
 	void OnSliderAddA(wxCommandEvent& event);
 	void OnSliderAddB(wxCommandEvent& event);
 	void OnSliderAlpha(wxCommandEvent& event);
@@ -165,6 +169,8 @@ enum
 	SLIDER_L_T,
 	SLIDER_Theta0,
 	SLIDER_Theta0_T,
+	SLIDER_BRUSH_SIZE,
+	SLIDER_BRUSH_SIZE_T,
 	SLIDER_AddA,
 	SLIDER_AddA_T,
 	SLIDER_AddB,

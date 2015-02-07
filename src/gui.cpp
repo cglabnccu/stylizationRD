@@ -4,7 +4,7 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 700));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 720));
 	frame->Show(true);
 
 //	frame->patternpicker->Show(true);
@@ -52,8 +52,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
 	//Sizer of rightside(control panel)
 	wxBoxSizer* control = new wxBoxSizer(wxVERTICAL);
+	wxString s;
 
-	#pragma region leftside
+	#pragma region Leftside: drawPane, log
 	//drawing panel
 	drawPane = new BasicDrawPane(this, Size(500, 500));
 
@@ -65,7 +66,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	leftside->Add(log, 1, wxEXPAND);
 	#pragma endregion
 
-	#pragma region buttons
+	#pragma region Buttons: Start, Fill Ink, Clean
 	start = new wxButton(this, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
 	control->Add(start, 0, wxEXPAND);
 	fill = new wxButton(this, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
@@ -93,11 +94,35 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	control->Add(controllingBox, 0, wxEXPAND);
 	#pragma endregion 
 
+	#pragma region Paint Parameters
+	wxStaticBox *st_paint = new wxStaticBox(this, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBoxSizer *st_paint_sizer = new wxStaticBoxSizer(st_paint, wxVERTICAL);
+
+	s.Printf("Brush Size : %d", drawPane->brushSize);
+	slider_brushSize_t = new wxStaticText(this, SLIDER_BRUSH_SIZE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_brushSize_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_brushSize = new wxSlider(this, SLIDER_BRUSH_SIZE, drawPane->brushSize, 0, 10, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_brushSize, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("addA : %.4f", drawPane->element.addA);
+	slider_addA_t = new wxStaticText(this, SLIDER_AddA_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_addA_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_addA = new wxSlider(this, SLIDER_AddA, int(drawPane->element.addA * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_addA, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("addB : %.4f", drawPane->element.addB);
+	slider_addB_t = new wxStaticText(this, SLIDER_AddB_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_addB_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_addB = new wxSlider(this, SLIDER_AddB, int(drawPane->element.addB * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_paint_sizer->Add(slider_addB, 0, wxEXPAND | wxLEFT, 10);
+
+	control->Add(st_paint_sizer, 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 3);
+	#pragma endregion
+
 	#pragma region Pattern Parameters
 	wxStaticBox *st_pattern = new wxStaticBox(this, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
 
-	wxString s;
 	s.Printf("Size : %.4f", drawPane->element.s);
 	slider_s_t = new wxStaticText(this, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
@@ -128,26 +153,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_theta0 = new wxSlider(this, SLIDER_Theta0, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_theta0, 0, wxEXPAND | wxLEFT, 10);
 
-	control->Add(st_pattern_sizer, 0,wxEXPAND | wxALL, 6);
+	control->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 	#pragma endregion 
-
-	#pragma region Paint Parameters
-	wxStaticBox *st_paint = new wxStaticBox(this, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
-	wxStaticBoxSizer *st_paint_sizer = new wxStaticBoxSizer(st_paint, wxVERTICAL);
-	s.Printf("addA : %.4f", drawPane->element.addA);
-	slider_addA_t = new wxStaticText(this, SLIDER_AddA_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_paint_sizer->Add(slider_addA_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_addA = new wxSlider(this, SLIDER_AddA, int(drawPane->element.addA * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	st_paint_sizer->Add(slider_addA, 0, wxEXPAND | wxLEFT, 10);
-
-	s.Printf("addB : %.4f", drawPane->element.addB);
-	slider_addB_t = new wxStaticText(this, SLIDER_AddB_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_paint_sizer->Add(slider_addB_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_addB = new wxSlider(this, SLIDER_AddB, int(drawPane->element.addB * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	st_paint_sizer->Add(slider_addB, 0, wxEXPAND | wxLEFT, 10);
-
-	control->Add(st_paint_sizer, 0, wxEXPAND | wxALL, 6);
-	#pragma endregion
 
 	#pragma region Post Processing Parameters
 	wxStaticBox *st_pp = new wxStaticBox(this, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
@@ -164,7 +171,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_beta = new wxSlider(this, SLIDER_Beta, int(drawPane->processing.beta * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_beta, 0, wxEXPAND | wxLEFT, 10);
 
-	control->Add(st_pp_sizer, 0, wxEXPAND | wxALL, 6);
+	control->Add(st_pp_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 	#pragma endregion
 
 	//set portion of size: leftside & rightside(control)
@@ -312,7 +319,7 @@ void MyFrame::addlog(wxString info, wxColour& color){
 	time(&currentTime);                   // Get the current time
 	localTime = localtime(&currentTime);  // Convert the current time to the local time
 	wxString s;
-	s.Printf("%02d : %02d : %02d  |  %s\n", localTime->tm_hour, localTime->tm_min, localTime->tm_sec, info);
+	s.Printf("\n%02d : %02d : %02d  |  %s", localTime->tm_hour, localTime->tm_min, localTime->tm_sec, info);
 	log->SetDefaultStyle(wxTextAttr(color));
 	log->AppendText(s);
 
@@ -565,6 +572,13 @@ void MyFrame::OnSliderL(wxCommandEvent& event)
 	s.Printf("l : %d", drawPane->element.l);
 	slider_l_t->SetLabel(s);
 }
+void MyFrame::OnSliderBrushSize(wxCommandEvent& event)
+{
+	drawPane->brushSize= slider_brushSize->GetValue();
+	wxString s;
+	s.Printf("Brush Size : %d", drawPane->brushSize);
+	slider_brushSize_t->SetLabel(s);
+}
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
 	drawPane->element.theta0 = slider_theta0->GetValue();
@@ -635,6 +649,7 @@ element(s),
 wxPanel(parent)
 {
 	activateDraw = false;
+	brushSize = 1;
 }
 
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -650,11 +665,11 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 			for (int i = w_offset - r; i < w; i += 2 * r){
 				temp.x = i + r + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
-				int thickness = 3;
+				int thickness = -1;
 				int lineType = 8;
 				ellipse(*element.c_B,
 					Point(temp.x%element.c_B->cols, temp.y%element.c_B->rows),
-					Size(1, 1),
+					Size(brushSize, brushSize),
 					0,
 					0,
 					360,
@@ -667,11 +682,11 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 			for (int i = w_offset + r; i < w; i += 2 * r){
 				temp.x = i + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
-				int thickness = 3;
+				int thickness = -1;
 				int lineType = 8;
 				ellipse(*element.c_B,
 					Point(temp.x%element.c_B->cols, temp.y%element.c_B->rows),
-					Size(1, 1),
+					Size(brushSize, brushSize),
 					0,
 					0,
 					360,
@@ -687,20 +702,40 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
 	if (activateDraw)
 	{
-		if (controllingS == "addA")
-			element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
-		else if (controllingS == "addB")
-			element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+		if (controllingS == "addA"){
+			//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+			ellipse(element.Addition_A,
+				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+				Size(brushSize, brushSize),
+				0,
+				0,
+				360,
+				Scalar(1, 1, 1),
+				-1,
+				8);
+		}
+		else if (controllingS == "addB"){
+			//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+			ellipse(element.Addition_B,
+				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+				Size(brushSize, brushSize),
+				0,
+				0,
+				360,
+				Scalar(1, 1, 1),
+				-1,
+				8);
+		}
 		else
 			ellipse(
 				*element.c_B,         // img - Image.
 				Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
-				Size(1, 1),           // axes - Half of the size of the ellipse main axes.
+				Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
 				0,                    // angle - Ellipse rotation angle in degrees.
 				0,                    // startAngle - Starting angle of the elliptic arc in degrees.
 				360,                  // endAngle - Ending angle of the elliptic arc in degrees.
 				Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
-				3,                    // thickness - Thickness of the ellipse arc outline
+				-1,                    // thickness - Thickness of the ellipse arc outline
 				8                     // lineType - Type of the ellipse boundary. See the line() description.
 			);
 	}
@@ -712,29 +747,35 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 		//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 		ellipse(element.Addition_A,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-			Size(1, 1),
+			Size(brushSize, brushSize),
 			0,
 			0,
 			360,
 			Scalar(1, 1, 1),
-			3,
+			-1,
 			8);
 	}
 	else if (controllingS == "addB") {
-		element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+		ellipse(element.Addition_B,
+			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+			Size(brushSize, brushSize),
+			0,
+			0,
+			360,
+			Scalar(1, 1, 1),
+			-1,
+			8);
+		//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 	}
-	//else if (controllingS == "seeds") {
-	//	Seeds(25, true, .5);
-	//}
 	else {
 		ellipse(*element.c_B,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-			Size(1, 1),
+			Size(brushSize, brushSize),
 			0,
 			0,
 			360,
 			Scalar(0.5, 0.5, 0.5),
-			3,
+			-1,
 			8);
 	}
 
@@ -747,18 +788,18 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 
 //Note: if not all characters are being intercepted by your OnKeyDown or OnChar handler, 
 //it may be because you are using the wxTAB_TRAVERSAL style, which grabs some keypresses for use by child controls.
-void BasicDrawPane::OnKeyDown(wxKeyEvent &event)
-{
-	switch (event.GetKeyCode()) {
-	case 'a':
-		((MyFrame *)GetParent())->SetStatusText(wxString::Format("UP %i", 555), 0);
-		break;
-
-	case WXK_DOWN:
-		break;
-
-	}
-}
+//void BasicDrawPane::OnKeyDown(wxKeyEvent &event)
+//{
+//	switch (event.GetKeyCode()) {
+//	case 'a':
+//		((MyFrame *)GetParent())->SetStatusText(wxString::Format("UP %i", 555), 0);
+//		break;
+//
+//	case WXK_DOWN:
+//		break;
+//
+//	}
+//}
 
 //first frame
 void BasicDrawPane::paintEvent(wxPaintEvent& evt)
