@@ -46,7 +46,7 @@
   <dt>Q: Error LNK2019(Build Error)</dt>
   <dd>Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows".</dd>
 
-  <dt>Q: Unable to startup program (The system cannot find the file specified 系統找不到指定的檔案)(Build Error)</dt>
+  <dt>Q: Unable to startup program (The system cannot find the file specified)(Build Error)</dt>
   <dd>Solution Explorer -> Select "FlowBase" -> Right Click and "Set as StartUp Project"</dd>
 </dl>
 ---
