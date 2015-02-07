@@ -6,7 +6,7 @@
 
 
 ### [Required]
-
+ * <a href="https://msdn.microsoft.com/zh-tw/vstudio/aa718325.aspx" target="_blank">Visual Studio</a>(2013 recommand)
  * <a href="http://www.cmake.org/" target="_blank">CMake</a>(3.0 or higher)
  * <a href="https://www.wxwidgets.org/" target="_blank">wxWidgets</a>(3.0.2 or higher)
  * <a href="http://opencv.org/" target="_blank">OpenCV</a>(2.9.7 or higher)
@@ -24,8 +24,7 @@
 
 ### [in post process]
   1. Segmentation
-  2. size of brush (addA, addB)
-  3. Demo Film
+  2. Demo Film
 
 
 ---
@@ -42,6 +41,15 @@
 
 ---
 
+###[Common Q&A]
+<dl>
+  <dt>Q: Error LNK2019(Build Error)</dt>
+  <dd>Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows".</dd>
+
+  <dt>Q: Unable to startup program (The system cannot find the file specified 系統找不到指定的檔案)(Build Error)</dt>
+  <dd>Solution Explorer -> Select "FlowBase" -> Right Click and "Set as StartUp Project"</dd>
+</dl>
+---
 ###[Useful Tutorials]
 #####[wxWidgets]
  * <a href="http://www.rhyous.com/2009/12/16/how-to-compile-a-wxwidgets-application-in-visual-studio-2008/" target="_blank">How to compile a wxWidgets application in Visual Studio 2008?</a>
@@ -52,8 +60,4 @@
  * <a href="http://docs.opencv.org/doc/tutorials/introduction/windows_install/windows_install.html#windowssetpathandenviromentvariable" target="_blank">Set the OpenCV enviroment variable and add it to the systems path</a>
  * <a href="http://docs.opencv.org/doc/tutorials/introduction/windows_visual_studio_Opencv/windows_visual_studio_Opencv.html#windows-visual-studio-how-to" target="_blank">How to build applications with OpenCV inside the Microsoft Visual Studio</a>
 
-#####[Others]
- - Q1:[Build Error] Error LNK2019
- - A1:Windows, Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows"
- - Q2:[Build Error] Unable to startup program (The system cannot find the file specified 系統找不到指定的檔案)
- - A2:Solution Explorer -> Select "FlowBase" -> Right Click and "Set as StartUp Project"
+
