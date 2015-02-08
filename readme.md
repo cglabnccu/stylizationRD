@@ -39,20 +39,19 @@
 |Fig. 5(d)| as above, adjust **theta0** roughly to 220 degrees|
 |Fig. 12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
 
-
+---
 
 ### [Table 1]
-
-|Style       | a(theta)| F    | k    | l| Figure     |
-|:-----------|---------|-----:|-----:|-:|:-----------|
-|semicircle  |    Eq. 6| .0375| .0655| 1|Fig. 5(a)   |
-|spot: spidle|    Eq. 6| .0375| .0655| 2|Fig. 5(b)   |
-|hole: spidle|    Eq. 6| .0300| .0546| 2|Fig. 8 blue |
-|stripe      |    Eq. 6| .0300| .0620| 2|Fig. 8 green|
-|triangle    |    Eq. 6| .0375| .0655| 3|Fig. 5(c)   |
-|spot: quad  |    Eq. 6| .0375| .0655| 4|Fig. 5(d)   |
-|water drop  |    Eq. 7| .0375| .0655| 2|Fig. 6(a)   |
-|sector      |    Eq. 7| .0375| .0655| 4|Fig. 6(b)   |
+|Style       | a(theta)| F    | k    | l   |Figure      |
+| ---------- | ------- | ---- | ---- | --- | ---------- |
+|semicircle  |    Eq. 6| .0375| .0655| 1   |Fig. 5(a)   |
+|spot: spidle|    Eq. 6| .0375| .0655| 2   |Fig. 5(b)   |
+|hole: spidle|    Eq. 6| .0300| .0546| 2   |Fig. 8 blue |
+|stripe      |    Eq. 6| .0300| .0620| 2   |Fig. 8 green|
+|triangle    |    Eq. 6| .0375| .0655| 3   |Fig. 5(c)   |
+|spot: quad  |    Eq. 6| .0375| .0655| 4   |Fig. 5(d)   |
+|water drop  |    Eq. 7| .0375| .0655| 2   |Fig. 6(a)   |
+|sector      |    Eq. 7| .0375| .0655| 4   |Fig. 6(b)   |
 
 
 ---
