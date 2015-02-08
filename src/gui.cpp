@@ -3,7 +3,7 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 720));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800,720));
 	frame->Show(true);
 
 	return true;
@@ -166,8 +166,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuBar->Append(menuTool, "&Tool");
 	menuBar->Append(menuHelp, "&Help");
 	SetMenuBar(menuBar);
-	CreateStatusBar();
-	SetStatusText("");
+	CreateStatusBar(4);
+	SetStatusText("SrcImg: None", 1);
+	SetStatusText("Flowfield: None", 2);
+	SetStatusText("Texture: None", 3);
 	#pragma endregion
 
 	//Sizer of whole window
@@ -180,13 +182,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	#pragma region Leftside: drawPane, log
 	//drawing panel
-	drawPane = new BasicDrawPane(this, Size(500, 500));
+	drawPane = new BasicDrawPane(this, Size(256, 256));
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2|wxTE_MULTILINE|wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
 	
-	leftside->Add(drawPane, 6, wxEXPAND);
+	leftside->Add(drawPane, 7, wxEXPAND);
 	leftside->Add(log, 1, wxEXPAND);
 	#pragma endregion
 
@@ -299,10 +301,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	#pragma endregion
 
 	//set portion of size: leftside & rightside(control)
-	sizer->Add(leftside, 6, wxEXPAND);
-	sizer->Add(control, 2, wxEXPAND);
+	sizer->Add(leftside, 7, wxEXPAND);
+	sizer->Add(control, 3, wxEXPAND);
 	SetSizer(sizer);
-
 
 	slider_alpha->Disable();
 	slider_beta->Disable();
@@ -343,6 +344,11 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		wxString s;
 		s.Printf("Load Img - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
+		SetStatusText(s, 1);
+		s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
+		SetStatusText(s, 2);
 	}
 
 	// proceed loading the file chosen by the user;
@@ -354,9 +360,10 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
+	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); //Read Same File as defaulf ETF
+
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
 
-	addlog("Img Loaded", wxColour(*wxBLACK));
 }
 void MyFrame::OnOpenTex(wxCommandEvent& event)
 {
@@ -369,6 +376,9 @@ void MyFrame::OnOpenTex(wxCommandEvent& event)
 		wxString s;
 		s.Printf("Load Texture - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Texture: %s", openFileDialog.GetFilename());
+		SetStatusText(s, 3);
 	}
 
 	// proceed loading the file chosen by the user;
@@ -394,6 +404,9 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		wxString s;
 		s.Printf("Load Flow(.vfb) - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Flowfield(vfb): %s", openFileDialog.GetFilename());
+		SetStatusText(s, 2);
 	}
 
 
@@ -406,7 +419,6 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadFlow((const char*)openFileDialog.GetPath().mb_str());
-	addlog("Flow Loaded", wxColour(*wxBLACK));
 }
 void MyFrame::OnOpenETF(wxCommandEvent& event)
 {
@@ -419,6 +431,9 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		wxString s;
 		s.Printf("Load ETF - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
+		SetStatusText(s, 2);
 	}
 
 
@@ -431,7 +446,6 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str());
-	addlog("ETF Loaded", wxColour(*wxBLACK));
 }
 
 void MyFrame::OnSaveResult(wxCommandEvent& event)

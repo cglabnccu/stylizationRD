@@ -156,7 +156,7 @@ void RD::FastGrayScott(){
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
 
 	array_view< float, 1 > alpha_A(nRows*nCols, (float*)alpha_A.data);
-	//array_view< float, 1 > alpha_B( nRows*nCols, (float*)e.alpha_B.data );
+	//array_view< float, 1 > alpha_B( nRows*nCols, (float*)alpha_B.data );
 	array_view< float, 1 > c_A(nRows*nCols, (float*)c_A->data);
 	array_view< float, 1 > c_B(nRows*nCols, (float*)c_B->data);
 	array_view< float, 1 > p_A(nRows*nCols, (float*)p_A->data);
@@ -167,7 +167,7 @@ void RD::FastGrayScott(){
 	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
 	int l = this->l;
-	float theta0 = (float)this->theta0 / 180 * 3.14;
+	float theta0 = (float)this->theta0 / 180.0 * M_PI;
 
 	// Gray-Scott models' paramaters
 	float f = this->f;
@@ -207,6 +207,8 @@ void RD::FastGrayScott(){
 
 			//anisotropic function
 			index<1> ix3 = idx * 3;
+
+			// a cross b ?
 			float axb = sqrt(sx*sx + sy*sy) * sqrt(p_flowfield[ix3] * p_flowfield[ix3] + p_flowfield[ix3 + 1] * p_flowfield[ix3 + 1]);
 			float cos_theta = 0;
 			float cross_product = 0;
@@ -228,19 +230,26 @@ void RD::FastGrayScott(){
 			if (cross_product < 0){
 				theta = 2 * M_PI - theta;
 			}
-			float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
-			float temp2 = 1 / temp*0.1;
-			alpha_A[idx] = temp2;
+
+			//if ((theta + theta0) >= 0.0 && (theta + theta0) <= M_PI){
+			//	float temp = 1.0*0.9 + 0.1;
+			//	float temp2 = 1 / temp*0.1;
+			//	alpha_A[idx] = temp2;
+			//}
+			//else{
+				float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+				float temp2 = 1 / temp*0.1;
+				alpha_A[idx] = temp2;
+			//}
 		}
 		);
 
 		parallel_for_each(p_A.extent,
 			[=](index<1> idx) restrict(amp)
 		{
-
 			//anisotropic diffusion
 			index<1> x = idx / nCols;
-			index<1> y = idx%nCols;
+			index<1> y = idx % nCols;
 			float da = 0;
 			float db = 0;
 			for (int q = -kh / 2; q <= kh / 2; q++){

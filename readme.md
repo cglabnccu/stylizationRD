@@ -1,7 +1,7 @@
-# StylizationRD 
+# StylizationRD
 #### Image stylization using anisotropic reaction diffusion
 ###### Keywords: image stylization · reaction diffusion · pattern generation
- 
+
 ---
 
 
@@ -15,7 +15,7 @@
 
 ### [WorkFlow]
  * Open src: Load image into MASK, and generate sobel edge image into MASK_s
- * Flowfield Option: 
+ * Flowfield Option:
   1. Open ETF: use the ETF of load image as flowfield
   2. Open Flow: there are some vfb in /data/
 
@@ -24,13 +24,14 @@
 
 ### [in post process]
   1. Segmentation
-  2. Demo Film
-
+  2. eq.7
+  3. Demo Film
+  4. [bug] LIC
 
 ---
 
 ### [Papers' Examples]
-|Papers' fig.|Workflow|
+|Fig.|Workflow|
 |------------|--------|
 |fig. 5(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|
 |fig. 5(b)| as above |
@@ -38,7 +39,17 @@
 |fig. 5(d)| as above, adjust **theta0** roughly to 220 degrees|
 |fig. 12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
 
-
+### [Table 1]
+|Style       | a(theta)| F    | k    | l| Figure     |
+|------------|---------|------|------|--|------------|
+|semicircle  |   Eq. 6 |.0375 |.0655 |1 |Fig. 5(a)   |
+|spot: spidle|    Eq. 6| .0375| .0655| 2| Fig. 5(b)  |
+|hole: spidle|   Eq. 6 |.0300 |.0546 |2 |Fig. 8 blue |
+|stripe      |   Eq. 6 |.0300 |.0620 |2 |Fig. 8 green|
+|triangle    |    Eq. 6| .0375| .0655| 3| Fig. 5(c)  |
+|spot: quad  |    Eq. 6| .0375| .0655| 4| Fig. 5(d)  |
+|water drop  |    Eq. 7| .0375| .0655| 2| Fig. 6(a)  |
+|sector      |    Eq. 7| .0375| .0655| 4| Fig. 6(b)  |
 ---
 
 ###[Common Q&A]
@@ -59,5 +70,3 @@
 #####[OpenCV]
  * <a href="http://docs.opencv.org/doc/tutorials/introduction/windows_install/windows_install.html#windowssetpathandenviromentvariable" target="_blank">Set the OpenCV enviroment variable and add it to the systems path</a>
  * <a href="http://docs.opencv.org/doc/tutorials/introduction/windows_visual_studio_Opencv/windows_visual_studio_Opencv.html#windows-visual-studio-how-to" target="_blank">How to build applications with OpenCV inside the Microsoft Visual Studio</a>
-
-
