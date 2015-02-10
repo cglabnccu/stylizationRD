@@ -137,7 +137,7 @@ void RD::ETF(string file){
 			float z = v.dot(u);
 			float temp = y*y - 2.0*x*y + x*x + 4.0*z*z;
 			float lambda1 = 0;
-			lambda1 = 0.5 * (y + x + sqrt(temp));
+			lambda1 = 0.5 * (y + x + sqrt(temp)); 
 			Flowfield.at<cv::Vec3f>(i, j) = normalize(Vec3f(z, x - lambda1, 0.0));
 			//dis.at<cv::Vec3f>(i,j) = normalize( Vec3f(lambda1-x,z,0.0) );
 
@@ -150,6 +150,7 @@ void RD::ETF(string file){
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
 }
 
+// for Eq.6
 void RD::FastGrayScott(){
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
@@ -231,16 +232,165 @@ void RD::FastGrayScott(){
 				theta = 2 * M_PI - theta;
 			}
 
+			//// modify anisotropic function
 			//if ((theta + theta0) >= 0.0 && (theta + theta0) <= M_PI){
 			//	float temp = 1.0*0.9 + 0.1;
 			//	float temp2 = 1 / temp*0.1;
 			//	alpha_A[idx] = temp2;
 			//}
 			//else{
+			float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+			float temp2 = 1 / temp*0.1;
+			alpha_A[idx] = temp2;
+			//}
+		}
+		);
+
+		parallel_for_each(p_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+			//anisotropic diffusion
+			index<1> x = idx / nCols;
+			index<1> y = idx % nCols;
+			float da = 0;
+			float db = 0;
+			for (int q = -kh / 2; q <= kh / 2; q++){
+				for (int p = -kw / 2; p <= kw / 2; p++){
+					//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
+					//	continue;
+					index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
+					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+				}
+			}
+			da /= (kw*kh - 1);
+			db /= (kw*kh - 1);
+
+			//reaction diffusion
+			float a = c_A[idx];
+			float b = c_B[idx];
+			float DA = sd*1.0*da;
+			float DB = sd*0.5*db;
+			float RA = sr*(-a*b*b + f*(1 - a));
+			float RB = sr*(a*b*b - (k + f)*b);
+			float AA = addA*a_A[idx];
+			float AB = addB*a_B[idx];
+			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
+			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
+		}
+		);
+		//--------------------------------------------- SWAP-------------------------------------------------------
+
+		//slower than parallel_for_each()
+		//p_A.copy_to(c_A);
+		//p_B.copy_to(c_B);
+		parallel_for_each(
+			c_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+			c_A[idx] = p_A[idx];
+			c_B[idx] = p_B[idx];
+		}
+		);
+		//inter finish
+	}
+}
+
+// for Eq.7
+void RD::FastGrayScott(float min_degree, float max_degree){
+	int nRows = c_A->rows;
+	int nCols = c_A->cols;
+	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
+
+	array_view< float, 1 > alpha_A(nRows*nCols, (float*)alpha_A.data);
+	//array_view< float, 1 > alpha_B( nRows*nCols, (float*)alpha_B.data );
+	array_view< float, 1 > c_A(nRows*nCols, (float*)c_A->data);
+	array_view< float, 1 > c_B(nRows*nCols, (float*)c_B->data);
+	array_view< float, 1 > p_A(nRows*nCols, (float*)p_A->data);
+	array_view< float, 1 > p_B(nRows*nCols, (float*)p_B->data);
+	array_view< float, 1 > a_A(nRows*nCols, (float*)Addition_A.data);
+	array_view< float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
+	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
+	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
+
+	int l = this->l;
+	float theta0 = (float)this->theta0 / 180.0 * M_PI;
+	min_degree = min_degree / 180.0 *M_PI;
+	max_degree = max_degree / 180.0 *M_PI;
+
+	// Gray-Scott models' paramaters
+	float f = this->f;
+	float k = this->k;
+
+	// Coefficient(weight)
+	float addA = this->addA;
+	float addB = this->addB;
+
+	// Scaling factors: Sd, Sr  (Refer to Section 3.2.1 in Paper)
+	float sd = 1.0;			  //speed of diffusion
+	float sr = 1.0 - this->s; //speed of reaction
+
+	int kh = 3;
+	int kw = 3;
+	//inter start
+	int t = 0;
+	const int innerAMPloopsize = 4;
+	while (t < innerAMPloopsize){
+		t++;
+		parallel_for_each(alpha_A.extent,
+			[=](index<1> idx) restrict(amp)
+		{
+			index<1> x = idx / nCols;
+			index<1> y = idx%nCols;
+			//Gradient
+			float sx = 0;
+			float sy = 0;
+			for (int i = -1; i <= 1; i++){
+				index<1> j1 = ((x + 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
+				index<1> j2 = ((x - 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
+				index<1> j3 = ((x + i + nRows) % nRows)*nCols + (y + 1 + nCols) % nCols;
+				index<1> j4 = ((x + i + nRows) % nRows)*nCols + (y - 1 + nCols) % nCols;
+				sx += c_A[j1] - c_A[j2];
+				sy += c_A[j3] - c_A[j4];
+			}
+
+			//anisotropic function
+			index<1> ix3 = idx * 3;
+
+			// a cross b ?
+			float axb = sqrt(sx*sx + sy*sy) * sqrt(p_flowfield[ix3] * p_flowfield[ix3] + p_flowfield[ix3 + 1] * p_flowfield[ix3 + 1]);
+			float cos_theta = 0;
+			float cross_product = 0;
+			if (axb == 0){
+				cos_theta = 0;
+				cross_product = 0;
+			}
+			else{
+				cos_theta = (sx*p_flowfield[ix3] + sy*p_flowfield[ix3 + 1]) / axb;
+				cross_product = (sx*p_flowfield[ix3 + 1] - sy*p_flowfield[ix3]) / axb;
+			}
+			if (cos_theta >= 1.0){
+				cos_theta = 1.0;
+			}
+			else if (cos_theta <= -1.0){
+				cos_theta = -1.0;
+			}
+			float theta = acos(cos_theta);
+			if (cross_product < 0){
+				theta = 2 * M_PI - theta;
+			}
+
+			// modify anisotropic function
+			if ((theta + theta0) >= min_degree && (theta + theta0) <= max_degree){
+				float temp = 1.0*0.9 + 0.1;
+				float temp2 = 1 / temp*0.1;
+				alpha_A[idx] = temp2;
+			}
+			else{
 				float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
 				float temp2 = 1 / temp*0.1;
 				alpha_A[idx] = temp2;
-			//}
+			}
 		}
 		);
 

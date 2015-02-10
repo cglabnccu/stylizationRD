@@ -15,8 +15,9 @@ public:
 	void ReadSrc(string);
 	void ReadFlow(string);
 	void ETF(string);
-	void FastGrayScott();
-	void GrayScottModel();
+	void FastGrayScott();// Eq.6
+	void FastGrayScott(float min_degree, float max_degree);// Eq.7
+	void GrayScottModel();// generate GS-Model
 	Mat *c_A;        // Current element of A
 	Mat *p_A;        // Previous element of A
 	Mat *c_B;

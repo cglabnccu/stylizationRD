@@ -24,6 +24,9 @@ public:
 	string processingS;
 	string controllingS;
 	int brushSize;
+	int mindegree;
+	int maxdegree;
+	bool customAnisotropicFunction;
 	BasicDrawPane(wxFrame* parent,Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
@@ -86,6 +89,7 @@ public:
 	void addlog(wxString info, wxColour& color);
 	void activateRenderLoop(bool on);
 protected:
+	bool render_loop_on;
 	wxTextCtrl *log; // Show the log
 	wxButton *start;
 	wxButton *fill;
@@ -93,33 +97,45 @@ protected:
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
 	wxStaticText *slider_s_t;
+	wxStaticText *slider_theta0_t;
+	wxStaticText *slider_brushSize_t;
+	wxStaticText *slider_addA_t;
+	wxStaticText *slider_addB_t;
+	wxStaticText *slider_alpha_t;
+	wxStaticText *slider_beta_t;
+	wxStaticText *slider_mindegree_t;
+	wxStaticText *slider_maxdegree_t;
 	wxSlider *slider_s;
 	wxSlider *slider_theta0;
-	wxStaticText *slider_theta0_t;
 	wxSlider *slider_brushSize;
-	wxStaticText *slider_brushSize_t;
 	wxSlider *slider_addA;
-	wxStaticText *slider_addA_t;
 	wxSlider *slider_addB;
-	wxStaticText *slider_addB_t;
 	wxSlider *slider_alpha;
-	wxStaticText *slider_alpha_t;
 	wxSlider *slider_beta;
-	wxStaticText *slider_beta_t;
-	bool render_loop_on;
+	wxCheckBox *Modify_cb; // Is User Want to Use Modified Anisotropic function?
+	wxSlider *slider_mindegree;
+	wxSlider *slider_maxdegree;
+
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);
+
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
+
+	void OnSliderBrushSize(wxCommandEvent& event);
+	void OnSliderAddA(wxCommandEvent& event);
+	void OnSliderAddB(wxCommandEvent& event);
+
 	void OnSliderS(wxCommandEvent& event);
 	void OnSliderF(wxCommandEvent& event);
 	void OnSliderK(wxCommandEvent& event);
 	void OnSliderL(wxCommandEvent& event);
 	void OnSliderTheta0(wxCommandEvent& event);
-	void OnSliderBrushSize(wxCommandEvent& event);
-	void OnSliderAddA(wxCommandEvent& event);
-	void OnSliderAddB(wxCommandEvent& event);
+	void OnCheckboxModifyToggle(wxCommandEvent& event);
+	void OnSliderMinDegree(wxCommandEvent& event);
+	void OnSliderMaxDegree(wxCommandEvent& event);
+
 	void OnSliderAlpha(wxCommandEvent& event);
 	void OnSliderBeta(wxCommandEvent& event);
 	void OnOpenSrc(wxCommandEvent& event);
@@ -159,6 +175,7 @@ enum
 	BUTTON_Clean,
 	COMBOBOX_Processing,
 	COMBOBOX_Controlling,
+
 	SLIDER_S,
 	SLIDER_S_T,
 	SLIDER_F,
@@ -175,7 +192,12 @@ enum
 	SLIDER_AddA_T,
 	SLIDER_AddB,
 	SLIDER_AddB_T,
-	
+	CHECKBOX_MODIFY_FUNCTION,
+	SLIDER_MINDEGREE,
+	SLIDER_MINDEGREE_T,
+	SLIDER_MAXDEGREE,
+	SLIDER_MAXDEGREE_T,
+
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,
 	SLIDER_Beta,

@@ -46,9 +46,10 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 			float y = j;
 			for (int k = 0; k<s; k++){
 				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
-				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
-				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
-
+				if (v[0] != 0 && v[1] != 0){
+					x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
+					y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
+				}
 				float r2 = k*k;
 				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
 				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
@@ -66,10 +67,10 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 			//	dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
 			//	w_sum += w;
 			//}
-			dis.at<float>(i, j) /= w_sum;
+			if (w_sum != 0)
+				dis.at<float>(i, j) /= w_sum;
 		}
 	}
-	//imshow("LIC Image", LIC);
 }
 
 void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis){

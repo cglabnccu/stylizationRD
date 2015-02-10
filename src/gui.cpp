@@ -230,13 +230,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_brushSize = new wxSlider(this, SLIDER_BRUSH_SIZE, drawPane->brushSize, 1, 10, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_brushSize, 0, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("addA : %.4f", drawPane->element.addA);
+	s.Printf("addA : %.3f", drawPane->element.addA);
 	slider_addA_t = new wxStaticText(this, SLIDER_AddA_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addA_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_addA = new wxSlider(this, SLIDER_AddA, int(drawPane->element.addA * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addA, 0, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("addB : %.4f", drawPane->element.addB);
+	s.Printf("addB : %.3f", drawPane->element.addB);
 	slider_addB_t = new wxStaticText(this, SLIDER_AddB_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addB_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_addB = new wxSlider(this, SLIDER_AddB, int(drawPane->element.addB * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
@@ -279,6 +279,22 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_theta0 = new wxSlider(this, SLIDER_Theta0, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_theta0, 0, wxEXPAND | wxLEFT, 10);
 
+	Modify_cb = new wxCheckBox(this, CHECKBOX_MODIFY_FUNCTION, wxT("Modify Anisotropic Function"), wxPoint(20, 20));
+	Modify_cb->SetValue(false);
+	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("min degree : %d", drawPane->mindegree);
+	slider_mindegree_t = new wxStaticText(this, SLIDER_MINDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_mindegree_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_mindegree = new wxSlider(this, SLIDER_MINDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_mindegree, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("max degree : %d", drawPane->maxdegree);
+	slider_maxdegree_t = new wxStaticText(this, SLIDER_MAXDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_maxdegree_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_maxdegree = new wxSlider(this, SLIDER_MAXDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_maxdegree, 0, wxEXPAND | wxLEFT, 10);
+
 	control->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 	#pragma endregion 
 
@@ -304,7 +320,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	sizer->Add(leftside, 7, wxEXPAND);
 	sizer->Add(control, 3, wxEXPAND);
 	SetSizer(sizer);
-
+	//SetScrollbar(wxVERTICAL, 0, 16, 50);
+	
+	slider_mindegree->Disable();
+	slider_maxdegree->Disable();
 	slider_alpha->Disable();
 	slider_beta->Disable();
 	fill->Disable();
@@ -581,6 +600,32 @@ void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 	s.Printf("theta0 : %d", drawPane->element.theta0);
 	slider_theta0_t->SetLabel(s);
 }
+void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
+{
+	if (Modify_cb->GetValue()) {
+		drawPane->customAnisotropicFunction = true;
+		slider_mindegree->Enable();
+		slider_maxdegree->Enable();
+	}
+	else {
+		drawPane->customAnisotropicFunction = false;
+		slider_mindegree->Disable();
+		slider_maxdegree->Disable();
+	}
+}
+void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
+{
+	drawPane->mindegree = slider_mindegree->GetValue();
+	wxString s;
+	s.Printf("min degree : %d", drawPane->mindegree);
+	slider_mindegree_t->SetLabel(s);
+}
+void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
+	drawPane->maxdegree = slider_maxdegree->GetValue();
+	wxString s;
+	s.Printf("max degree : %d", drawPane->maxdegree);
+	slider_maxdegree_t->SetLabel(s);
+}
 
 //Slides: Paint Parameter
 void MyFrame::OnSliderBrushSize(wxCommandEvent& event)
@@ -594,14 +639,14 @@ void MyFrame::OnSliderAddA(wxCommandEvent& event)
 {
 	drawPane->element.addA = slider_addA->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("addA : %.4f", drawPane->element.addA);
+	s.Printf("addA : %.3f", drawPane->element.addA);
 	slider_addA_t->SetLabel(s);
 }
 void MyFrame::OnSliderAddB(wxCommandEvent& event)
 {
 	drawPane->element.addB = slider_addB->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("addB : %.4f", drawPane->element.addB);
+	s.Printf("addB : %.3f", drawPane->element.addB);
 	slider_addB_t->SetLabel(s);
 }
 
@@ -667,6 +712,9 @@ wxPanel(parent)
 {
 	activateDraw = false;
 	brushSize = 1;
+	customAnisotropicFunction = false;
+	mindegree = 0;
+	maxdegree = 0;
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {
@@ -833,12 +881,15 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	int timeSincePrevFrame = currTime - prevTime;
 	int elapsedTime = currTime - startTime;
 	prevTime = currTime;
-
 	static int counter = 0;
+
 	if (render_loop_on){
-		element.FastGrayScott();
-		//element.GrayScottModel();
+		if (customAnisotropicFunction)
+			element.FastGrayScott(mindegree, maxdegree);
+		else
+			element.FastGrayScott();
 		counter++;
+		//element.GrayScottModel();
 	}
 
 	dis = element.c_A->clone();
