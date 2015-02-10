@@ -31,6 +31,10 @@ RD::RD(Size s){
 	this->theta0 = 0;
 	this->addA = 0.5;
 	this->addB = 0.5;
+
+	SrcLoaded = false;
+	FlowLoaded = false;
+	ETFLoaded = false;
 }
 
 void RD::Init(Size s){
@@ -107,6 +111,9 @@ void RD::ReadFlow(string file){
 		}
 	}
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
+
+	FlowLoaded = true;
+	ETFLoaded = false;
 }
 
 //Generate ETF of input image as flowfield
@@ -148,6 +155,9 @@ void RD::ETF(string file){
 	}
 
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
+
+	ETFLoaded = true;
+	FlowLoaded = false;
 }
 
 // for Eq.6

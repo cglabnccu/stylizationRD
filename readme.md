@@ -24,9 +24,8 @@
 
 ### [in post process]
   1. Segmentation
-  2. eq.7
-  3. Demo Film
-  4. [bug] LIC
+  2. Demo Film
+  3. [bug] LIC
 
 ---
 

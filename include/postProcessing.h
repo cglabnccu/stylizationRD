@@ -9,6 +9,7 @@ public:
 	PP(Size);
 	void motionIllu(Mat &src,Mat &flowfield,Mat &dis);
 	void dirTexture(Mat &src,Mat &flowfield,Mat &dis); 
+	void dirTexture_Polar(Mat &src, Mat &flowfield, Mat &dis);
 	void adaThresholding(Mat &src,Mat &mask,Mat &dis);
 	void LIC(Mat &flowfield, Mat &dis);
 	void Thresholding(Mat &src,Mat &dis);

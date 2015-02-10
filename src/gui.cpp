@@ -184,6 +184,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox->Append("LIC");
 	processingBox->Append("Motion_Illusion");
 	processingBox->Append("dirTexture");
+	processingBox->Append("PolarTexture");
 	processingBox->Append("adaThresholding");
 	processingBox->Append("Thresholding");
 
@@ -372,7 +373,11 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 
 		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
 		SetStatusText(s, 1);
-		if (!drawPane->element.FlowLoaded){
+		
+		//If no Flow is Loaded, Read Same File as defaulf ETF
+		if (!drawPane->element.FlowLoaded && !drawPane->element.ETFLoaded)
+		{	
+			drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
 			s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
 			SetStatusText(s, 2);
 		}
@@ -387,8 +392,6 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
 
-	if (!drawPane->element.FlowLoaded)//If no Flow is Loaded, Read Same File as defaulf ETF
-		drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
 
@@ -552,10 +555,23 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 {
 	drawPane->processingS = processingBox->GetValue();
 	
-	if (drawPane->processingS == "dirTexture" && !drawPane->processing.TextureLoaded){
-		addlog("Must Loaded Texture First! (dirTexture)", wxColour(*wxRED));
-		drawPane->processingS = "distribution_A";
-		processingBox->SetSelection(0);
+	if (drawPane->processingS == "dirTexture" || drawPane->processingS == "PolarTexture")
+	{
+		wxString s;
+		if (!drawPane->processing.TextureLoaded)
+		{
+			s.Printf("Must Loaded Texture First! (%s)", drawPane->processingS);
+			addlog(s, wxColour(*wxRED));
+			drawPane->processingS = "distribution_A";
+			processingBox->SetSelection(0);
+		}
+		else if (!drawPane->element.FlowLoaded)
+		{
+			s.Printf("Must Loaded vfb for Flowfield! (%s)", drawPane->processingS);
+			addlog(s, wxColour(*wxRED));
+			drawPane->processingS = "distribution_A";
+			processingBox->SetSelection(0);
+		}
 	}
 
 	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" || processingBox->GetValue() == "dirTexture"){
@@ -915,7 +931,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "distribution_B"){
 		dis = element.c_B->clone();
-		//processing.LIC(element.Flowfield, dis);
+		//processing.LIC(element.Flowfield, dis); ?
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
@@ -926,7 +942,11 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "dirTexture"){
 		processing.dirTexture(*element.c_A, element.Flowfield, dis);
-		//processing.LIC(element.Flowfield, dis);
+		dis.convertTo(dis, CV_8UC1, 255);
+		cvtColor(dis, dis, CV_RGB2BGR);
+	}
+	else if (processingS == "PolarTexture"){
+		processing.dirTexture_Polar(*element.c_A, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
