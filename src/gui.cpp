@@ -3,7 +3,7 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800,720));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800,730));
 	frame->Show(true);
 
 	return true;
@@ -172,12 +172,44 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	SetStatusText("Texture: None", 3);
 	#pragma endregion
 
+	#pragma region ToolBar: Buttons(Start, Fill Ink, Clean), Combobox(processingBox, controllingBox)
+	wxToolBar *toolbar1 = new wxToolBar(this, wxID_ANY);
+	start = new wxButton(toolbar1, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
+	fill = new wxButton(toolbar1, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
+	clean = new wxButton(toolbar1, BUTTON_Clean, _T("Clean"), wxDefaultPosition, wxDefaultSize, 0);
+
+	processingBox = new wxComboBox(toolbar1, COMBOBOX_Processing, "distribution_A", wxDefaultPosition, wxDefaultSize, 0);
+	processingBox->Append("distribution_A");
+	processingBox->Append("distribution_B");
+	processingBox->Append("LIC");
+	processingBox->Append("Motion_Illusion");
+	processingBox->Append("dirTexture");
+	processingBox->Append("adaThresholding");
+	processingBox->Append("Thresholding");
+
+	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
+	controllingBox->Append("paint_to_B");
+	//controllingBox->Append("seeds");
+	controllingBox->Append("addA");
+	controllingBox->Append("addB");
+
+	toolbar1->AddControl(start);
+	toolbar1->AddControl(fill);
+	toolbar1->AddControl(clean);
+	toolbar1->AddControl(processingBox);
+	toolbar1->AddControl(controllingBox);
+
+	toolbar1->Realize();
+	SetToolBar(toolbar1);
+	#pragma endregion 
+
 	//Sizer of whole window
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	//Sizer of leftside
 	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
 	//Sizer of rightside(control panel)
 	wxBoxSizer* control = new wxBoxSizer(wxVERTICAL);
+
 	wxString s;
 
 	#pragma region Leftside: drawPane, log
@@ -191,34 +223,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	leftside->Add(drawPane, 7, wxEXPAND);
 	leftside->Add(log, 1, wxEXPAND);
 	#pragma endregion
-
-	#pragma region Buttons: Start, Fill Ink, Clean
-	start = new wxButton(this, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
-	control->Add(start, 0, wxEXPAND);
-	fill = new wxButton(this, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
-	control->Add(fill, 0, wxEXPAND);
-	clean = new wxButton(this, BUTTON_Clean, _T("Clean"), wxDefaultPosition, wxDefaultSize, 0);
-	control->Add(clean, 0, wxEXPAND);
-	#pragma endregion
-
-	#pragma region Combobox: processingBox, controllingBox
-	processingBox = new wxComboBox(this, COMBOBOX_Processing, "distribution_A", wxDefaultPosition, wxDefaultSize, 0);
-	processingBox->Append("distribution_A");
-	processingBox->Append("distribution_B");
-	processingBox->Append("LIC");
-	processingBox->Append("Motion_Illusion");
-	processingBox->Append("dirTexture");
-	processingBox->Append("adaThresholding");
-	processingBox->Append("Thresholding");
-	control->Add(processingBox, 0, wxEXPAND);
-
-	controllingBox = new wxComboBox(this, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
-	controllingBox->Append("paint_to_B");
-	//controllingBox->Append("seeds");
-	controllingBox->Append("addA");
-	controllingBox->Append("addB");
-	control->Add(controllingBox, 0, wxEXPAND);
-	#pragma endregion 
 
 	#pragma region Paint Parameters
 	wxStaticBox *st_paint = new wxStaticBox(this, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
@@ -246,8 +250,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	#pragma endregion
 
 	#pragma region Pattern Parameters
-	wxStaticBox *st_pattern = new wxStaticBox(this, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
-	wxStaticBoxSizer *st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
+	wxStaticBox* st_pattern = new wxStaticBox(this, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
 
 	s.Printf("Size : %.4f", drawPane->element.s);
 	slider_s_t = new wxStaticText(this, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
@@ -279,7 +283,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_theta0 = new wxSlider(this, SLIDER_Theta0, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_theta0, 0, wxEXPAND | wxLEFT, 10);
 
-	Modify_cb = new wxCheckBox(this, CHECKBOX_MODIFY_FUNCTION, wxT("Modify Anisotropic Function"), wxPoint(20, 20));
+	Modify_cb = new wxCheckBox(this, CHECKBOX_MODIFY_FUNCTION, wxT("Customize Anisotropic Function"), wxPoint(20, 20));
 	Modify_cb->SetValue(false);
 	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
 
@@ -320,13 +324,15 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	sizer->Add(leftside, 7, wxEXPAND);
 	sizer->Add(control, 3, wxEXPAND);
 	SetSizer(sizer);
-	//SetScrollbar(wxVERTICAL, 0, 16, 50);
 	
-	slider_mindegree->Disable();
-	slider_maxdegree->Disable();
 	slider_alpha->Disable();
 	slider_beta->Disable();
 	fill->Disable();
+	slider_mindegree->Hide();
+	slider_maxdegree->Hide();
+	slider_mindegree_t->Hide();
+	slider_maxdegree_t->Hide();
+	this->GetSizer()->Layout();
 
 	render_loop_on = false;
 }
@@ -366,12 +372,13 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 
 		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
 		SetStatusText(s, 1);
-		s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
-		SetStatusText(s, 2);
+		if (!drawPane->element.FlowLoaded){
+			s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
+			SetStatusText(s, 2);
+		}
 	}
 
-	// proceed loading the file chosen by the user;
-	// this can be done with e.g. wxWidgets input streams:
+	// proceed loading the file chosen by the user, this can be done with e.g. wxWidgets input streams:
 	wxFileInputStream input_stream(openFileDialog.GetPath());
 	if (!input_stream.IsOk())
 	{
@@ -379,7 +386,9 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
-	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); //Read Same File as defaulf ETF
+
+	if (!drawPane->element.FlowLoaded)//If no Flow is Loaded, Read Same File as defaulf ETF
+		drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
 
@@ -604,14 +613,19 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 {
 	if (Modify_cb->GetValue()) {
 		drawPane->customAnisotropicFunction = true;
-		slider_mindegree->Enable();
-		slider_maxdegree->Enable();
+		slider_mindegree->Show();
+		slider_maxdegree->Show();
+		slider_mindegree_t->Show();
+		slider_maxdegree_t->Show();
 	}
 	else {
 		drawPane->customAnisotropicFunction = false;
-		slider_mindegree->Disable();
-		slider_maxdegree->Disable();
+		slider_mindegree->Hide();
+		slider_maxdegree->Hide();
+		slider_mindegree_t->Hide();
+		slider_maxdegree_t->Hide();
 	}
+	this->Layout();
 }
 void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
 {
