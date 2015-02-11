@@ -105,8 +105,9 @@ void RD::ReadFlow(string file){
 	for (int j = 0; j<vf_h; j++){
 		for (int i = 0; i<vf_w; i++){
 			int index = j*vf_w + i;
-			float dx = data[index * 2 + 1];
-			float dy = data[index * 2];
+			float dx = data[index * 2];
+			float dy = data[index * 2 + 1];
+			
 			Flowfield.at<Vec3f>(j, i) = Vec3f(dx, dy, 0.0);  //x,y swap??
 		}
 	}

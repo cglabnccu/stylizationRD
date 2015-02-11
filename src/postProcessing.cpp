@@ -33,7 +33,7 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 	randu(noise, 0, 1.0f);
 	resize(noise, noise, flowfield.size(), 0, 0, INTER_NEAREST);
 
-	int s = 10;
+	int s = 10 * alpha;
 	int nRows = noise.rows;
 	int nCols = noise.cols;
 	float sigma = 2 * s*s;
@@ -69,6 +69,69 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 		}
 	}
 }
+
+
+void PP::Flowtest(Mat &flowfield, Mat &dis)
+{
+	const float M_PI = 3.14159265358979323846;
+
+	dis = Mat::zeros(flowfield.size(), CV_32F);
+
+
+	int s = 10;
+	int nRows = flowfield.rows;
+	int nCols = flowfield.cols;
+	float step = nRows*(alpha>0? alpha: 0.1);
+#pragma omp parallel for
+	for (int j = 0; j<nRows; j += step){
+		for (int i = 0; i<nCols; i += step){
+
+			float x = i;
+			float y = j;
+
+			Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
+			int thickness = 1;
+			int lineType = 8;
+
+			circle(dis,
+				Point(x, y),
+				3,
+				Scalar(255, 0, 255));
+
+			line(dis,
+				Point(x, y), 
+				Point(x + 0.5*step*v[0], y + 0.5*step*v[1]),
+				Scalar(255, 0, 0),
+				thickness,
+				lineType);
+		}
+	}
+
+	float x = 0.5*nRows;
+	float y = 0.5*nCols;
+	static float angle = 0;
+
+	line(dis,
+		Point(x, y),
+		Point(x + 10, y),
+		Scalar(255, 0, 0),
+		2);
+	line(dis,
+		Point(x, y),
+		Point(x, y + 10),
+		Scalar(255, 0, 0),
+		2,
+		3);
+
+	line(dis,
+		Point(x, y),
+		Point(x + 10*cos(angle), y + 10*sin(angle)),
+		Scalar(255, 0, 0),
+		1);
+	angle += 0.01;
+
+}
+
 
 void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis){
 	vector<Mat> channels;

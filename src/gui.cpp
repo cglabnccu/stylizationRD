@@ -182,6 +182,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox->Append("distribution_A");
 	processingBox->Append("distribution_B");
 	processingBox->Append("LIC");
+	processingBox->Append("Flowtest");
 	processingBox->Append("Motion_Illusion");
 	processingBox->Append("dirTexture");
 	processingBox->Append("PolarTexture");
@@ -931,12 +932,16 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "distribution_B"){
 		dis = element.c_B->clone();
-		//processing.LIC(element.Flowfield, dis); ?
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
 	else if (processingS == "LIC"){
 		processing.LIC(element.Flowfield, dis);
+		dis.convertTo(dis, CV_8UC1, 255);
+		cvtColor(dis, dis, CV_GRAY2BGR);
+	}
+	else if (processingS == "Flowtest"){
+		processing.Flowtest(element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}

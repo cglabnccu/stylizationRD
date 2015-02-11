@@ -12,6 +12,7 @@ public:
 	void dirTexture_Polar(Mat &src, Mat &flowfield, Mat &dis);
 	void adaThresholding(Mat &src,Mat &mask,Mat &dis);
 	void LIC(Mat &flowfield, Mat &dis);
+	void Flowtest(Mat &flowfield, Mat &dis);
 	void Thresholding(Mat &src,Mat &dis);
 	void ReadTexture(string);
 	Mat texture;
