@@ -29,9 +29,9 @@
 
 ### [Future Work]
   1. more UI friendly
-   --* partition pattern selection
-   --* Customize Anisotropic Function degree selection
-   --* ???
+   * partition pattern selection
+   * Customize Anisotropic Function degree selection
+   * ???
   2. oriental cloud patterns
   3. merge flowfield maker
   4. ???
