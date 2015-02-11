@@ -142,7 +142,9 @@ protected:
 	void OnOpenVfb(wxCommandEvent& event);
 	void OnOpenETF(wxCommandEvent& event);
 	void OnOpenTex(wxCommandEvent& event);
+	void OnOpenControlImg(wxCommandEvent& event);
 	void OnSaveResult(wxCommandEvent& event);
+
 	void OnEdge2AddA(wxCommandEvent& event);
 	void OnEdge2AddB(wxCommandEvent& event);
 	void OnOpenMask(wxCommandEvent& event);
@@ -161,6 +163,7 @@ enum
 	ID_ONOPENVFB,
 	ID_ONOPENETF,
 	ID_ONOPENTEX,
+	ID_ONOPENCONTOLIMG,
 	ID_ONSAVE,
 
 	ID_ONEdge2AddA,

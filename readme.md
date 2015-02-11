@@ -26,6 +26,12 @@
   1. Segmentation
   2. Demo Film
   3. [bug] LIC
+  4. [bug] eq7 (across 360 degree)
+
+### [Future Work]
+  1. more UI friendly
+  2. oriental cloud patterns
+  3. ???
 
 ---
 

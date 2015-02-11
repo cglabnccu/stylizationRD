@@ -15,6 +15,7 @@ public:
 	void ReadSrc(string);
 	void ReadFlow(string);
 	void ETF(string);
+	void ReadControlImg(string);
 	void FastGrayScott();// Eq.6
 	void FastGrayScott(float min_degree, float max_degree);// Eq.7
 	void GrayScottModel();// generate GS-Model
@@ -26,6 +27,7 @@ public:
 	Mat RotationMat;
 	Mat Mask;
 	Mat Mask_s;
+	Mat Mask_control;
 	Mat Diffusion_A;
 	Mat Diffusion_B;
 	Mat Gradient_A; // Gradient vetor of A
@@ -49,4 +51,5 @@ public:
 	bool SrcLoaded;
 	bool FlowLoaded;
 	bool ETFLoaded;
+	bool ControlImgLoad;
 };

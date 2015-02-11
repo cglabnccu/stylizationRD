@@ -25,11 +25,12 @@ END_EVENT_TABLE()
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	// Menu - File
-    EVT_MENU(ID_ONOPENSRC,   MyFrame::OnOpenSrc)
-    EVT_MENU(ID_ONOPENVFB,   MyFrame::OnOpenVfb)
-    EVT_MENU(ID_ONOPENETF,   MyFrame::OnOpenETF)
-    EVT_MENU(ID_ONOPENTEX,   MyFrame::OnOpenTex)
-    EVT_MENU(ID_ONSAVE,   MyFrame::OnSaveResult)
+    EVT_MENU(ID_ONOPENSRC, MyFrame::OnOpenSrc)
+    EVT_MENU(ID_ONOPENVFB, MyFrame::OnOpenVfb)
+	EVT_MENU(ID_ONOPENETF, MyFrame::OnOpenETF)
+	EVT_MENU(ID_ONOPENTEX, MyFrame::OnOpenTex)
+	EVT_MENU(ID_ONOPENCONTOLIMG, MyFrame::OnOpenControlImg)
+	EVT_MENU(ID_ONSAVE, MyFrame::OnSaveResult)
     EVT_MENU(wxID_EXIT,  MyFrame::OnExit)
 
 	// Menu - Tool
@@ -42,12 +43,14 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	// Menu - Help
 	EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
 
-	// Control Panel
+	// Toolbar
 	EVT_BUTTON(BUTTON_Start, MyFrame::OnStart)
 	EVT_BUTTON(BUTTON_Fill, MyFrame::OnFill)
 	EVT_BUTTON(BUTTON_Clean, MyFrame::OnClean)
 	EVT_COMBOBOX(COMBOBOX_Processing, MyFrame::OnProcessingBox)
 	EVT_COMBOBOX(COMBOBOX_Controlling, MyFrame::OnControllingBox)
+
+	// Control Panel
 	EVT_SLIDER(SLIDER_S, MyFrame::OnSliderS)
 	EVT_SLIDER(SLIDER_F, MyFrame::OnSliderF)
 	EVT_SLIDER(SLIDER_K, MyFrame::OnSliderK)

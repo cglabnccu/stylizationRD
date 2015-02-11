@@ -146,6 +146,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_ONOPENVFB, "&Open Flow\tCtrl-F", "Open Flowfield file");
 	menuFile->Append(ID_ONOPENETF, "&Open ETF\tCtrl-E", "Open image file");
 	menuFile->Append(ID_ONOPENTEX, "&Open Texture\tCtrl-E", "Open texture file");
+	menuFile->Append(ID_ONOPENCONTOLIMG, "&Open Control Image\tCtrl-E", "Open Control Image file");
 	menuFile->Append(ID_ONSAVE, "&Save\tCtrl-E", "Save Result");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
@@ -167,9 +168,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuBar->Append(menuHelp, "&Help");
 	SetMenuBar(menuBar);
 	CreateStatusBar(4);
-	SetStatusText("SrcImg: None", 1);
-	SetStatusText("Flowfield: None", 2);
-	SetStatusText("Texture: None", 3);
+	SetStatusText("SrcImg: None", 0);
+	SetStatusText("Flowfield: None", 1);
+	SetStatusText("Texture: None", 2);
+	SetStatusText("Control-Img: None", 3);
 	#pragma endregion
 
 	#pragma region ToolBar: Buttons(Start, Fill Ink, Clean), Combobox(processingBox, controllingBox)
@@ -372,14 +374,14 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		addlog(s, wxColour(*wxBLUE));
 
 		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
-		SetStatusText(s, 1);
+		SetStatusText(s, 0);
 		
 		//If no Flow is Loaded, Read Same File as defaulf ETF
 		if (!drawPane->element.FlowLoaded && !drawPane->element.ETFLoaded)
 		{	
 			drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
 			s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
-			SetStatusText(s, 2);
+			SetStatusText(s, 1);
 		}
 	}
 
@@ -396,34 +398,6 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
 
 }
-void MyFrame::OnOpenTex(wxCommandEvent& event)
-{
-	wxFileDialog openFileDialog(this, _("Open texture file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
-		addlog("Load Texture Canceled", wxColour(*wxBLACK));
-		return;     // the user changed idea...
-	}
-	else{
-		wxString s;
-		s.Printf("Load Texture - %s", openFileDialog.GetFilename());
-		addlog(s, wxColour(*wxBLUE));
-
-		s.Printf("Texture: %s", openFileDialog.GetFilename());
-		SetStatusText(s, 3);
-	}
-
-	// proceed loading the file chosen by the user;
-	// this can be done with e.g. wxWidgets input streams:
-	wxFileInputStream input_stream(openFileDialog.GetPath());
-	if (!input_stream.IsOk())
-	{
-		wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
-		return;
-	}
-	drawPane->processing.ReadTexture((const char*)openFileDialog.GetPath().mb_str());
-
-	addlog("Texture Loaded", wxColour(*wxBLACK));
-}
 void MyFrame::OnOpenVfb(wxCommandEvent& event)
 {
 	wxFileDialog openFileDialog(this, _("Open vfb file"), "", "", "vfb files (*.vfb)|*.vfb", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -437,7 +411,7 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		addlog(s, wxColour(*wxBLUE));
 
 		s.Printf("Flowfield(vfb): %s", openFileDialog.GetFilename());
-		SetStatusText(s, 2);
+		SetStatusText(s, 1);
 	}
 
 
@@ -464,7 +438,7 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		addlog(s, wxColour(*wxBLUE));
 
 		s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
-		SetStatusText(s, 2);
+		SetStatusText(s, 1);
 	}
 
 
@@ -477,6 +451,60 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str());
+}
+void MyFrame::OnOpenTex(wxCommandEvent& event)
+{
+	wxFileDialog openFileDialog(this, _("Open texture file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_CANCEL){
+		addlog("Load Texture Canceled", wxColour(*wxBLACK));
+		return;     // the user changed idea...
+	}
+	else{
+		wxString s;
+		s.Printf("Load Texture - %s", openFileDialog.GetFilename());
+		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Texture: %s", openFileDialog.GetFilename());
+		SetStatusText(s, 2);
+	}
+
+	// proceed loading the file chosen by the user;
+	// this can be done with e.g. wxWidgets input streams:
+	wxFileInputStream input_stream(openFileDialog.GetPath());
+	if (!input_stream.IsOk())
+	{
+		wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
+		return;
+	}
+	drawPane->processing.ReadTexture((const char*)openFileDialog.GetPath().mb_str());
+
+	addlog("Texture Loaded", wxColour(*wxBLACK));
+}
+void MyFrame::OnOpenControlImg(wxCommandEvent& event)
+{
+	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_CANCEL){
+		addlog("Load Control Img Canceled", wxColour(*wxBLACK));
+		return;     // the user changed idea...
+	}
+	else{
+		wxString s;
+		s.Printf("Load Control Img - %s", openFileDialog.GetFilename());
+		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Control Img: %s", openFileDialog.GetFilename());
+		SetStatusText(s, 3);
+	}
+
+	// proceed loading the file chosen by the user, this can be done with e.g. wxWidgets input streams:
+	wxFileInputStream input_stream(openFileDialog.GetPath());
+	if (!input_stream.IsOk())
+	{
+		wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
+		return;
+	}
+	drawPane->element.ReadControlImg((const char*)openFileDialog.GetPath().mb_str());
+
 }
 
 void MyFrame::OnSaveResult(wxCommandEvent& event)
@@ -900,25 +928,14 @@ void BasicDrawPane::paintNow(bool render_loop_on)
 	render(dc, render_loop_on);
 }
 
-//Global variables for measuring time (in milli-seconds)
-int	startTime;
-int	prevTime;
 //Main Render(iteration) Section
 void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
-	// Measure the elapsed time
-	int currTime = static_cast <float> (clock()) ;
-	int timeSincePrevFrame = currTime - prevTime;
-	int elapsedTime = currTime - startTime;
-	prevTime = currTime;
-	static int counter = 0;
-
 	if (render_loop_on){
 		if (customAnisotropicFunction)
 			element.FastGrayScott(mindegree, maxdegree);
 		else
 			element.FastGrayScott();
-		counter++;
 		//element.GrayScottModel();
 	}
 

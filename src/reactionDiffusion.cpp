@@ -6,6 +6,7 @@ RD::RD(Size s){
 	Flowfield = Mat::zeros(s, CV_32FC3);
 	Mask = Mat::zeros(s, CV_32F);
 	Mask_s = Mat::zeros(s, CV_32F);
+	Mask_control = Mat::zeros(s, CV_32F);
 	Gradient_A = Mat::zeros(s, CV_32FC3);
 	Gradient_B = Mat::zeros(s, CV_32FC3);
 	Diffusion_A = Mat::zeros(s, CV_32F);
@@ -35,6 +36,7 @@ RD::RD(Size s){
 	SrcLoaded = false;
 	FlowLoaded = false;
 	ETFLoaded = false;
+	ControlImgLoad = false;
 }
 
 void RD::Init(Size s){
@@ -116,6 +118,17 @@ void RD::ReadFlow(string file){
 	ETFLoaded = false;
 }
 
+void RD::ReadControlImg(string file){
+	Mask_control = imread(file, 0);
+	Mask.convertTo(Mask, CV_32FC1);
+	normalize(Mask_control, Mask_control, 0.0, 1.0, NORM_MINMAX, CV_32FC1);
+
+	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	ControlImgLoad = true;
+	imshow("loil", Mask_control);
+}
+
+
 //Generate ETF of input image as flowfield
 void RD::ETF(string file){
 	Mat src = imread(file, 1);
@@ -177,6 +190,8 @@ void RD::FastGrayScott(){
 	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
 	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
+	array_view<float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
+
 	int l = this->l;
 	float theta0 = (float)this->theta0 / 180.0 * M_PI;
 
@@ -203,7 +218,7 @@ void RD::FastGrayScott(){
 			[=](index<1> idx) restrict(amp)
 		{
 			index<1> x = idx / nCols;
-			index<1> y = idx%nCols;
+			index<1> y = idx % nCols;
 			//Gradient
 			float sx = 0;
 			float sy = 0;
@@ -273,10 +288,20 @@ void RD::FastGrayScott(){
 			float b = c_B[idx];
 			float DA = sd*1.0*da;
 			float DB = sd*0.5*db;
-			float RA = sr*(-a*b*b + f*(1 - a));
-			float RB = sr*(a*b*b - (k + f)*b);
 			float AA = addA*a_A[idx];
 			float AB = addB*a_B[idx];
+			float RA;
+			float RB;
+			if (m_control[idx] == 0.0){  // RD work on black area
+				RA = sr*(-a*b*b + f*(1 - a));
+				RB = sr*(a*b*b - (k + f)*b);
+			}
+			else{// else didn't work (on white area)
+				float f = 0.7;
+				float k = 0.7;
+				RA = sr*(-a*b*b + f*(1 - a));
+				RB = sr*(a*b*b - (k + f)*b);
+			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
 		}
@@ -314,6 +339,8 @@ void RD::FastGrayScott(float min_degree, float max_degree){
 	array_view< float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
 	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
 	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
+
+	array_view<float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
 
 	int l = this->l;
 	float theta0 = (float)this->theta0 / 180.0 * M_PI;
@@ -421,10 +448,20 @@ void RD::FastGrayScott(float min_degree, float max_degree){
 			float b = c_B[idx];
 			float DA = sd*1.0*da;
 			float DB = sd*0.5*db;
-			float RA = sr*(-a*b*b + f*(1 - a));
-			float RB = sr*(a*b*b - (k + f)*b);
+			float RA;
+			float RB;
 			float AA = addA*a_A[idx];
 			float AB = addB*a_B[idx];
+			if (m_control[idx] == 0.0){  // RD work on black area
+				RA = sr*(-a*b*b + f*(1 - a));
+				RB = sr*(a*b*b - (k + f)*b);
+			}
+			else{// else didn't work (on white area)
+				float f = 0.7;
+				float k = 0.7;
+				RA = sr*(-a*b*b + f*(1 - a));
+				RB = sr*(a*b*b - (k + f)*b);
+			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
 		}
