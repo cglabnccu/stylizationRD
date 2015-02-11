@@ -67,7 +67,9 @@
 ###[Useful Tutorials]
 #####[wxWidgets]
  * <a href="http://www.rhyous.com/2009/12/16/how-to-compile-a-wxwidgets-application-in-visual-studio-2008/" target="_blank">How to compile a wxWidgets application in Visual Studio 2008?</a>
- * <a href="http://changyang319.pixnet.net/blog/post/26984931-wxwidgets%E6%95%99%E5%AD%B8%EF%BC%9A%E7%B7%A8%E8%AD%AF%E9%9D%9C%E6%85%8Blib%E6%AA%94%E5%8F%8A%E7%AC%AC%E4%B8%80%E5%80%8Bhello-world" target="_blank">wxWidgets教學：編譯靜態LIB檔及第一個Hello World程式]</a>
+ * <a href="http://changyang319.pixnet.net/blog/post/26984931-wxwidgets%E6%95%99%E5%AD%B8%EF%BC%9A%E7%B7%A8%E8%AD%AF%E9%9D%9C%E6%85%8Blib%E6%AA%94%E5%8F%8A%E7%AC%AC%E4%B8%80%E5%80%8Bhello-world" target="_blank">wxWidgets教學：編譯靜態LIB檔及第一個Hello World程式</a>
+ * <a href="http://sourceforge.net/projects/wxformbuilder/?source=typ_redirect" target="_blank">wxFormBuilder - a RAD tool for wxWidgets GUI design.</a>
+
 
 
 #####[OpenCV]

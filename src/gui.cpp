@@ -254,7 +254,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxStaticBox* st_pattern = new wxStaticBox(this, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
 
-	s.Printf("Size : %.4f", drawPane->element.s);
+	s.Printf("Size : %.3f", drawPane->element.s);
 	slider_s_t = new wxStaticText(this, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_s = new wxSlider(this, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
@@ -306,13 +306,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	#pragma region Post Processing Parameters
 	wxStaticBox *st_pp = new wxStaticBox(this, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_pp_sizer = new wxStaticBoxSizer(st_pp, wxVERTICAL);
-	s.Printf("alpha : %.4f", drawPane->processing.alpha);
+	s.Printf("alpha : %.3f", drawPane->processing.alpha);
 	slider_alpha_t = new wxStaticText(this, SLIDER_Alpha_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_alpha = new wxSlider(this, SLIDER_Alpha, int(drawPane->processing.alpha * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha, 0, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("beta : %.4f", drawPane->processing.beta);
+	s.Printf("beta : %.3f", drawPane->processing.beta);
 	slider_beta_t = new wxStaticText(this, SLIDER_Beta_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_beta_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_beta = new wxSlider(this, SLIDER_Beta, int(drawPane->processing.beta * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
@@ -594,7 +594,7 @@ void MyFrame::OnSliderS(wxCommandEvent& event)
 {
 	drawPane->element.s = slider_s->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("Size : %.4f", drawPane->element.s);
+	s.Printf("Size : %.3f", drawPane->element.s);
 	slider_s_t->SetLabel(s);
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
@@ -685,14 +685,14 @@ void MyFrame::OnSliderAlpha(wxCommandEvent& event)
 {
 	drawPane->processing.alpha = slider_alpha->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("alpha : %f", drawPane->processing.alpha);
+	s.Printf("alpha : %.3f", drawPane->processing.alpha);
 	slider_alpha_t->SetLabel(s);
 }
 void MyFrame::OnSliderBeta(wxCommandEvent& event)
 {
 	drawPane->processing.beta = slider_beta->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("beta : %f", drawPane->processing.beta);
+	s.Printf("beta : %.3f", drawPane->processing.beta);
 	slider_beta_t->SetLabel(s);
 }
 
