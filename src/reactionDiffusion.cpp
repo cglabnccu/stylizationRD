@@ -410,15 +410,29 @@ void RD::FastGrayScott(float min_degree, float max_degree){
 			}
 
 			// modify anisotropic function
-			if (theta  >= min_degree && theta <= max_degree){
-				float temp = 1.0*0.9 + 0.1;
-				float temp2 = 1 / temp*0.1;
-				alpha_A[idx] = temp2;
+			if (min_degree <= max_degree){ 
+				if (theta  >= min_degree && theta <= max_degree){
+					float temp = 1.0*0.9 + 0.1;
+					float temp2 = 1 / temp*0.1;
+					alpha_A[idx] = temp2;
+				}
+				else{
+					float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+					float temp2 = 1 / temp*0.1;
+					alpha_A[idx] = temp2;
+				}
 			}
 			else{
-				float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
-				float temp2 = 1 / temp*0.1;
-				alpha_A[idx] = temp2;
+				if ((theta >= min_degree && theta <= 2 * M_PI) || (theta <= max_degree&& theta > 0)){
+					float temp = 1.0*0.9 + 0.1;
+					float temp2 = 1 / temp*0.1;
+					alpha_A[idx] = temp2;
+				}
+				else{
+					float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+					float temp2 = 1 / temp*0.1;
+					alpha_A[idx] = temp2;
+				}
 			}
 		}
 		);

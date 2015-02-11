@@ -23,15 +23,18 @@
 
 
 ### [in post process]
-  1. Segmentation
+  1. Segmentation(now just done black/white partition)
   2. Demo Film
   3. [bug] LIC
-  4. [bug] eq7 (across 360 degree)
 
 ### [Future Work]
   1. more UI friendly
+   --* partition pattern selection
+   --* Customize Anisotropic Function degree selection
+   --* ???
   2. oriental cloud patterns
-  3. ???
+  3. merge flowfield maker
+  4. ???
 
 ---
 
