@@ -1,16 +1,18 @@
 #include "gui.h"
 
+BEGIN_EVENT_TABLE(SimpleDrawPanel, wxPanel)
+	EVT_PAINT(SimpleDrawPanel::paintEvent)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(BasicDrawPane, wxPanel)
 	EVT_PAINT(BasicDrawPane::paintEvent)
 	EVT_MOTION(BasicDrawPane::MouseMove)
 	EVT_LEFT_DOWN(BasicDrawPane::MouseLDown)
 	EVT_LEFT_UP(BasicDrawPane::MouseLUp)
-	//EVT_KEY_DOWN(BasicDrawPane::OnKeyDown)
 END_EVENT_TABLE()
 
 // Pattern Picker Window
 BEGIN_EVENT_TABLE(MyPatternPicker, wxFrame)
-	//EVT_LEFT_DOWN(MyPatternPicker::MouseLDown)
 	EVT_BUTTON(BUTTON_Select, MyPatternPicker::OnSelect)
 	//EVT_MENU(wxID_EXIT, MyPatternPicker::OnExit)
 END_EVENT_TABLE()

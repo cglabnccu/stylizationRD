@@ -136,6 +136,40 @@ void Picker::render(wxDC&  dc)
 }
 #pragma endregion 
 
+#pragma region Custome Function Preview
+SimpleDrawPanel::SimpleDrawPanel(wxFrame* parent) :
+wxPanel(parent)
+{
+	dmin = 0;
+	dmax = 0;
+}
+void SimpleDrawPanel::paintEvent(wxPaintEvent & evt)
+{
+	wxPaintDC dc(this);
+	render(dc);
+}
+
+void SimpleDrawPanel::paintNow()
+{
+	wxClientDC dc(this);
+	render(dc);
+}
+void SimpleDrawPanel::render(wxDC&  dc)
+{
+	dc.Clear();
+	dc.SetPen(wxPen(wxColor(0, 0, 0), 1)); // 1-pixels-thick black outline
+	dc.DrawCircle(wxPoint(40, 40), 25 /* radius */);
+	dc.SetPen(wxPen(wxColor(255, 0, 0), 5)); // 5-pixels-thick red outline
+	if (dmin <= dmax){
+		dc.DrawEllipticArc(15, 15, 50, 50, dmin, dmax);
+	}
+	else{
+		dc.DrawEllipticArc(15, 15, 50, 50, dmin, 360);
+		dc.DrawEllipticArc(15, 15, 50, 50, 0, dmax+1);
+	}
+}
+#pragma endregion
+
 #pragma region MyFrame
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
@@ -290,19 +324,34 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	Modify_cb->SetValue(false);
 	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
 
+
+	//	  |-------|---------------|
+	//    |	degree| ======[]===== |
+	//	  |  GUI  | ====[]======= |
+	//	  |-------|---------------|
+	wxBoxSizer* degree_outer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* degree_slider = new wxBoxSizer(wxVERTICAL);
 	s.Printf("min degree : %d", drawPane->mindegree);
 	slider_mindegree_t = new wxStaticText(this, SLIDER_MINDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_mindegree_t, 0, wxEXPAND | wxLEFT, 10);
+	degree_slider->Add(slider_mindegree_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_mindegree = new wxSlider(this, SLIDER_MINDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_mindegree, 0, wxEXPAND | wxLEFT, 10);
+	degree_slider->Add(slider_mindegree, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("max degree : %d", drawPane->maxdegree);
 	slider_maxdegree_t = new wxStaticText(this, SLIDER_MAXDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_maxdegree_t, 0, wxEXPAND | wxLEFT, 10);
+	degree_slider->Add(slider_maxdegree_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_maxdegree = new wxSlider(this, SLIDER_MAXDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_maxdegree, 0, wxEXPAND | wxLEFT, 10);
+	degree_slider->Add(slider_maxdegree, 0, wxEXPAND | wxLEFT, 10);
 
+
+	degreeGUI = new SimpleDrawPanel(this);
+	degree_outer->Add(degreeGUI, 1, wxEXPAND);
+	degree_outer->Add(degree_slider, 2, wxEXPAND);
+
+	st_pattern_sizer->Add(degree_outer, 0, wxEXPAND);
 	control->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
+
+
 	#pragma endregion 
 
 	#pragma region Post Processing Parameters
@@ -331,6 +380,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_alpha->Disable();
 	slider_beta->Disable();
 	fill->Disable();
+	degreeGUI->Hide();
 	slider_mindegree->Hide();
 	slider_maxdegree->Hide();
 	slider_mindegree_t->Hide();
@@ -657,6 +707,7 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 {
 	if (Modify_cb->GetValue()) {
 		drawPane->customAnisotropicFunction = true;
+		degreeGUI->Show();
 		slider_mindegree->Show();
 		slider_maxdegree->Show();
 		slider_mindegree_t->Show();
@@ -664,6 +715,7 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 	}
 	else {
 		drawPane->customAnisotropicFunction = false;
+		degreeGUI->Hide();
 		slider_mindegree->Hide();
 		slider_maxdegree->Hide();
 		slider_mindegree_t->Hide();
@@ -677,12 +729,16 @@ void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
 	wxString s;
 	s.Printf("min degree : %d", drawPane->mindegree);
 	slider_mindegree_t->SetLabel(s);
+	degreeGUI->dmin = slider_mindegree->GetValue();
+	degreeGUI->paintNow();
 }
 void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
 	drawPane->maxdegree = slider_maxdegree->GetValue();
 	wxString s;
 	s.Printf("max degree : %d", drawPane->maxdegree);
 	slider_maxdegree_t->SetLabel(s);
+	degreeGUI->dmax = slider_maxdegree->GetValue();
+	degreeGUI->paintNow();
 }
 
 //Slides: Paint Parameter

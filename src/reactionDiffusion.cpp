@@ -75,6 +75,9 @@ void RD::ReadSrc(string file){
 	addWeighted(abs(grad_x), 0.5, abs(grad_y), 0.5, 0, Mask_s);
 	normalize(Mask_s, Mask_s, 0.0, 1.0, NORM_MINMAX);
 	GaussianBlur(Mask, Mask, Size(9, 9), 0, 0);
+
+	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	
 	//imshow("M",Mask);
 	//imshow("MS",Mask_s);
 	SrcLoaded = true;

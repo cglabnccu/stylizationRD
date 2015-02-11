@@ -32,9 +32,10 @@
    * partition pattern selection
    * Customize Anisotropic Function degree selection
    * ???
-  2. oriental cloud patterns
-  3. merge flowfield maker
-  4. ???
+  2. using faster algorithm
+  3. oriental cloud patterns
+  4. merge flowfield maker
+  5. ???
 
 ---
 

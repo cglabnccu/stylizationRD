@@ -35,10 +35,21 @@ public:
 	void MouseMove(wxMouseEvent &event);
 	void MouseLDown(wxMouseEvent &event);
 	void MouseLUp(wxMouseEvent &event);	
-	//void OnKeyDown(wxKeyEvent& event);
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
+};
+
+class SimpleDrawPanel : public wxPanel
+{
+public:
+	int dmin;
+	int dmax;
+	SimpleDrawPanel(wxFrame* parent);
+	void paintEvent(wxPaintEvent & evt);
+	void paintNow();
+	void render(wxDC& dc);
+	DECLARE_EVENT_TABLE()
 };
 
 class Picker : public wxPanel
@@ -48,14 +59,9 @@ public:
 	wxBitmap image;
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
-
 	void render(wxDC& dc);
-
-//public:
-	//Picker(wxFrame* parent);
 	void MouseLDown(wxMouseEvent &event);
 	DECLARE_EVENT_TABLE()
-
 };
 
 class MyPatternPicker : public wxFrame
@@ -91,6 +97,7 @@ public:
 protected:
 	bool render_loop_on;
 	wxTextCtrl *log; // Show the log
+	SimpleDrawPanel *degreeGUI;
 	wxButton *start;
 	wxButton *fill;
 	wxButton *clean;
