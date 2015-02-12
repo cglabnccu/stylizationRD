@@ -61,6 +61,9 @@ void RD::Init(Size s){
 }
 
 void RD::ReadSrc(string file){
+	Original_img = imread(file, CV_LOAD_IMAGE_COLOR);
+	//imshow("mjk,", Original_img);
+
 	Mask = imread(file, 0);
 	Init(Mask.size());
 	Mask.convertTo(Mask, CV_32FC1);

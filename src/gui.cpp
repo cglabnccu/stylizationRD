@@ -162,6 +162,8 @@ void SimpleDrawPanel::render(wxDC&  dc)
 	dc.SetPen(wxPen(wxColor(255, 0, 0), 5)); // 5-pixels-thick red outline
 	if (dmin < dmax){
 		dc.DrawEllipticArc(15, 15, 50, 50, dmin, dmax);
+
+
 	}
 	else if (dmin > dmax){
 		dc.DrawEllipticArc(15, 15, 50, 50, dmin, 360);

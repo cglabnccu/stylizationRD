@@ -25,6 +25,7 @@ public:
 	Mat *p_B;
 	Mat Flowfield;
 	Mat RotationMat;
+	Mat Original_img;
 	Mat Mask;
 	Mat Mask_s;
 	Mat Mask_control;
