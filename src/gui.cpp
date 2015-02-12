@@ -137,7 +137,7 @@ void Picker::render(wxDC&  dc)
 #pragma endregion 
 
 #pragma region Custome Function Preview
-SimpleDrawPanel::SimpleDrawPanel(wxFrame* parent) :
+SimpleDrawPanel::SimpleDrawPanel(wxPanel* parent) :
 wxPanel(parent)
 {
 	dmin = 0;
@@ -158,17 +158,23 @@ void SimpleDrawPanel::render(wxDC&  dc)
 {
 	dc.Clear();
 	dc.SetPen(wxPen(wxColor(0, 0, 0), 1)); // 1-pixels-thick black outline
-	dc.DrawCircle(wxPoint(40, 40), 25 /* radius */);
+	dc.DrawCircle(wxPoint(37, 40), 25 /* radius */);
 	dc.SetPen(wxPen(wxColor(255, 0, 0), 5)); // 5-pixels-thick red outline
 	if (dmin < dmax){
-		dc.DrawEllipticArc(15, 15, 50, 50, dmin, dmax);
-
-
+		dc.DrawEllipticArc(12, 15, 50, 50, dmin, dmax);
 	}
 	else if (dmin > dmax){
-		dc.DrawEllipticArc(15, 15, 50, 50, dmin, 360);
-		if (dmax != 0) dc.DrawEllipticArc(15, 15, 50, 50, 0, dmax);
+		dc.DrawEllipticArc(12, 15, 50, 50, dmin, 360);
+		if (dmax != 0) dc.DrawEllipticArc(12, 15, 50, 50, 0, dmax);
 	}
+	//dc.SetPen(wxPen(wxColor(0, 0, 255), 5)); // 5-pixels-thick red outline
+	//if (dmin < dmax){
+	//	dc.DrawEllipticArc(12, 15, 50, 50, dmax + 2 * ((270 - dmax) % 90), dmax + 2 * ((270 - dmax) % 90)+(dmax-dmin));
+	//}
+	//else if (dmin > dmax){
+	//	dc.DrawEllipticArc(12, 15, 50, 50, dmax + 2 * ((270 - dmax) % 90), 360);
+	//	if (dmax != 0) dc.DrawEllipticArc(12, 15, 50, 50, 0,(dmax + 2 * ((270 - dmax) % 90)+(dmax-dmin)));
+	//}
 }
 #pragma endregion
 
@@ -196,7 +202,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
 	wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(wxID_ABOUT);
+	menuHelp->Append(wxID_ABOUT, "&About\tCtrl-A", "About the System");
+	menuHelp->Append(new wxMenuItem(menuHelp, wxID_TOGGLE_LOG, wxString(wxT("&Open Log\tCtrl-L")), "Show/Hide the Log", wxITEM_CHECK));
+	//menuHelp->Append(wxID_TOGGLE_LOG, "&Toggle Log\tCtrl-L", "Show/Hide the Log");
 
 	wxMenuBar *menuBar = new wxMenuBar;
 	menuBar->Append(menuFile, "&File");
@@ -248,7 +256,11 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//Sizer of leftside
 	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
 	//Sizer of rightside(control panel)
-	wxBoxSizer* control = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* rightside = new wxBoxSizer(wxVERTICAL);
+
+	wxPanel* controlpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	controlpanel->SetMaxSize(wxSize(250, -1));
+	controlpanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE));
 
 	wxString s;
 
@@ -265,65 +277,65 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	#pragma endregion
 
 	#pragma region Paint Parameters
-	wxStaticBox *st_paint = new wxStaticBox(this, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBox *st_paint = new wxStaticBox(controlpanel, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_paint_sizer = new wxStaticBoxSizer(st_paint, wxVERTICAL);
 
 	s.Printf("Brush Size : %d", drawPane->brushSize);
-	slider_brushSize_t = new wxStaticText(this, SLIDER_BRUSH_SIZE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_brushSize_t = new wxStaticText(controlpanel, SLIDER_BRUSH_SIZE_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_brushSize_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_brushSize = new wxSlider(this, SLIDER_BRUSH_SIZE, drawPane->brushSize, 1, 10, wxDefaultPosition, wxDefaultSize, 0);
+	slider_brushSize = new wxSlider(controlpanel, SLIDER_BRUSH_SIZE, drawPane->brushSize, 1, 10, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_brushSize, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("addA : %.3f", drawPane->element.addA);
-	slider_addA_t = new wxStaticText(this, SLIDER_AddA_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_addA_t = new wxStaticText(controlpanel, SLIDER_AddA_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addA_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_addA = new wxSlider(this, SLIDER_AddA, int(drawPane->element.addA * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_addA = new wxSlider(controlpanel, SLIDER_AddA, int(drawPane->element.addA * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addA, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("addB : %.3f", drawPane->element.addB);
-	slider_addB_t = new wxStaticText(this, SLIDER_AddB_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_addB_t = new wxStaticText(controlpanel, SLIDER_AddB_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addB_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_addB = new wxSlider(this, SLIDER_AddB, int(drawPane->element.addB * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_addB = new wxSlider(controlpanel, SLIDER_AddB, int(drawPane->element.addB * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_paint_sizer->Add(slider_addB, 0, wxEXPAND | wxLEFT, 10);
 
-	control->Add(st_paint_sizer, 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 3);
+	rightside->Add(st_paint_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 	#pragma endregion
 
 	#pragma region Pattern Parameters
-	wxStaticBox* st_pattern = new wxStaticBox(this, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBox* st_pattern = new wxStaticBox(controlpanel, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
 
 	s.Printf("Size : %.3f", drawPane->element.s);
-	slider_s_t = new wxStaticText(this, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s_t = new wxStaticText(controlpanel, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_s = new wxSlider(this, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s = new wxSlider(controlpanel, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("F : %.4f", drawPane->element.f);
-	slider_f_t = new wxStaticText(this, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_f_t = new wxStaticText(controlpanel, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_f = new wxSlider(this, SLIDER_F, int((drawPane->element.f / 0.06) * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_f = new wxSlider(controlpanel, SLIDER_F, int((drawPane->element.f / 0.06) * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_f, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("k : %.4f", drawPane->element.k);
-	slider_k_t = new wxStaticText(this, SLIDER_K_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_k_t = new wxStaticText(controlpanel, SLIDER_K_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_k = new wxSlider(this, SLIDER_K, int((drawPane->element.k - 0.03) / 0.04 * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_k = new wxSlider(controlpanel, SLIDER_K, int((drawPane->element.k - 0.03) / 0.04 * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_k, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("l : %d", drawPane->element.l);
-	slider_l_t = new wxStaticText(this, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_l_t = new wxStaticText(controlpanel, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_l = new wxSlider(this, SLIDER_L, int(drawPane->element.l), 0, 6, wxDefaultPosition, wxDefaultSize, 0);
+	slider_l = new wxSlider(controlpanel, SLIDER_L, int(drawPane->element.l), 0, 6, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_l,0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("theta0 : %d", drawPane->element.theta0);
-	slider_theta0_t = new wxStaticText(this, SLIDER_Theta0_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_theta0_t = new wxStaticText(controlpanel, SLIDER_Theta0_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_theta0_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_theta0 = new wxSlider(this, SLIDER_Theta0, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
+	slider_theta0 = new wxSlider(controlpanel, SLIDER_Theta0, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_theta0, 0, wxEXPAND | wxLEFT, 10);
 
-	Modify_cb = new wxCheckBox(this, CHECKBOX_MODIFY_FUNCTION, wxT("Customize Anisotropic Function"), wxPoint(20, 20));
+	Modify_cb = new wxCheckBox(controlpanel, CHECKBOX_MODIFY_FUNCTION, wxT("Customize Anisotropic Function"), wxPoint(20, 20));
 	Modify_cb->SetValue(false);
 	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
 
@@ -335,53 +347,57 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxBoxSizer* degree_outer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* degree_slider = new wxBoxSizer(wxVERTICAL);
 	s.Printf("min degree : %d", drawPane->mindegree);
-	slider_mindegree_t = new wxStaticText(this, SLIDER_MINDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_mindegree_t = new wxStaticText(controlpanel, SLIDER_MINDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	degree_slider->Add(slider_mindegree_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_mindegree = new wxSlider(this, SLIDER_MINDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
+	slider_mindegree = new wxSlider(controlpanel, SLIDER_MINDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	degree_slider->Add(slider_mindegree, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("max degree : %d", drawPane->maxdegree);
-	slider_maxdegree_t = new wxStaticText(this, SLIDER_MAXDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_maxdegree_t = new wxStaticText(controlpanel, SLIDER_MAXDEGREE_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	degree_slider->Add(slider_maxdegree_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_maxdegree = new wxSlider(this, SLIDER_MAXDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
+	slider_maxdegree = new wxSlider(controlpanel, SLIDER_MAXDEGREE, 0, 0, 360, wxDefaultPosition, wxDefaultSize, 0);
 	degree_slider->Add(slider_maxdegree, 0, wxEXPAND | wxLEFT, 10);
 
 
-	degreeGUI = new SimpleDrawPanel(this);
+	degreeGUI = new SimpleDrawPanel(controlpanel);
 	degree_outer->Add(degreeGUI, 1, wxEXPAND);
 	degree_outer->Add(degree_slider, 2, wxEXPAND);
 
 	st_pattern_sizer->Add(degree_outer, 0, wxEXPAND);
-	control->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
+	rightside->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 
 
 	#pragma endregion 
 
 	#pragma region Post Processing Parameters
-	wxStaticBox *st_pp = new wxStaticBox(this, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBox *st_pp = new wxStaticBox(controlpanel, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_pp_sizer = new wxStaticBoxSizer(st_pp, wxVERTICAL);
 	s.Printf("alpha : %.3f", drawPane->processing.alpha);
-	slider_alpha_t = new wxStaticText(this, SLIDER_Alpha_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_alpha_t = new wxStaticText(controlpanel, SLIDER_Alpha_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_alpha = new wxSlider(this, SLIDER_Alpha, int(drawPane->processing.alpha * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_alpha = new wxSlider(controlpanel, SLIDER_Alpha, int(drawPane->processing.alpha * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("beta : %.3f", drawPane->processing.beta);
-	slider_beta_t = new wxStaticText(this, SLIDER_Beta_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	slider_beta_t = new wxStaticText(controlpanel, SLIDER_Beta_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_beta_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_beta = new wxSlider(this, SLIDER_Beta, int(drawPane->processing.beta * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_beta = new wxSlider(controlpanel, SLIDER_Beta, int(drawPane->processing.beta * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_beta, 0, wxEXPAND | wxLEFT, 10);
 
-	control->Add(st_pp_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
+	rightside->Add(st_pp_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 	#pragma endregion
 
 	//set portion of size: leftside & rightside(control)
+	controlpanel->SetSizer(rightside);
 	sizer->Add(leftside, 7, wxEXPAND);
-	sizer->Add(control, 3, wxEXPAND);
+	sizer->Add(controlpanel, 3, wxEXPAND);
+	rightside->Fit(controlpanel);
 	SetSizer(sizer);
 	
 	slider_alpha->Disable();
 	slider_beta->Disable();
+
+	log->Hide();
 	fill->Disable();
 	degreeGUI->Hide();
 	slider_mindegree->Hide();
@@ -399,20 +415,13 @@ void MyFrame::OnExit(wxCommandEvent& event)
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
 	wxMessageBox("Wei-Ching Liu - Computer Science - National Chengchi University",	"About CRD", wxOK | wxICON_INFORMATION);
-//	wxMessageBox("\
-//---Style----------F-------k   | l\n\
-//---------------------------------\n\
-//semicircle    | .0375 | .0655 | 1\n\
-//spot: spidle  | .0375 | .0655 | 2\n\
-//hole : spidle | .0300 | .0546 | 2\n\
-//stripe        | .0300 | .0620 | 2\n\
-//triangle      | .0375 | .0655 | 3\n\
-//spot : quad   | .0375 | .0655 | 4\n\
-//water drop    | .0375 | .0655 | 2\n\
-//sector        | .0375 | .0655 | 4\n",
-//"About CRD", wxOK | wxICON_INFORMATION);
-
 }
+void MyFrame::OnToggleLog(wxCommandEvent& event){
+	event.IsChecked() ? log->Show() : log->Hide();
+	
+	this->GetSizer()->Layout();
+}
+
 
 void MyFrame::OnOpenSrc(wxCommandEvent& event)
 {

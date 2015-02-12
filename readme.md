@@ -23,8 +23,9 @@
 
 
 ### [in post process]
-  1. Segmentation(now just done black/white partition)
-  2. Demo Film
+  * Segmentation(now just done black/white partition)
+  * Demo Film
+  * [BUG] CAF degree selection 
 
 ### [Future Work]
   1. more UI friendly

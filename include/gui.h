@@ -45,7 +45,7 @@ class SimpleDrawPanel : public wxPanel
 public:
 	int dmin;
 	int dmax;
-	SimpleDrawPanel(wxFrame* parent);
+	SimpleDrawPanel(wxPanel* parent);
 	void paintEvent(wxPaintEvent & evt);
 	void paintNow();
 	void render(wxDC& dc);
@@ -159,6 +159,7 @@ protected:
 	void OnOpenPatternPicker(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
+	void OnToggleLog(wxCommandEvent& event);
 	void onIdle(wxIdleEvent& evt);
 	wxDECLARE_EVENT_TABLE();
 };
@@ -172,6 +173,7 @@ enum
 	ID_ONOPENTEX,
 	ID_ONOPENCONTOLIMG,
 	ID_ONSAVE,
+	wxID_TOGGLE_LOG,
 
 	ID_ONEdge2AddA,
 	ID_ONEdge2AddB,

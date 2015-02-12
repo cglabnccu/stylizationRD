@@ -44,6 +44,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
 	// Menu - Help
 	EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+	EVT_MENU(wxID_TOGGLE_LOG, MyFrame::OnToggleLog)
 
 	// Toolbar
 	EVT_BUTTON(BUTTON_Start, MyFrame::OnStart)
