@@ -224,7 +224,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox->Append("dirTexture");
 	processingBox->Append("PolarTexture");
 	processingBox->Append("adaThresholding");
-	processingBox->Append("Thresholding");
+	processingBox->Append("Thresholding"); 
+	processingBox->Append("Color_mapping");
 
 	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
 	controllingBox->Append("paint_to_B");
@@ -1032,6 +1033,11 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "Thresholding"){
 		processing.Thresholding(*element.c_A, dis);
+		dis.convertTo(dis, CV_8UC1, 255);
+		cvtColor(dis, dis, CV_RGB2BGR);
+	}
+	else if (processingS == "Color_mapping"){
+		processing.Colormapping(*element.c_A, element.Mask, element.Original_img, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}

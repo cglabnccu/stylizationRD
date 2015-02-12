@@ -255,17 +255,26 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis){
 	merge(channels, dis);
 };
 
-void PP::Colormapping(Mat &src, Mat &dis){
+void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis){
 	vector<Mat> channels;
 	Mat r = Mat::zeros(src.size(), CV_32F);
 	Mat b = Mat::zeros(src.size(), CV_32F);
 	Mat g = Mat::zeros(src.size(), CV_32F);
+
 #pragma omp parallel for
 	for (int i = 0; i < src.rows; i++){
 		for (int j = 0; j < src.cols; j++){
-				r.at<float>(i, j) = 0.0;
+			float center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
+			if (src.at<float>(i, j) > center){
+				r.at<float>(i, j) = 1.0;
 				g.at<float>(i, j) = 1.0;
 				b.at<float>(i, j) = 1.0;
+			}
+			else{
+				b.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[0]/255.0;		
+				g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1]/255.0;
+				r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2]/255.0;
+			}
 		}
 	}
 	channels.push_back(b);
