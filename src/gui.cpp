@@ -160,12 +160,12 @@ void SimpleDrawPanel::render(wxDC&  dc)
 	dc.SetPen(wxPen(wxColor(0, 0, 0), 1)); // 1-pixels-thick black outline
 	dc.DrawCircle(wxPoint(40, 40), 25 /* radius */);
 	dc.SetPen(wxPen(wxColor(255, 0, 0), 5)); // 5-pixels-thick red outline
-	if (dmin <= dmax){
+	if (dmin < dmax){
 		dc.DrawEllipticArc(15, 15, 50, 50, dmin, dmax);
 	}
-	else{
+	else if (dmin > dmax){
 		dc.DrawEllipticArc(15, 15, 50, 50, dmin, 360);
-		dc.DrawEllipticArc(15, 15, 50, 50, 0, dmax+1);
+		if (dmax != 0) dc.DrawEllipticArc(15, 15, 50, 50, 0, dmax);
 	}
 }
 #pragma endregion
@@ -426,13 +426,13 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
 		SetStatusText(s, 0);
 		
-		//If no Flow is Loaded, Read Same File as defaulf ETF
-		if (!drawPane->element.FlowLoaded && !drawPane->element.ETFLoaded)
-		{	
-			drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
-			s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
-			SetStatusText(s, 1);
-		}
+		////If no Flow is Loaded, Read Same File as defaulf ETF
+		//if (!drawPane->element.FlowLoaded && !drawPane->element.ETFLoaded)
+		//{	
+		//	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str()); 
+		//	s.Printf("Flowfield(ETF): %s", openFileDialog.GetFilename());
+		//	SetStatusText(s, 1);
+		//}
 	}
 
 	// proceed loading the file chosen by the user, this can be done with e.g. wxWidgets input streams:

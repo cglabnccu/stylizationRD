@@ -237,6 +237,11 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis){
 				g.at<float>(i, j) = 0.0;
 				b.at<float>(i, j) = 0.0;
 			}
+			else {
+				r.at<float>(i, j) = 0.5;
+				g.at<float>(i, j) = 0.5;
+				b.at<float>(i, j) = 0.5;
+			}
 		}
 	}
 	channels.push_back(b);
