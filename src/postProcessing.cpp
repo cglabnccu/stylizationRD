@@ -33,41 +33,42 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 	randu(noise, 0, 1.0f);
 	resize(noise, noise, flowfield.size(), 0, 0, INTER_NEAREST);
 
-	int s = 10 * alpha;
-	int nRows = noise.rows;
-	int nCols = noise.cols;
+	int s = 10;
+	int nRows = noise.rows; //h
+	int nCols = noise.cols; //w
 	float sigma = 2 * s*s;
 #pragma omp parallel for
-	for (int i = 0; i<nRows; i++){
-		for (int j = 0; j<nCols; j++){
+	for (int j = 0; j<nRows; j++){
+		for (int i = 0; i<nCols; i++){
 			float w_sum = 0.0;
 			float x = i;
 			float y = j;
 			for (int k = 0; k < s; k++){
-				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
+				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
 				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
 				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
 				float r2 = k*k;
 				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
-				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
+				dis.at<float>(j, i) += w*noise.at<float>(int(x + nCols) % nCols, int(y + nRows) % nRows);
 				w_sum += w;
 			}
 
 			x = i;
 			y = j;
 			for (int k = 0; k<s; k++){
-				Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nRows) % nRows, int(y + nCols) % nCols));
+				Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
 				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
 				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
 
 				float r2 = k*k;
 				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
-				dis.at<float>(i, j) += w*noise.at<float>(int(x + nRows) % nRows, int(y + nCols) % nCols);
+				dis.at<float>(j, i) += w*noise.at<float>(int(x + nCols) % nCols, int(y + nRows) % nRows);
 				w_sum += w;
 			}
-			dis.at<float>(i, j) /= w_sum;
+			dis.at<float>(j, i) /= w_sum;
 		}
 	}
+
 }
 
 
@@ -90,6 +91,11 @@ void PP::Flowtest(Mat &flowfield, Mat &dis)
 			float y = j;
 
 			Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
+			//Vec3f v = Vec3f(1, 0, 0);
+			//Vec3f v = Vec3f(0, 1, 0);
+			//Vec3f v = normalize(Vec3f(x - 0.5*nCols, y - 0.5*nRows, 0));  //source
+
+
 			int thickness = 1;
 			int lineType = 8;
 
@@ -107,8 +113,8 @@ void PP::Flowtest(Mat &flowfield, Mat &dis)
 		}
 	}
 
-	float x = 0.5*nRows;
-	float y = 0.5*nCols;
+	float x = 0.5*nCols;
+	float y = 0.5*nRows;
 	static float angle = 0;
 
 	line(dis,
