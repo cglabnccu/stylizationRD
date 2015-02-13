@@ -1,5 +1,18 @@
-#include "reactionDiffusion.h"
+﻿#include "reactionDiffusion.h"
 # define M_PI 3.14159265358979323846
+
+PixelPattern::PixelPattern(){
+	this->GrayScale = 0;
+	this->F = 0;
+	this->k = 0;
+	this->l = 0;
+}
+PixelPattern::PixelPattern(int GrayScale, float F, float k, int l){
+	this->GrayScale = GrayScale;
+	this->F = F;
+	this->k = k;
+	this->l = l;
+}
 
 RD::RD(Size s){
 	RotationMat = Mat::zeros(s, CV_32F);
@@ -7,6 +20,9 @@ RD::RD(Size s){
 	Mask = Mat::zeros(s, CV_32F);
 	Mask_s = Mat::zeros(s, CV_32F);
 	Mask_control = Mat::zeros(s, CV_32F);
+	Mask_control_F = Mat::zeros(s, CV_32F);
+	Mask_control_k = Mat::zeros(s, CV_32F);
+	Mask_control_l = Mat::zeros(s, CV_32F);
 	Gradient_A = Mat::zeros(s, CV_32FC3);
 	Gradient_B = Mat::zeros(s, CV_32FC3);
 	Diffusion_A = Mat::zeros(s, CV_32F);
@@ -126,14 +142,57 @@ void RD::ReadFlow(string file){
 
 void RD::ReadControlImg(string file){
 	Mask_control = imread(file, 0);
-	Mask.convertTo(Mask, CV_32FC1);
-	normalize(Mask_control, Mask_control, 0.0, 1.0, NORM_MINMAX, CV_32FC1);
+	//Mask.convertTo(Mask, CV_8U);
+	//normalize(Mask_control, Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
 
 	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_F, Mask_control_F, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_k, Mask_control_k, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_l, Mask_control_l, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	ControlImgLoad = true;
-	imshow("loil", Mask_control);
+	//imshow("loil", Mask_control);
+
+	segmentation.clear();
+	for (int i = 0; i < Mask_control.rows; i++){
+		for (int j = 0; j < Mask_control.cols; j++){
+			int n = Mask_control.at<uchar>(i, j);
+			PixelPattern pixel(n, 0.0375, 0.0655, 1);
+			if (segmentation.empty()){
+				segmentation.push_back(pixel);
+			}
+			else{
+				bool haved = false;
+				for (int u = 0; u < segmentation.size(); u++){
+					if (segmentation[u].GrayScale == pixel.GrayScale) {
+						haved = true;
+						break;
+					}
+				}
+				if (!haved)
+					segmentation.push_back(pixel);
+			}
+		}
+	}
+	UpdateControlMask();
 }
 
+void RD::UpdateControlMask(){
+	for (int i = 0; i < Mask_control.rows; i++){
+		for (int j = 0; j < Mask_control.cols; j++){
+			int n = Mask_control.at<uchar>(i, j);
+			for (int num = 0; num < segmentation.size(); num++){
+				if (n == segmentation[num].GrayScale){
+					Mask_control_F.at<float>(i, j) = 0.0375;
+					Mask_control_k.at<float>(i, j) = 0.0655;
+					Mask_control_l.at<float>(i, j) = segmentation[num].l;
+				}
+			}
+
+			int uj = 78;
+
+		}
+	}
+}
 
 //Generate ETF of input image as flowfield
 void RD::ETF(string file){
@@ -196,7 +255,14 @@ void RD::FastGrayScott(){
 	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
 	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
-	array_view<float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
+
+	Mat tmp_Mask_control;
+	normalize(Mask_control, tmp_Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
+
+	array_view<float, 1> m_control(nRows*nCols, (float*)tmp_Mask_control.data); // control img
+	array_view<float, 1> m_control_F(nRows*nCols, (float*)Mask_control_F.data); // control img - F
+	array_view<float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
+	array_view<float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
 
 	int l = this->l;
 	float theta0 = (float)this->theta0 / 180.0 * M_PI;
@@ -263,7 +329,7 @@ void RD::FastGrayScott(){
 				theta = 2 * M_PI - theta;
 			}
 
-			float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
+			float temp = 0.5*(1 + cos(m_control_l[idx]* (theta + theta0)))*0.9 + 0.1;
 			float temp2 = 1 / temp*0.1;
 			alpha_A[idx] = temp2;
 		}
@@ -298,15 +364,18 @@ void RD::FastGrayScott(){
 			float AB = addB*a_B[idx];
 			float RA;
 			float RB;
-			if (m_control[idx] == 0.0){  // RD work on black area
-				RA = sr*(-a*b*b + f*(1 - a));
-				RB = sr*(a*b*b - (k + f)*b);
-			}
-			else{// else didn't work (on white area)
+
+			// assign diﬀerent parameters to each region
+			if (m_control[idx] == 1.0){ // didn't work (on white area) 
 				float f = 0.7;
 				float k = 0.7;
 				RA = sr*(-a*b*b + f*(1 - a));
 				RB = sr*(a*b*b - (k + f)*b);
+
+			}
+			else{// RD work on black area
+				RA = sr*(-a*b*b + m_control_F[idx]*(1 - a));
+				RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
 			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);

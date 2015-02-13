@@ -23,6 +23,7 @@ public:
 	Mat temp;
 	string processingS;
 	string controllingS;
+	int regionSelected;
 	int brushSize;
 	int mindegree;
 	int maxdegree;
@@ -79,7 +80,6 @@ private:
 	DECLARE_EVENT_TABLE()
 };
 
-
 class MyFrame: public wxFrame
 {
 public:
@@ -122,6 +122,8 @@ protected:
 	wxCheckBox *Modify_cb; // Is User Want to Use Modified Anisotropic function?
 	wxSlider *slider_mindegree;
 	wxSlider *slider_maxdegree;
+	wxCheckBox *Segmentation_cb; 
+	wxChoice *SegmentationBox;
 
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
@@ -142,6 +144,8 @@ protected:
 	void OnCheckboxModifyToggle(wxCommandEvent& event);
 	void OnSliderMinDegree(wxCommandEvent& event);
 	void OnSliderMaxDegree(wxCommandEvent& event);
+	void OnCheckboxSegmentation(wxCommandEvent& event);
+	void OnSegmentationBox(wxCommandEvent& event);
 
 	void OnSliderAlpha(wxCommandEvent& event);
 	void OnSliderBeta(wxCommandEvent& event);
@@ -163,7 +167,6 @@ protected:
 	void onIdle(wxIdleEvent& evt);
 	wxDECLARE_EVENT_TABLE();
 };
-
 
 enum
 {
@@ -209,6 +212,8 @@ enum
 	SLIDER_MINDEGREE_T,
 	SLIDER_MAXDEGREE,
 	SLIDER_MAXDEGREE_T,
+	CHECKBOX_SEGMENTATION,
+	COMBOBOX_Region,
 
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,

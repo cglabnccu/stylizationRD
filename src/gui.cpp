@@ -338,12 +338,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	Modify_cb = new wxCheckBox(controlpanel, CHECKBOX_MODIFY_FUNCTION, wxT("Customize Anisotropic Function"), wxPoint(20, 20));
 	Modify_cb->SetValue(false);
 	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
-
-
-	//	  |-------|---------------|
-	//    |	degree| ======[]===== |
-	//	  |  GUI  | ====[]======= |
-	//	  |-------|---------------|
+	
+	#pragma region Customize Anisotropic Function Panel
+	//      Circle    min/Max Slider
+	//	  |--------|-----------------|
+	//    |	degree |  ========[]===  |
+	//	  |   GUI  |  ====[]=======  |
+	//	  |--------|-----------------|
 	wxBoxSizer* degree_outer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* degree_slider = new wxBoxSizer(wxVERTICAL);
 	s.Printf("min degree : %d", drawPane->mindegree);
@@ -364,9 +365,18 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	degree_outer->Add(degree_slider, 2, wxEXPAND);
 
 	st_pattern_sizer->Add(degree_outer, 0, wxEXPAND);
+	#pragma endregion
+
+	Segmentation_cb = new wxCheckBox(controlpanel, CHECKBOX_SEGMENTATION, wxT("Activate Segmentation"), wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(Segmentation_cb, 0, wxEXPAND | wxLEFT, 10);
+
+	wxArrayString m_choice1Choices;
+	SegmentationBox = new wxChoice(controlpanel, COMBOBOX_Region, wxDefaultPosition, wxDefaultSize, m_choice1Choices, 0);
+	SegmentationBox->SetSelection(0);
+	//SegmentationBox->Append("kiul");
+	st_pattern_sizer->Add(SegmentationBox, 0, wxEXPAND | wxLEFT, 10);
+
 	rightside->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
-
-
 	#pragma endregion 
 
 	#pragma region Post Processing Parameters
@@ -421,7 +431,6 @@ void MyFrame::OnToggleLog(wxCommandEvent& event){
 	
 	this->GetSizer()->Layout();
 }
-
 
 void MyFrame::OnOpenSrc(wxCommandEvent& event)
 {
@@ -600,7 +609,10 @@ void MyFrame::OnEdge2AddB(wxCommandEvent& event)
 }
 
 void MyFrame::OnOpenMask(wxCommandEvent& event){
-	if (drawPane->element.SrcLoaded) imshow("Maks Img", drawPane->element.Mask);
+	if (drawPane->element.SrcLoaded){
+		imshow("Original Img", drawPane->element.Original_img);
+		imshow("Maks Img", drawPane->element.Mask);
+	}
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
 void MyFrame::OnOpenMaskS(wxCommandEvent& event){
@@ -703,10 +715,17 @@ void MyFrame::OnSliderK(wxCommandEvent& event)
 }
 void MyFrame::OnSliderL(wxCommandEvent& event)
 {
-	drawPane->element.l = slider_l->GetValue();
-	wxString s;
-	s.Printf("l : %d", drawPane->element.l);
-	slider_l_t->SetLabel(s);
+		wxString s;
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].l = slider_l->GetValue();
+		s.Printf("l : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].l);
+		drawPane->element.UpdateControlMask();
+	}
+	else{
+		drawPane->element.l = slider_l->GetValue();
+		s.Printf("l : %d", drawPane->element.l);
+	}
+		slider_l_t->SetLabel(s);
 }
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
@@ -751,6 +770,39 @@ void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
 	slider_maxdegree_t->SetLabel(s);
 	degreeGUI->dmax = slider_maxdegree->GetValue();
 	degreeGUI->paintNow();
+}
+void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event){
+	if (Segmentation_cb->GetValue()) {
+		SegmentationBox->Enable();
+		int regions = drawPane->element.segmentation.size();
+		for (int i = 0; i < regions; i++){
+			SegmentationBox->Append(to_string(i + 1));
+		}
+	}
+	else {
+		SegmentationBox->Disable();
+	}
+	this->Layout();
+
+}
+void MyFrame::OnSegmentationBox(wxCommandEvent& event){
+	drawPane->regionSelected = SegmentationBox->GetSelection()+1;
+	int sr = drawPane->regionSelected;
+
+	wxString s;
+	slider_f->SetValue(drawPane->element.segmentation[sr].F * 1000.0 / 0.06);
+	slider_k->SetValue(drawPane->element.segmentation[sr].k * 1000.0 / 0.04 - 0.03);
+	slider_l->SetValue(drawPane->element.segmentation[sr].l);
+	
+	s.Printf("F : %.4f", drawPane->element.segmentation[sr].F);
+	slider_f_t->SetLabel(s);
+	s.Printf("k : %.4f", drawPane->element.segmentation[sr].k);
+	slider_k_t->SetLabel(s);
+	s.Printf("l : %d", drawPane->element.segmentation[sr].l);
+	slider_l_t->SetLabel(s);
+
+	s.Printf("Region selected: %d", drawPane->regionSelected);
+	addlog(s, wxColour(*wxBLUE));
 }
 
 //Slides: Paint Parameter
@@ -841,6 +893,7 @@ wxPanel(parent)
 	customAnisotropicFunction = false;
 	mindegree = 0;
 	maxdegree = 0;
+	regionSelected = 0;
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {

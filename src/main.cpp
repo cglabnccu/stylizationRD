@@ -54,6 +54,10 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_COMBOBOX(COMBOBOX_Controlling, MyFrame::OnControllingBox)
 
 	// Control Panel
+	EVT_SLIDER(SLIDER_BRUSH_SIZE, MyFrame::OnSliderBrushSize)
+	EVT_SLIDER(SLIDER_AddA, MyFrame::OnSliderAddA)
+	EVT_SLIDER(SLIDER_AddB, MyFrame::OnSliderAddB)
+
 	EVT_SLIDER(SLIDER_S, MyFrame::OnSliderS)
 	EVT_SLIDER(SLIDER_F, MyFrame::OnSliderF)
 	EVT_SLIDER(SLIDER_K, MyFrame::OnSliderK)
@@ -62,9 +66,9 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_CHECKBOX(CHECKBOX_MODIFY_FUNCTION, MyFrame::OnCheckboxModifyToggle)
 	EVT_SLIDER(SLIDER_MINDEGREE, MyFrame::OnSliderMinDegree)
 	EVT_SLIDER(SLIDER_MAXDEGREE, MyFrame::OnSliderMaxDegree)
-	EVT_SLIDER(SLIDER_BRUSH_SIZE, MyFrame::OnSliderBrushSize)
-	EVT_SLIDER(SLIDER_AddA, MyFrame::OnSliderAddA)
-	EVT_SLIDER(SLIDER_AddB, MyFrame::OnSliderAddB)
+	EVT_CHECKBOX(CHECKBOX_SEGMENTATION, MyFrame::OnCheckboxSegmentation)
+	EVT_CHOICE(COMBOBOX_Region, MyFrame::OnSegmentationBox)
+
 	EVT_SLIDER(SLIDER_Alpha, MyFrame::OnSliderAlpha)
 	EVT_SLIDER(SLIDER_Beta, MyFrame::OnSliderBeta)
 wxEND_EVENT_TABLE()

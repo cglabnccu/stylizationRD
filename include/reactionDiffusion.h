@@ -8,6 +8,16 @@ using namespace std;
 using namespace concurrency;
 using namespace concurrency::fast_math;
 
+class PixelPattern{
+public:
+	PixelPattern();
+	PixelPattern(int GrayScale, float F, float k, int l);
+	int GrayScale;
+	float F;
+	float k; 
+	int l;
+};
+
 class RD{
 public:
 	RD(Size);
@@ -16,9 +26,11 @@ public:
 	void ReadFlow(string);
 	void ETF(string);
 	void ReadControlImg(string);
+	void UpdateControlMask();
 	void FastGrayScott();// Eq.6
 	void FastGrayScott(float min_degree, float max_degree);// Eq.7
 	void GrayScottModel();// generate GS-Model
+	vector<PixelPattern> segmentation;
 	Mat *c_A;        // Current element of A
 	Mat *p_A;        // Previous element of A
 	Mat *c_B;
@@ -29,6 +41,9 @@ public:
 	Mat Mask;
 	Mat Mask_s;
 	Mat Mask_control;
+	Mat Mask_control_F;
+	Mat Mask_control_k;
+	Mat Mask_control_l;
 	Mat Diffusion_A;
 	Mat Diffusion_B;
 	Mat Gradient_A; // Gradient vetor of A
