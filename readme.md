@@ -24,8 +24,8 @@
 
 ### [in post process]
   * Segmentation
-   ** theat, size
-   ** [bug] a lot of
+   * theat, size
+   * a lot of bugz
   * Demo Film
   * [BUG] CAF degree selection
 
