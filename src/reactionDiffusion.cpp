@@ -182,8 +182,8 @@ void RD::UpdateControlMask(){
 			int n = Mask_control.at<uchar>(i, j);
 			for (int num = 0; num < segmentation.size(); num++){
 				if (n == segmentation[num].GrayScale){
-					Mask_control_F.at<float>(i, j) = 0.0375;
-					Mask_control_k.at<float>(i, j) = 0.0655;
+					Mask_control_F.at<float>(i, j) = segmentation[num].F;
+					Mask_control_k.at<float>(i, j) = segmentation[num].k;
 					Mask_control_l.at<float>(i, j) = segmentation[num].l;
 				}
 			}
@@ -239,7 +239,7 @@ void RD::ETF(string file){
 }
 
 // for Eq.6
-void RD::FastGrayScott(){
+void RD::FastGrayScott(bool segmentOn){
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
@@ -258,11 +258,14 @@ void RD::FastGrayScott(){
 
 	Mat tmp_Mask_control;
 	normalize(Mask_control, tmp_Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
+	bool ControlImgLoad = this->ControlImgLoad;
 
 	array_view<float, 1> m_control(nRows*nCols, (float*)tmp_Mask_control.data); // control img
 	array_view<float, 1> m_control_F(nRows*nCols, (float*)Mask_control_F.data); // control img - F
 	array_view<float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
 	array_view<float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
+
+
 
 	int l = this->l;
 	float theta0 = (float)this->theta0 / 180.0 * M_PI;
@@ -329,7 +332,16 @@ void RD::FastGrayScott(){
 				theta = 2 * M_PI - theta;
 			}
 
-			float temp = 0.5*(1 + cos(m_control_l[idx]* (theta + theta0)))*0.9 + 0.1;
+			float temp;
+			if (ControlImgLoad){
+				if (segmentOn) 
+					temp = 0.5*(1 + cos(m_control_l[idx] * (theta + theta0)))*0.9 + 0.1;
+				else
+					temp = 0.5*(1 + cos(l * (theta + theta0)))*0.9 + 0.1;
+			}
+			else
+				temp = 0.5*(1 + cos(l * (theta + theta0)))*0.9 + 0.1;
+
 			float temp2 = 1 / temp*0.1;
 			alpha_A[idx] = temp2;
 		}
@@ -366,16 +378,28 @@ void RD::FastGrayScott(){
 			float RB;
 
 			// assign diﬀerent parameters to each region
-			if (m_control[idx] == 1.0){ // didn't work (on white area) 
-				float f = 0.7;
-				float k = 0.7;
-				RA = sr*(-a*b*b + f*(1 - a));
-				RB = sr*(a*b*b - (k + f)*b);
+			if (ControlImgLoad){
+				if (m_control[idx] == 1.0){ // didn't work (on white area) 
+					float f = 0.7;
+					float k = 0.7;
+					RA = sr*(-a*b*b + f*(1 - a));
+					RB = sr*(a*b*b - (k + f)*b);
 
+				}
+				else{// RD work on black area
+					if (segmentOn){
+						RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
+						RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
+					}
+					else{
+						RA = sr*(-a*b*b + f*(1 - a));
+						RB = sr*(a*b*b - (k + f)*b);
+					}
+				}
 			}
 			else{// RD work on black area
-				RA = sr*(-a*b*b + m_control_F[idx]*(1 - a));
-				RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
+				RA = sr*(-a*b*b + f*(1 - a));
+				RB = sr*(a*b*b - (k + f)*b);
 			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
@@ -399,7 +423,7 @@ void RD::FastGrayScott(){
 }
 
 // for Eq.7
-void RD::FastGrayScott(float min_degree, float max_degree){
+void RD::FastGrayScott(float min_degree, float max_degree, bool segmentOn){
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);

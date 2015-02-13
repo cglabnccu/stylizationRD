@@ -28,6 +28,7 @@ public:
 	int mindegree;
 	int maxdegree;
 	bool customAnisotropicFunction;
+	bool regionOn;
 	BasicDrawPane(wxFrame* parent,Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
@@ -92,6 +93,7 @@ public:
 	wxStaticText *slider_f_t;
 	wxStaticText *slider_k_t;
 	wxStaticText *slider_l_t;
+	wxCheckBox *Segmentation_cb; 
 	void addlog(wxString info, wxColour& color);
 	void activateRenderLoop(bool on);
 protected:
@@ -122,7 +124,6 @@ protected:
 	wxCheckBox *Modify_cb; // Is User Want to Use Modified Anisotropic function?
 	wxSlider *slider_mindegree;
 	wxSlider *slider_maxdegree;
-	wxCheckBox *Segmentation_cb; 
 	wxChoice *SegmentationBox;
 
 	void OnStart(wxCommandEvent& event);

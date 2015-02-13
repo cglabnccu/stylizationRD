@@ -40,22 +40,45 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	Centre();
 }
 void MyPatternPicker::OnSelect(wxCommandEvent& event){
-	((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
-	((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
-	((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
+	if (!((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
+		((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
+		((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
+		((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
 
-	wxString s;
-	s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
-	((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
-	s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
-	((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
-	s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
-	((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
+		wxString s;
+		s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
+		((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
+		s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
+		((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
+		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
+		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
 
-	((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
-	((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
-	((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+		((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
+		((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
+		((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+	}
 
+	//segmentation On
+	else{
+		int sr = ((MyFrame *)GetParent())->drawPane->regionSelected-1;
+		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l = preview->element.l;
+		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].F = preview->element.f;
+		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].k = preview->element.k;
+
+		wxString s;
+		s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].k);
+		((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
+		s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].F);
+		((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
+		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l);
+		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
+
+		((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
+		((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
+		((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+
+		((MyFrame *)GetParent())->drawPane->element.UpdateControlMask();
+	}
 
 	((MyFrame *)GetParent())->activateRenderLoop(true);
 	Close(true);
@@ -408,6 +431,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_beta->Disable();
 
 	log->Hide();
+	SegmentationBox->Hide();
 	fill->Disable();
 	degreeGUI->Hide();
 	slider_mindegree->Hide();
@@ -553,6 +577,9 @@ void MyFrame::OnOpenTex(wxCommandEvent& event)
 }
 void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 {
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
+
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL){
 		addlog("Load Control Img Canceled", wxColour(*wxBLACK));
@@ -575,7 +602,10 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadControlImg((const char*)openFileDialog.GetPath().mb_str());
-
+	int regions = drawPane->element.segmentation.size();
+	for (int i = 0; i < regions; i++){
+		SegmentationBox->Append(to_string(i + 1));
+	}
 }
 
 void MyFrame::OnSaveResult(wxCommandEvent& event)
@@ -701,21 +731,35 @@ void MyFrame::OnSliderS(wxCommandEvent& event)
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
 {
-	drawPane->element.f = slider_f->GetValue() / 1000.0*0.06;
 	wxString s;
-	s.Printf("F : %.4f", drawPane->element.f);
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].F = slider_f->GetValue() / 1000.0*0.06;
+		s.Printf("F : %.4f", drawPane->element.segmentation[drawPane->regionSelected - 1].F);
+		drawPane->element.UpdateControlMask();
+	}
+	else{
+		drawPane->element.f = slider_f->GetValue() / 1000.0*0.06;
+		s.Printf("F : %.4f", drawPane->element.f);
+	}
 	slider_f_t->SetLabel(s);
 }
 void MyFrame::OnSliderK(wxCommandEvent& event)
 { 
-	drawPane->element.k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
 	wxString s;
-	s.Printf("k : %.4f", drawPane->element.k);
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
+		s.Printf("k : %.4f", drawPane->element.segmentation[drawPane->regionSelected - 1].k);
+		drawPane->element.UpdateControlMask();
+	}
+	else{
+		drawPane->element.k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
+		s.Printf("k : %.4f", drawPane->element.k);
+	}
 	slider_k_t->SetLabel(s);
 }
 void MyFrame::OnSliderL(wxCommandEvent& event)
 {
-		wxString s;
+	wxString s;
 	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
 		drawPane->element.segmentation[drawPane->regionSelected - 1].l = slider_l->GetValue();
 		s.Printf("l : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].l);
@@ -725,7 +769,7 @@ void MyFrame::OnSliderL(wxCommandEvent& event)
 		drawPane->element.l = slider_l->GetValue();
 		s.Printf("l : %d", drawPane->element.l);
 	}
-		slider_l_t->SetLabel(s);
+	slider_l_t->SetLabel(s);
 }
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
@@ -772,26 +816,33 @@ void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
 	degreeGUI->paintNow();
 }
 void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event){
-	if (Segmentation_cb->GetValue()) {
-		SegmentationBox->Enable();
-		int regions = drawPane->element.segmentation.size();
-		for (int i = 0; i < regions; i++){
-			SegmentationBox->Append(to_string(i + 1));
+	if (drawPane->element.ControlImgLoad){
+		if (Segmentation_cb->GetValue()) {
+			SegmentationBox->Show();
+			drawPane->regionOn = true;
+			SegmentationBox->Select(0);
+			drawPane->regionSelected = SegmentationBox->GetSelection() + 1;
 		}
+		else {
+			drawPane->regionOn = false;
+			SegmentationBox->Hide();
+		}
+		this->Layout();
 	}
-	else {
-		SegmentationBox->Disable();
+	else{
+		addlog("Must Load Control Img First!", wxColour(*wxRED));
+		Segmentation_cb->SetValue(false);
 	}
-	this->Layout();
 
 }
 void MyFrame::OnSegmentationBox(wxCommandEvent& event){
 	drawPane->regionSelected = SegmentationBox->GetSelection()+1;
-	int sr = drawPane->regionSelected;
+	int sr = drawPane->regionSelected-1;
+
 
 	wxString s;
 	slider_f->SetValue(drawPane->element.segmentation[sr].F * 1000.0 / 0.06);
-	slider_k->SetValue(drawPane->element.segmentation[sr].k * 1000.0 / 0.04 - 0.03);
+	slider_k->SetValue((drawPane->element.segmentation[sr].k - 0.03) / 0.04 * 1000);
 	slider_l->SetValue(drawPane->element.segmentation[sr].l);
 	
 	s.Printf("F : %.4f", drawPane->element.segmentation[sr].F);
@@ -894,6 +945,7 @@ wxPanel(parent)
 	mindegree = 0;
 	maxdegree = 0;
 	regionSelected = 0;
+	regionOn = false;
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {
@@ -1054,9 +1106,9 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
 	if (render_loop_on){
 		if (customAnisotropicFunction)
-			element.FastGrayScott(mindegree, maxdegree);
+			element.FastGrayScott(mindegree, maxdegree, regionOn);
 		else
-			element.FastGrayScott();
+			element.FastGrayScott(regionOn);
 		//element.GrayScottModel();
 	}
 

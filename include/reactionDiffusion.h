@@ -27,8 +27,8 @@ public:
 	void ETF(string);
 	void ReadControlImg(string);
 	void UpdateControlMask();
-	void FastGrayScott();// Eq.6
-	void FastGrayScott(float min_degree, float max_degree);// Eq.7
+	void FastGrayScott(bool segmentOn);// Eq.6
+	void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
 	void GrayScottModel();// generate GS-Model
 	vector<PixelPattern> segmentation;
 	Mat *c_A;        // Current element of A
