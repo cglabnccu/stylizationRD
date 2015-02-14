@@ -375,8 +375,11 @@ void RD::FastGrayScott(bool segmentOn){
 
 			// assign diﬀerent parameters to each region
 			if (ControlImgLoad && segmentOn){
-				RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
-				RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
+				//Unresolved BUG - GTX970 is OK but AMD7850 will crash
+				//RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
+				//RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
+				RA = sr*(-a*b*b + 0.0375 * (1 - a));
+				RB = sr*(a*b*b - (m_control_k[idx] +0.0375)*b);
 			}
 			else{
 				RA = sr*(-a*b*b + f*(1 - a));
