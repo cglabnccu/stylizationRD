@@ -171,7 +171,6 @@ void SimpleDrawPanel::paintEvent(wxPaintEvent & evt)
 	wxPaintDC dc(this);
 	render(dc);
 }
-
 void SimpleDrawPanel::paintNow()
 {
 	wxClientDC dc(this);
@@ -226,7 +225,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
 	wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(wxID_ABOUT, "&About\tCtrl-A", "About the System");
-	menuHelp->Append(new wxMenuItem(menuHelp, wxID_TOGGLE_LOG, wxString(wxT("&Open Log\tCtrl-L")), "Show/Hide the Log", wxITEM_CHECK));
+	menuHelp->Append(new wxMenuItem(menuHelp, wxID_TOGGLE_LOG, wxString(wxT("&Log\tCtrl-L")), "Show/Hide the Log", wxITEM_CHECK))->Check(true);
 	//menuHelp->Append(wxID_TOGGLE_LOG, "&Toggle Log\tCtrl-L", "Show/Hide the Log");
 
 	wxMenuBar *menuBar = new wxMenuBar;
@@ -430,7 +429,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_alpha->Disable();
 	slider_beta->Disable();
 
-	log->Hide();
 	SegmentationBox->Hide();
 	fill->Disable();
 	degreeGUI->Hide();

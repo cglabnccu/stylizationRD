@@ -242,6 +242,8 @@ void RD::ETF(string file){
 void RD::FastGrayScott(bool segmentOn){
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
+	bool ControlImgLoad = this->ControlImgLoad;
+
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
 
 	array_view< float, 1 > alpha_A(nRows*nCols, (float*)alpha_A.data);
@@ -256,11 +258,9 @@ void RD::FastGrayScott(bool segmentOn){
 	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
 
-	Mat tmp_Mask_control;
-	normalize(Mask_control, tmp_Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
-	bool ControlImgLoad = this->ControlImgLoad;
-
-	array_view<float, 1> m_control(nRows*nCols, (float*)tmp_Mask_control.data); // control img
+	//Mat tmp_Mask_control;
+	//normalize(Mask_control, tmp_Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
+	array_view<float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
 	array_view<float, 1> m_control_F(nRows*nCols, (float*)Mask_control_F.data); // control img - F
 	array_view<float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
 	array_view<float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
@@ -333,14 +333,10 @@ void RD::FastGrayScott(bool segmentOn){
 			}
 
 			float temp;
-			if (ControlImgLoad){
-				if (segmentOn) 
+			if (ControlImgLoad && segmentOn){
 					temp = 0.5*(1 + cos(m_control_l[idx] * (theta + theta0)))*0.9 + 0.1;
-				else
-					temp = 0.5*(1 + cos(l * (theta + theta0)))*0.9 + 0.1;
 			}
-			else
-				temp = 0.5*(1 + cos(l * (theta + theta0)))*0.9 + 0.1;
+			else temp = 0.5*(1 + cos(l * (theta + theta0)))*0.9 + 0.1;
 
 			float temp2 = 1 / temp*0.1;
 			alpha_A[idx] = temp2;
@@ -378,26 +374,11 @@ void RD::FastGrayScott(bool segmentOn){
 			float RB;
 
 			// assign diﬀerent parameters to each region
-			if (ControlImgLoad){
-				if (m_control[idx] == 1.0){ // didn't work (on white area) 
-					float f = 0.7;
-					float k = 0.7;
-					RA = sr*(-a*b*b + f*(1 - a));
-					RB = sr*(a*b*b - (k + f)*b);
-
-				}
-				else{// RD work on black area
-					if (segmentOn){
-						RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
-						RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
-					}
-					else{
-						RA = sr*(-a*b*b + f*(1 - a));
-						RB = sr*(a*b*b - (k + f)*b);
-					}
-				}
+			if (ControlImgLoad && segmentOn){
+				RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
+				RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
 			}
-			else{// RD work on black area
+			else{
 				RA = sr*(-a*b*b + f*(1 - a));
 				RB = sr*(a*b*b - (k + f)*b);
 			}
