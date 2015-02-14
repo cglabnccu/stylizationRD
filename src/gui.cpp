@@ -92,6 +92,7 @@ void MyPatternPicker::StartPreview(){
 
 	preview->element.ReadFlow(path);
 	preview->processingS = "Thresholding";
+	preview->processing.beta = 0.7;
 	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
 }
 void MyPatternPicker::onIdle(wxIdleEvent& evt)
@@ -722,9 +723,16 @@ void MyFrame::OnControllingBox(wxCommandEvent& event)
 //Slides: Pattern Parameter
 void MyFrame::OnSliderS(wxCommandEvent& event)
 {
-	drawPane->element.s = slider_s->GetValue() / 1000.0;
 	wxString s;
-	s.Printf("Size : %.3f", drawPane->element.s);
+	//if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	//	drawPane->element.segmentation[drawPane->regionSelected - 1].size = slider_s->GetValue() / 1000.0;
+	//	s.Printf("Size : %.3f", drawPane->element.segmentation[drawPane->regionSelected - 1].size);
+	//	drawPane->element.UpdateControlMask();
+	//}
+	//else{
+		drawPane->element.s = slider_s->GetValue() / 1000.0;
+		s.Printf("Size : %.3f", drawPane->element.s);
+	//}
 	slider_s_t->SetLabel(s);
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
@@ -771,14 +779,26 @@ void MyFrame::OnSliderL(wxCommandEvent& event)
 }
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
-	drawPane->element.theta0 = slider_theta0->GetValue();
 	wxString s;
-	s.Printf("theta0 : %d", drawPane->element.theta0);
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].theta0 = slider_theta0->GetValue();
+		s.Printf("theta0 : %.0f", drawPane->element.segmentation[drawPane->regionSelected - 1].theta0);
+
+		drawPane->element.UpdateControlMask();
+	}
+	else{
+		drawPane->element.theta0 = slider_theta0->GetValue();
+		s.Printf("theta0 : %d", drawPane->element.theta0);
+	}
 	slider_theta0_t->SetLabel(s);
 }
 void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 {
 	if (Modify_cb->GetValue()) {
+		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+			drawPane->element.segmentation[drawPane->regionSelected - 1].CAF = true;
+		}
+
 		drawPane->customAnisotropicFunction = true;
 		degreeGUI->Show();
 		slider_mindegree->Show();
@@ -787,6 +807,24 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 		slider_maxdegree_t->Show();
 	}
 	else {
+		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+			drawPane->element.segmentation[drawPane->regionSelected - 1].dmin = 0;
+			drawPane->element.segmentation[drawPane->regionSelected - 1].dmax = 0;
+
+			drawPane->element.segmentation[drawPane->regionSelected - 1].CAF = false;
+			drawPane->element.UpdateControlMask();
+		}
+		wxString s;
+		slider_mindegree->SetValue(0);
+		slider_maxdegree->SetValue(0);
+		s.Printf("min degree : %d", 0);
+		slider_mindegree_t->SetLabel(s);
+		s.Printf("max degree : %d", 0);
+		slider_maxdegree_t->SetLabel(s);
+		degreeGUI->dmin = slider_mindegree->GetValue();
+		degreeGUI->dmax = slider_maxdegree->GetValue();
+		degreeGUI->paintNow();
+
 		drawPane->customAnisotropicFunction = false;
 		degreeGUI->Hide();
 		slider_mindegree->Hide();
@@ -798,27 +836,46 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 }
 void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
 {
-	drawPane->mindegree = slider_mindegree->GetValue();
 	wxString s;
-	s.Printf("min degree : %d", drawPane->mindegree);
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].dmin = slider_mindegree->GetValue();
+		s.Printf("min degree : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].dmin);
+		drawPane->element.UpdateControlMask();
+		degreeGUI->dmin = slider_mindegree->GetValue();
+		degreeGUI->paintNow();
+	}
+	else{
+		drawPane->mindegree = slider_mindegree->GetValue();
+		s.Printf("min degree : %d", drawPane->mindegree);
+		degreeGUI->dmin = slider_mindegree->GetValue();
+		degreeGUI->paintNow();
+	}
 	slider_mindegree_t->SetLabel(s);
-	degreeGUI->dmin = slider_mindegree->GetValue();
-	degreeGUI->paintNow();
 }
 void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
-	drawPane->maxdegree = slider_maxdegree->GetValue();
 	wxString s;
-	s.Printf("max degree : %d", drawPane->maxdegree);
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+		drawPane->element.segmentation[drawPane->regionSelected - 1].dmax = slider_maxdegree->GetValue();
+		s.Printf("max degree : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].dmax);
+		drawPane->element.UpdateControlMask();
+		degreeGUI->dmax = slider_maxdegree->GetValue();
+		degreeGUI->paintNow();
+	}
+	else{
+		drawPane->maxdegree = slider_maxdegree->GetValue();
+		s.Printf("max degree : %d", drawPane->maxdegree);
+		degreeGUI->dmax = slider_maxdegree->GetValue();
+		degreeGUI->paintNow();
+	}
 	slider_maxdegree_t->SetLabel(s);
-	degreeGUI->dmax = slider_maxdegree->GetValue();
-	degreeGUI->paintNow();
+
 }
 void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event){
 	if (drawPane->element.ControlImgLoad){
 		if (Segmentation_cb->GetValue()) {
 			SegmentationBox->Show();
 			drawPane->regionOn = true;
-			SegmentationBox->Select(0);
+			//SegmentationBox->Select(0);
 			drawPane->regionSelected = SegmentationBox->GetSelection() + 1;
 		}
 		else {
@@ -842,16 +899,54 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event){
 	slider_f->SetValue(drawPane->element.segmentation[sr].F * 1000.0 / 0.06);
 	slider_k->SetValue((drawPane->element.segmentation[sr].k - 0.03) / 0.04 * 1000);
 	slider_l->SetValue(drawPane->element.segmentation[sr].l);
-	
+	slider_theta0->SetValue((int)drawPane->element.segmentation[sr].theta0);
+	if (drawPane->element.segmentation[sr].CAF){
+		Modify_cb->SetValue(true);
+		slider_mindegree->SetValue(drawPane->element.segmentation[sr].dmin);
+		slider_maxdegree->SetValue(drawPane->element.segmentation[sr].dmax);
+		degreeGUI->dmin = slider_mindegree->GetValue();
+		degreeGUI->dmax = slider_maxdegree->GetValue();
+
+		degreeGUI->paintNow();
+
+		degreeGUI->Show();
+		slider_mindegree->Show();
+		slider_maxdegree->Show();
+		slider_mindegree_t->Show();
+		slider_maxdegree_t->Show();
+	}
+	else{
+		Modify_cb->SetValue(false);
+		slider_mindegree->SetValue(0);
+		slider_maxdegree->SetValue(0);
+		degreeGUI->dmin = slider_mindegree->GetValue();
+		degreeGUI->dmax = slider_maxdegree->GetValue();
+
+		degreeGUI->paintNow();
+
+		degreeGUI->Hide();
+		slider_mindegree->Hide();
+		slider_maxdegree->Hide();
+		slider_mindegree_t->Hide();
+		slider_maxdegree_t->Hide();
+	}
+
 	s.Printf("F : %.4f", drawPane->element.segmentation[sr].F);
 	slider_f_t->SetLabel(s);
 	s.Printf("k : %.4f", drawPane->element.segmentation[sr].k);
 	slider_k_t->SetLabel(s);
 	s.Printf("l : %d", drawPane->element.segmentation[sr].l);
 	slider_l_t->SetLabel(s);
+	s.Printf("theta0 : %.0f", drawPane->element.segmentation[sr].theta0);
+	slider_theta0_t->SetLabel(s);
+	s.Printf("min degree : %d", drawPane->element.segmentation[sr].dmin);
+	slider_mindegree_t->SetLabel(s);
+	s.Printf("max degree : %d", drawPane->element.segmentation[sr].dmax);
+	slider_maxdegree_t->SetLabel(s);
 
 	s.Printf("Region selected: %d", drawPane->regionSelected);
 	addlog(s, wxColour(*wxBLUE));
+	this->Layout();
 }
 
 //Slides: Paint Parameter
@@ -1103,10 +1198,10 @@ void BasicDrawPane::paintNow(bool render_loop_on)
 void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
 	if (render_loop_on){
-		if (customAnisotropicFunction)
-			element.FastGrayScott(mindegree, maxdegree, regionOn);
-		else
-			element.FastGrayScott(regionOn);
+		//if (customAnisotropicFunction)
+			element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		//else
+		//	element.FastGrayScott(0, 0, false, regionOn);
 		//element.GrayScottModel();
 	}
 

@@ -11,11 +11,16 @@ using namespace concurrency::fast_math;
 class PixelPattern{
 public:
 	PixelPattern();
-	PixelPattern(int GrayScale, float F, float k, int l);
+	PixelPattern(int GrayScale, float F, float k, int l, float size, int dmin, int dmax);
 	int GrayScale;
 	float F;
 	float k; 
 	int l;
+	float size;
+	float theta0;
+	bool CAF;
+	int dmin;
+	int dmax;
 };
 
 class RD{
@@ -27,8 +32,8 @@ public:
 	void ETF(string);
 	void ReadControlImg(string);
 	void UpdateControlMask();
-	void FastGrayScott(bool segmentOn);// Eq.6
-	void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
+	void FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
+	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
 	void GrayScottModel();// generate GS-Model
 	vector<PixelPattern> segmentation;
 	Mat *c_A;        // Current element of A
@@ -44,6 +49,10 @@ public:
 	Mat Mask_control_F;
 	Mat Mask_control_k;
 	Mat Mask_control_l;
+	Mat Mask_control_theta0;
+	Mat Mask_control_dmin;
+	Mat Mask_control_dmax;
+	Mat Mask_control_size;
 	Mat Diffusion_A;
 	Mat Diffusion_B;
 	Mat Gradient_A; // Gradient vetor of A
