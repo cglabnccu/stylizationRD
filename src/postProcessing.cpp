@@ -83,34 +83,105 @@ void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis){
 	Mat b = Mat::zeros(src.size(), CV_32F);
 	Mat g = Mat::zeros(src.size(), CV_32F);
 
-#pragma omp parallel for
-	for (int i = 0; i < src.rows; i++){
-		for (int j = 0; j < src.cols; j++){
-			float cos_theta = normalize(Gradient.at<Vec3f>(i, j)).dot(normalize(flowfield.at<Vec3f>(i, j)));
-			float range = alpha / 2.0;
-			float center = beta;
-			if (src.at<float>(i, j) > center + range){
-				r.at<float>(i, j) = 1.0;
-				g.at<float>(i, j) = 1.0;
-				b.at<float>(i, j) = 0.0;
-			}
-			else if (src.at<float>(i, j) < center - range){
-				r.at<float>(i, j) = 0.0;
-				g.at<float>(i, j) = 0.0;
-				b.at<float>(i, j) = 1.0;
-			}
-			else if (cos_theta > 0){
-				r.at<float>(i, j) = 0.0;
-				g.at<float>(i, j) = 0.0;
-				b.at<float>(i, j) = 0.0;
-			}
-			else {
-				r.at<float>(i, j) = 1.0;
-				g.at<float>(i, j) = 1.0;
-				b.at<float>(i, j) = 1.0;
+	// Create binary image from source image,
+	cv::Mat bw;
+
+	src.convertTo(bw, CV_8UC1, 255);
+	cv::threshold(bw, bw, 255*beta, 255, CV_THRESH_BINARY);
+	//outward distance
+	cv::Mat dist_outward;
+	cv::distanceTransform(bw, dist_outward, CV_DIST_L2, 3);
+	
+	
+	src.convertTo(bw, CV_8UC1, 255);
+	cv::threshold(bw, bw, 255 * beta, 255, CV_THRESH_BINARY_INV);
+	//inward distance
+	cv::Mat dist_inward;
+	cv::distanceTransform(bw, dist_inward, CV_DIST_L2, 3);
+	
+	// display distance field
+	//cv::normalize(dist_outward, dist_outward, 0, 1., cv::NORM_MINMAX);
+	//cv::normalize(dist_inward, dist_inward, 0, 1., cv::NORM_MINMAX);
+	//for (int i = 0; i < src.rows; i++){
+	//	for (int j = 0; j < src.cols; j++){
+	//		float range = alpha / 2.0;
+	//		float center = beta;
+	//		//r.at<float>(i, j) = bw.at<uchar>(i, j);
+	//		//g.at<float>(i, j) = bw.at<uchar>(i, j);
+	//		//b.at<float>(i, j) = bw.at<uchar>(i, j);
+
+	//		r.at<float>(i, j) = dist_outward.at<float>(i, j);
+	//		g.at<float>(i, j) = 0;
+	//		b.at<float>(i, j) = dist_inward.at<float>(i, j);
+
+	//	}
+	//}
+
+	#pragma omp parallel for
+		for (int i = 0; i < src.rows; i++){
+			for (int j = 0; j < src.cols; j++){
+				float cos_theta = normalize(Gradient.at<Vec3f>(i, j)).dot(normalize(flowfield.at<Vec3f>(i, j)));
+				float range = alpha / 2.0;
+				float center = beta;
+
+				if (src.at<float>(i, j) > center){
+					if (dist_outward.at<float>(i, j)< 20 * range){
+						if (cos_theta > 0){
+							r.at<float>(i, j) = 0.0;
+							g.at<float>(i, j) = 0.0;
+							b.at<float>(i, j) = 0.0;
+						}
+						else {
+							r.at<float>(i, j) = 1.0;
+							g.at<float>(i, j) = 1.0;
+							b.at<float>(i, j) = 1.0;
+						}
+					}
+					else {
+						r.at<float>(i, j) = 1.0;
+						g.at<float>(i, j) = 1.0;
+						b.at<float>(i, j) = 0.0;
+					}
+				}
+				else if (src.at<float>(i, j) <= center){
+					r.at<float>(i, j) = 0.0;
+					g.at<float>(i, j) = 0.0;
+					b.at<float>(i, j) = 1.0;
+				}
 			}
 		}
-	}
+
+//#pragma omp parallel for
+//	for (int i = 0; i < src.rows; i++){
+//		for (int j = 0; j < src.cols; j++){
+//			float cos_theta = normalize(Gradient.at<Vec3f>(i, j)).dot(normalize(flowfield.at<Vec3f>(i, j)));
+//			float range = alpha / 2.0;
+//			float center = beta;
+//			if (src.at<float>(i, j) > center + range){
+//				r.at<float>(i, j) = 1.0;
+//				g.at<float>(i, j) = 1.0;
+//				b.at<float>(i, j) = 0.0;
+//			}
+//			else if (src.at<float>(i, j) < center - range){
+//				r.at<float>(i, j) = 0.0;
+//				g.at<float>(i, j) = 0.0;
+//				b.at<float>(i, j) = 1.0;
+//			}
+//			else if (cos_theta > 0){
+//				r.at<float>(i, j) = 0.0;
+//				g.at<float>(i, j) = 0.0;
+//				b.at<float>(i, j) = 0.0;
+//			}
+//			else {
+//				r.at<float>(i, j) = 1.0;
+//				g.at<float>(i, j) = 1.0;
+//				b.at<float>(i, j) = 1.0;
+//			}
+//		}
+//	}
+
+
+
 	channels.push_back(b);
 	channels.push_back(g);
 	channels.push_back(r);
