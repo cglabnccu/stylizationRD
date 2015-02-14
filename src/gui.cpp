@@ -457,6 +457,8 @@ void MyFrame::OnToggleLog(wxCommandEvent& event){
 
 void MyFrame::OnOpenSrc(wxCommandEvent& event)
 {
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL){
 		addlog("Load Img Canceled", wxColour(*wxBLACK));
@@ -490,10 +492,13 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
-
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
 }
 void MyFrame::OnOpenVfb(wxCommandEvent& event)
 {
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open vfb file"), "", "", "vfb files (*.vfb)|*.vfb", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL){
 		addlog("Load Flow Canceled", wxColour(*wxBLACK));
@@ -518,9 +523,13 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadFlow((const char*)openFileDialog.GetPath().mb_str());
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
 }
 void MyFrame::OnOpenETF(wxCommandEvent& event)
 {
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL){
 		addlog("Load ETF Canceled", wxColour(*wxBLACK));
@@ -545,9 +554,14 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str());
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
+
 }
 void MyFrame::OnOpenTex(wxCommandEvent& event)
 {
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open texture file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL){
 		addlog("Load Texture Canceled", wxColour(*wxBLACK));
@@ -573,6 +587,9 @@ void MyFrame::OnOpenTex(wxCommandEvent& event)
 	drawPane->processing.ReadTexture((const char*)openFileDialog.GetPath().mb_str());
 
 	addlog("Texture Loaded", wxColour(*wxBLACK));
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
+
 }
 void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 {
@@ -601,10 +618,15 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadControlImg((const char*)openFileDialog.GetPath().mb_str());
-	int regions = drawPane->element.segmentation.size();
-	for (int i = 0; i < regions; i++){
-		SegmentationBox->Append(to_string(i + 1));
+
+	for (int i = 0; i < drawPane->element.segmentation.size(); i++){
+		wxString s;
+		s.Printf("Region - %s", to_string(i + 1));
+		SegmentationBox->Append(s);
 	}
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
+
 }
 
 void MyFrame::OnSaveResult(wxCommandEvent& event)
@@ -979,6 +1001,7 @@ void MyFrame::OnSliderAlpha(wxCommandEvent& event)
 	wxString s;
 	s.Printf("alpha : %.3f", drawPane->processing.alpha);
 	slider_alpha_t->SetLabel(s);
+	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnSliderBeta(wxCommandEvent& event)
 {
@@ -986,6 +1009,7 @@ void MyFrame::OnSliderBeta(wxCommandEvent& event)
 	wxString s;
 	s.Printf("beta : %.3f", drawPane->processing.beta);
 	slider_beta_t->SetLabel(s);
+	drawPane->paintNow(true); //execute action
 }
 
 void MyFrame::addlog(wxString info, wxColour& color){
