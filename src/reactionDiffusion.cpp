@@ -110,20 +110,18 @@ void RD::ReadSrc(string file){
 	GaussianBlur(Mask, Mask, Size(9, 9), 0, 0);
 
 	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
-	
+
 	//imshow("M",Mask);
 	//imshow("MS",Mask_s);
 	SrcLoaded = true;
-	if (ControlImgLoad){
-		resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_F, Mask_control_F, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_k, Mask_control_k, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_l, Mask_control_l, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_size, Mask_control_size, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_dmin, Mask_control_dmin, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_dmax, Mask_control_dmax, Mask.size(), 0, 0, CV_INTER_LINEAR);
-		resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
-	}
+	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_F, Mask_control_F, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_k, Mask_control_k, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_l, Mask_control_l, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_size, Mask_control_size, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_dmin, Mask_control_dmin, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_dmax, Mask_control_dmax, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
 }
 
 void RD::ReadFlow(string file){
