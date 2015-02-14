@@ -38,6 +38,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	// Menu - Tool
 	EVT_MENU(ID_ONEdge2AddA, MyFrame::OnEdge2AddA)
 	EVT_MENU(ID_ONEdge2AddB, MyFrame::OnEdge2AddB)
+	EVT_MENU(ID_ONCLAHE, MyFrame::OnCLAHE)
 	EVT_MENU(ID_ONOPEN_MASK, MyFrame::OnOpenMask)
 	EVT_MENU(ID_ONOPEN_MASK_S, MyFrame::OnOpenMaskS)
 	EVT_MENU(ID_ONOPEN_PATTERN_PICKER, MyFrame::OnOpenPatternPicker)
