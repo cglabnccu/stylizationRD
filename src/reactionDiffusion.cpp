@@ -223,6 +223,24 @@ void RD::UpdateControlMask(){
 	}
 }
 
+void RD::DisplaySeg(Mat &dis, int regionindex){
+	int regionGray = segmentation[regionindex].GrayScale;
+
+	for (int i = 0; i < Mask_control.rows; i++){
+		for (int j = 0; j < Mask_control.cols; j++){
+			int Gray = Mask_control.at<uchar>(i, j);
+			if (Gray != regionGray){
+				int k = (j/3) % 2;
+				int l = (i/3) % 2;
+				if ( (k==0&&l==0) || (k==1&&l==1) )
+					dis.at<float>(i, j) = 0.5;
+				else
+					dis.at<float>(i, j) = 1.0;
+			}
+		}
+	}
+}
+
 //Generate ETF of input image as flowfield
 void RD::ETF(string file){
 	Mat src = imread(file, 1);
