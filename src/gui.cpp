@@ -3,7 +3,7 @@
 
 bool MyApp::OnInit()
 {
-	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800,730));
+	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 730));
 	frame->Show(true);
 
 	return true;
@@ -11,7 +11,8 @@ bool MyApp::OnInit()
 
 #pragma region MyPatternPicker
 MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
-	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550)){
+	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550))
+{
 	wxPanel *panel = new wxPanel(this, -1);
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
@@ -39,8 +40,10 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	SetSizer(sizer);
 	Centre();
 }
-void MyPatternPicker::OnSelect(wxCommandEvent& event){
-	if (!((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
+void MyPatternPicker::OnSelect(wxCommandEvent& event)
+{
+	if (!((MyFrame *)GetParent())->Segmentation_cb->GetValue())
+	{
 		((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
 		((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
 		((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
@@ -59,8 +62,9 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event){
 	}
 
 	//segmentation On
-	else{
-		int sr = ((MyFrame *)GetParent())->drawPane->regionSelected-1;
+	else
+	{
+		int sr = ((MyFrame *)GetParent())->drawPane->regionSelected - 1;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l = preview->element.l;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].F = preview->element.f;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].k = preview->element.k;
@@ -83,7 +87,8 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event){
 	((MyFrame *)GetParent())->activateRenderLoop(true);
 	Close(true);
 }
-void MyPatternPicker::StartPreview(){
+void MyPatternPicker::StartPreview()
+{
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
 	string path = "";
@@ -105,12 +110,13 @@ void MyPatternPicker::onIdle(wxIdleEvent& evt)
 
 #pragma region Picker
 Picker::Picker(wxFrame* parent, wxString file, wxBitmapType format) :
-	wxPanel(parent)
+wxPanel(parent)
 {
 	wxInitAllImageHandlers();
 	image.LoadFile(file, format);
 }
-void Picker::MouseLDown(wxMouseEvent &event){
+void Picker::MouseLDown(wxMouseEvent &event)
+{
 
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
@@ -126,7 +132,8 @@ void Picker::MouseLDown(wxMouseEvent &event){
 	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
 
 	// fill preview with ink
-	for (int i = 0; i < 15; i++){
+	for (int i = 0; i < 15; i++)
+	{
 		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols;
 		int y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
 		ellipse(
@@ -184,10 +191,12 @@ void SimpleDrawPanel::render(wxDC&  dc)
 	dc.SetPen(wxPen(wxColor(0, 0, 0), 1)); // 1-pixels-thick black outline
 	dc.DrawCircle(wxPoint(37, 40), 25 /* radius */);
 	dc.SetPen(wxPen(wxColor(255, 0, 0), 5)); // 5-pixels-thick red outline
-	if (dmin < dmax){
+	if (dmin < dmax)
+	{
 		dc.DrawEllipticArc(12, 15, 50, 50, dmin, dmax);
 	}
-	else if (dmin > dmax){
+	else if (dmin > dmax)
+	{
 		dc.DrawEllipticArc(12, 15, 50, 50, dmin, 360);
 		if (dmax != 0) dc.DrawEllipticArc(12, 15, 50, 50, 0, dmax);
 	}
@@ -206,7 +215,7 @@ void SimpleDrawPanel::render(wxDC&  dc)
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	: wxFrame(NULL, wxID_ANY, title, pos, size)
 {
-	#pragma region MenuBar
+#pragma region MenuBar
 	wxMenu *menuFile = new wxMenu;
 	menuFile->Append(ID_ONOPENSRC, "&Open SrcImg\tCtrl-O", "Open source image");
 	menuFile->Append(ID_ONOPENVFB, "&Open Flow\tCtrl-F", "Open Flowfield file");
@@ -242,9 +251,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	SetStatusText("Flowfield: None", 1);
 	SetStatusText("Texture: None", 2);
 	SetStatusText("Control-Img: None", 3);
-	#pragma endregion
+#pragma endregion
 
-	#pragma region ToolBar: Buttons(Start, Fill Ink, Clean), Combobox(processingBox, controllingBox)
+#pragma region ToolBar: Buttons(Start, Fill Ink, Clean), Combobox(processingBox, controllingBox)
 	wxToolBar *toolbar1 = new wxToolBar(this, wxID_ANY);
 	start = new wxButton(toolbar1, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
 	fill = new wxButton(toolbar1, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
@@ -258,7 +267,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox->Append("dirTexture");
 	processingBox->Append("PolarTexture");
 	processingBox->Append("adaThresholding");
-	processingBox->Append("Thresholding"); 
+	processingBox->Append("Thresholding");
 	processingBox->Append("Color_mapping");
 
 	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
@@ -275,7 +284,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	toolbar1->Realize();
 	SetToolBar(toolbar1);
-	#pragma endregion 
+#pragma endregion 
 
 	//Sizer of whole window
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -290,19 +299,19 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	wxString s;
 
-	#pragma region Leftside: drawPane, log
+#pragma region Leftside: drawPane, log
 	//drawing panel
 	drawPane = new BasicDrawPane(this, Size(256, 256));
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
-	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2|wxTE_MULTILINE|wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
+	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
-	
+
 	leftside->Add(drawPane, 7, wxEXPAND);
 	leftside->Add(log, 1, wxEXPAND);
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Paint Parameters
+#pragma region Paint Parameters
 	wxStaticBox *st_paint = new wxStaticBox(controlpanel, -1, wxT("Paint"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_paint_sizer = new wxStaticBoxSizer(st_paint, wxVERTICAL);
 
@@ -325,9 +334,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	st_paint_sizer->Add(slider_addB, 0, wxEXPAND | wxLEFT, 10);
 
 	rightside->Add(st_paint_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Pattern Parameters
+#pragma region Pattern Parameters
 	wxStaticBox* st_pattern = new wxStaticBox(controlpanel, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
 
@@ -353,7 +362,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_l_t = new wxStaticText(controlpanel, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_l = new wxSlider(controlpanel, SLIDER_L, int(drawPane->element.l), 0, 6, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_l,0, wxEXPAND | wxLEFT, 10);
+	st_pattern_sizer->Add(slider_l, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("theta0 : %d", drawPane->element.theta0);
 	slider_theta0_t = new wxStaticText(controlpanel, SLIDER_Theta0_T, s, wxDefaultPosition, wxDefaultSize, 0);
@@ -364,8 +373,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	Modify_cb = new wxCheckBox(controlpanel, CHECKBOX_MODIFY_FUNCTION, wxT("Customize Anisotropic Function"), wxPoint(20, 20));
 	Modify_cb->SetValue(false);
 	st_pattern_sizer->Add(Modify_cb, 0, wxEXPAND | wxLEFT, 10);
-	
-	#pragma region Customize Anisotropic Function Panel
+
+#pragma region Customize Anisotropic Function Panel
 	//      Circle    min/Max Slider
 	//	  |--------|-----------------|
 	//    |	degree |  ========[]===  |
@@ -391,7 +400,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	degree_outer->Add(degree_slider, 2, wxEXPAND);
 
 	st_pattern_sizer->Add(degree_outer, 0, wxEXPAND);
-	#pragma endregion
+#pragma endregion
 
 	Segmentation_cb = new wxCheckBox(controlpanel, CHECKBOX_SEGMENTATION, wxT("Activate Segmentation"), wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(Segmentation_cb, 0, wxEXPAND | wxLEFT, 10);
@@ -403,9 +412,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	st_pattern_sizer->Add(SegmentationBox, 0, wxEXPAND | wxLEFT, 10);
 
 	rightside->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
-	#pragma endregion 
+#pragma endregion 
 
-	#pragma region Post Processing Parameters
+#pragma region Post Processing Parameters
 	wxStaticBox *st_pp = new wxStaticBox(controlpanel, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_pp_sizer = new wxStaticBoxSizer(st_pp, wxVERTICAL);
 	s.Printf("alpha : %.3f", drawPane->processing.alpha);
@@ -421,7 +430,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	st_pp_sizer->Add(slider_beta, 0, wxEXPAND | wxLEFT, 10);
 
 	rightside->Add(st_pp_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
-	#pragma endregion
+#pragma endregion
 
 	//set portion of size: leftside & rightside(control)
 	controlpanel->SetSizer(rightside);
@@ -429,7 +438,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	sizer->Add(controlpanel, 3, wxEXPAND);
 	rightside->Fit(controlpanel);
 	SetSizer(sizer);
-	
+
 	slider_alpha->Disable();
 	slider_beta->Disable();
 
@@ -451,11 +460,12 @@ void MyFrame::OnExit(wxCommandEvent& event)
 }
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Wei-Ching Liu - Computer Science - National Chengchi University",	"About CRD", wxOK | wxICON_INFORMATION);
+	wxMessageBox("Wei-Ching Liu - Computer Science - National Chengchi University", "About CRD", wxOK | wxICON_INFORMATION);
 }
-void MyFrame::OnToggleLog(wxCommandEvent& event){
+void MyFrame::OnToggleLog(wxCommandEvent& event)
+{
 	event.IsChecked() ? log->Show() : log->Hide();
-	
+
 	this->GetSizer()->Layout();
 }
 
@@ -464,18 +474,20 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 	render_loop_on = false;
 	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
 		addlog("Load Img Canceled", wxColour(*wxBLACK));
 		return;     // the user changed idea...
 	}
-	else{
+	else
+	{
 		wxString s;
 		s.Printf("Load Img - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
 
 		s.Printf("SrcImg: %s", openFileDialog.GetFilename());
 		SetStatusText(s, 0);
-		
+
 		////If no Flow is Loaded, Read Same File as defaulf ETF
 		//if (!drawPane->element.FlowLoaded && !drawPane->element.ETFLoaded)
 		//{	
@@ -504,11 +516,13 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 	render_loop_on = false;
 	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open vfb file"), "", "", "vfb files (*.vfb)|*.vfb", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
 		addlog("Load Flow Canceled", wxColour(*wxBLACK));
 		return;     // the user changed idea...
 	}
-	else{
+	else
+	{
 		wxString s;
 		s.Printf("Load Flow(.vfb) - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
@@ -535,11 +549,13 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 	render_loop_on = false;
 	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
 		addlog("Load ETF Canceled", wxColour(*wxBLACK));
 		return;     // the user changed idea...
 	}
-	else{
+	else
+	{
 		wxString s;
 		s.Printf("Load ETF - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
@@ -567,11 +583,13 @@ void MyFrame::OnOpenTex(wxCommandEvent& event)
 	render_loop_on = false;
 	activateRenderLoop(render_loop_on);
 	wxFileDialog openFileDialog(this, _("Open texture file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
 		addlog("Load Texture Canceled", wxColour(*wxBLACK));
 		return;     // the user changed idea...
 	}
-	else{
+	else
+	{
 		wxString s;
 		s.Printf("Load Texture - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
@@ -601,11 +619,13 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 	activateRenderLoop(render_loop_on);
 
 	wxFileDialog openFileDialog(this, _("Open image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	if (openFileDialog.ShowModal() == wxID_CANCEL){
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
 		addlog("Load Control Img Canceled", wxColour(*wxBLACK));
 		return;     // the user changed idea...
 	}
-	else{
+	else
+	{
 		wxString s;
 		s.Printf("Load Control Img - %s", openFileDialog.GetFilename());
 		addlog(s, wxColour(*wxBLUE));
@@ -624,7 +644,8 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 	drawPane->element.ReadControlImg((const char*)openFileDialog.GetPath().mb_str());
 
 	SegmentationBox->Clear();
-	for (int i = 0; i < drawPane->element.segmentation.size(); i++){
+	for (int i = 0; i < drawPane->element.segmentation.size(); i++)
+	{
 		wxString s;
 		s.Printf("Region - %s", to_string(i + 1));
 		SegmentationBox->Append(s);
@@ -668,18 +689,22 @@ void MyFrame::OnCLAHE(wxCommandEvent& event)
 	isCLAHE = !isCLAHE;
 }
 
-void MyFrame::OnOpenMask(wxCommandEvent& event){
-	if (drawPane->element.SrcLoaded){
+void MyFrame::OnOpenMask(wxCommandEvent& event)
+{
+	if (drawPane->element.SrcLoaded)
+	{
 		imshow("Original Img", drawPane->element.Original_img);
 		imshow("Maks Img", drawPane->element.Mask);
 	}
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
-void MyFrame::OnOpenMaskS(wxCommandEvent& event){
+void MyFrame::OnOpenMaskS(wxCommandEvent& event)
+{
 	if (drawPane->element.SrcLoaded) imshow("Mask_S Img", drawPane->element.Mask_s);
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
 }
-void MyFrame::OnOpenPatternPicker(wxCommandEvent& event){
+void MyFrame::OnOpenPatternPicker(wxCommandEvent& event)
+{
 	activateRenderLoop(false);
 	patternpicker = new MyPatternPicker(this, wxT("Pattern Picker"));
 	patternpicker->Show();
@@ -691,7 +716,7 @@ void MyFrame::OnStart(wxCommandEvent& event)
 {
 	render_loop_on = !render_loop_on;
 	activateRenderLoop(render_loop_on);
-	
+
 	//if (render_loop_on) fill->Enable();
 	//else fill->Disable();
 }
@@ -707,7 +732,7 @@ void MyFrame::OnClean(wxCommandEvent& event)
 	*drawPane->element.p_B = Mat::zeros(drawPane->element.Mask.size(), CV_32F);
 	drawPane->element.Addition_A = Mat::zeros(drawPane->element.Mask.size(), CV_32F);
 	drawPane->element.Addition_B = Mat::zeros(drawPane->element.Mask.size(), CV_32F);
-	
+
 	drawPane->paintNow(true); //execute clean action
 	addlog("Draw Panel Cleaned.", wxColour(*wxBLACK));
 }
@@ -716,7 +741,7 @@ void MyFrame::OnClean(wxCommandEvent& event)
 void MyFrame::OnProcessingBox(wxCommandEvent& event)
 {
 	drawPane->processingS = processingBox->GetValue();
-	
+
 	if (drawPane->processingS == "dirTexture" || drawPane->processingS == "PolarTexture")
 	{
 		wxString s;
@@ -736,11 +761,13 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		}
 	}
 
-	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" || processingBox->GetValue() == "dirTexture"){
+	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" || processingBox->GetValue() == "dirTexture")
+	{
 		slider_alpha->Disable();
 		slider_beta->Disable();
 	}
-	else{
+	else
+	{
 		slider_alpha->Enable();
 		slider_beta->Enable();
 	}
@@ -761,34 +788,38 @@ void MyFrame::OnSliderS(wxCommandEvent& event)
 	//	drawPane->element.UpdateControlMask();
 	//}
 	//else{
-		drawPane->element.s = slider_s->GetValue() / 1000.0;
-		s.Printf("Size : %.3f", drawPane->element.s);
+	drawPane->element.s = slider_s->GetValue() / 1000.0;
+	s.Printf("Size : %.3f", drawPane->element.s);
 	//}
 	slider_s_t->SetLabel(s);
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
 {
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].F = slider_f->GetValue() / 1000.0*0.06;
 		s.Printf("F : %.4f", drawPane->element.segmentation[drawPane->regionSelected - 1].F);
 		drawPane->element.UpdateControlMask();
 	}
-	else{
+	else
+	{
 		drawPane->element.f = slider_f->GetValue() / 1000.0*0.06;
 		s.Printf("F : %.4f", drawPane->element.f);
 	}
 	slider_f_t->SetLabel(s);
 }
 void MyFrame::OnSliderK(wxCommandEvent& event)
-{ 
+{
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
 		s.Printf("k : %.4f", drawPane->element.segmentation[drawPane->regionSelected - 1].k);
 		drawPane->element.UpdateControlMask();
 	}
-	else{
+	else
+	{
 		drawPane->element.k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
 		s.Printf("k : %.4f", drawPane->element.k);
 	}
@@ -797,12 +828,14 @@ void MyFrame::OnSliderK(wxCommandEvent& event)
 void MyFrame::OnSliderL(wxCommandEvent& event)
 {
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].l = slider_l->GetValue();
 		s.Printf("l : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].l);
 		drawPane->element.UpdateControlMask();
 	}
-	else{
+	else
+	{
 		drawPane->element.l = slider_l->GetValue();
 		s.Printf("l : %d", drawPane->element.l);
 	}
@@ -811,13 +844,15 @@ void MyFrame::OnSliderL(wxCommandEvent& event)
 void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 {
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].theta0 = slider_theta0->GetValue();
 		s.Printf("theta0 : %.0f", drawPane->element.segmentation[drawPane->regionSelected - 1].theta0);
 
 		drawPane->element.UpdateControlMask();
 	}
-	else{
+	else
+	{
 		drawPane->element.theta0 = slider_theta0->GetValue();
 		s.Printf("theta0 : %d", drawPane->element.theta0);
 	}
@@ -825,8 +860,10 @@ void MyFrame::OnSliderTheta0(wxCommandEvent& event)
 }
 void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 {
-	if (Modify_cb->GetValue()) {
-		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Modify_cb->GetValue())
+	{
+		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+		{
 			drawPane->element.segmentation[drawPane->regionSelected - 1].CAF = true;
 		}
 
@@ -837,8 +874,10 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 		slider_mindegree_t->Show();
 		slider_maxdegree_t->Show();
 	}
-	else {
-		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	else
+	{
+		if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+		{
 			drawPane->element.segmentation[drawPane->regionSelected - 1].dmin = 0;
 			drawPane->element.segmentation[drawPane->regionSelected - 1].dmax = 0;
 
@@ -868,14 +907,16 @@ void MyFrame::OnCheckboxModifyToggle(wxCommandEvent& event)
 void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
 {
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].dmin = slider_mindegree->GetValue();
 		s.Printf("min degree : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].dmin);
 		drawPane->element.UpdateControlMask();
 		degreeGUI->dmin = slider_mindegree->GetValue();
 		degreeGUI->paintNow();
 	}
-	else{
+	else
+	{
 		drawPane->mindegree = slider_mindegree->GetValue();
 		s.Printf("min degree : %d", drawPane->mindegree);
 		degreeGUI->dmin = slider_mindegree->GetValue();
@@ -883,16 +924,19 @@ void MyFrame::OnSliderMinDegree(wxCommandEvent& event)
 	}
 	slider_mindegree_t->SetLabel(s);
 }
-void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
+void MyFrame::OnSliderMaxDegree(wxCommandEvent& event)
+{
 	wxString s;
-	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
 		drawPane->element.segmentation[drawPane->regionSelected - 1].dmax = slider_maxdegree->GetValue();
 		s.Printf("max degree : %d", drawPane->element.segmentation[drawPane->regionSelected - 1].dmax);
 		drawPane->element.UpdateControlMask();
 		degreeGUI->dmax = slider_maxdegree->GetValue();
 		degreeGUI->paintNow();
 	}
-	else{
+	else
+	{
 		drawPane->maxdegree = slider_maxdegree->GetValue();
 		s.Printf("max degree : %d", drawPane->maxdegree);
 		degreeGUI->dmax = slider_maxdegree->GetValue();
@@ -901,29 +945,35 @@ void MyFrame::OnSliderMaxDegree(wxCommandEvent& event){
 	slider_maxdegree_t->SetLabel(s);
 
 }
-void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event){
-	if (drawPane->element.ControlImgLoad){
-		if (Segmentation_cb->GetValue()) {
+void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event)
+{
+	if (drawPane->element.ControlImgLoad)
+	{
+		if (Segmentation_cb->GetValue())
+		{
 			SegmentationBox->Show();
 			drawPane->regionOn = true;
 			//SegmentationBox->Select(0);
 			drawPane->regionSelected = SegmentationBox->GetSelection() + 1;
 		}
-		else {
+		else
+		{
 			drawPane->regionOn = false;
 			SegmentationBox->Hide();
 		}
 		this->Layout();
 	}
-	else{
+	else
+	{
 		addlog("Must Load Control Img First!", wxColour(*wxRED));
 		Segmentation_cb->SetValue(false);
 	}
 
 }
-void MyFrame::OnSegmentationBox(wxCommandEvent& event){
-	drawPane->regionSelected = SegmentationBox->GetSelection()+1;
-	int sr = drawPane->regionSelected-1;
+void MyFrame::OnSegmentationBox(wxCommandEvent& event)
+{
+	drawPane->regionSelected = SegmentationBox->GetSelection() + 1;
+	int sr = drawPane->regionSelected - 1;
 
 
 	wxString s;
@@ -931,7 +981,8 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event){
 	slider_k->SetValue((drawPane->element.segmentation[sr].k - 0.03) / 0.04 * 1000);
 	slider_l->SetValue(drawPane->element.segmentation[sr].l);
 	slider_theta0->SetValue((int)drawPane->element.segmentation[sr].theta0);
-	if (drawPane->element.segmentation[sr].CAF){
+	if (drawPane->element.segmentation[sr].CAF)
+	{
 		Modify_cb->SetValue(true);
 		slider_mindegree->SetValue(drawPane->element.segmentation[sr].dmin);
 		slider_maxdegree->SetValue(drawPane->element.segmentation[sr].dmax);
@@ -946,7 +997,8 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event){
 		slider_mindegree_t->Show();
 		slider_maxdegree_t->Show();
 	}
-	else{
+	else
+	{
 		Modify_cb->SetValue(false);
 		slider_mindegree->SetValue(0);
 		slider_maxdegree->SetValue(0);
@@ -983,7 +1035,7 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event){
 //Slides: Paint Parameter
 void MyFrame::OnSliderBrushSize(wxCommandEvent& event)
 {
-	drawPane->brushSize= slider_brushSize->GetValue();
+	drawPane->brushSize = slider_brushSize->GetValue();
 	wxString s;
 	s.Printf("Brush Size : %d", drawPane->brushSize);
 	slider_brushSize_t->SetLabel(s);
@@ -1021,7 +1073,8 @@ void MyFrame::OnSliderBeta(wxCommandEvent& event)
 	drawPane->paintNow(true); //execute action
 }
 
-void MyFrame::addlog(wxString info, wxColour& color){
+void MyFrame::addlog(wxString info, wxColour& color)
+{
 	time_t currentTime;// for logging current time
 	struct tm *localTime;// for logging current time
 	time(&currentTime);                   // Get the current time
@@ -1081,9 +1134,12 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 	int h_offset = h % (int(2 * r)) / 2;
 
 	Point2i temp;
-	for (int j = h_offset + hr, k = 0; j < h; j += 2 * hr, k++){
-		if (isoffset && k % 2 == 1) {
-			for (int i = w_offset - r; i < w; i += 2 * r){
+	for (int j = h_offset + hr, k = 0; j < h; j += 2 * hr, k++)
+	{
+		if (isoffset && k % 2 == 1)
+		{
+			for (int i = w_offset - r; i < w; i += 2 * r)
+			{
 				temp.x = i + r + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				int thickness = -1;
@@ -1099,8 +1155,10 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 					lineType);
 			}
 		}
-		else{
-			for (int i = w_offset + r; i < w; i += 2 * r){
+		else
+		{
+			for (int i = w_offset + r; i < w; i += 2 * r)
+			{
 				temp.x = i + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				temp.y = j + hr * 2 * (((float)rand()) / RAND_MAX - 0.5);
 				int thickness = -1;
@@ -1123,7 +1181,8 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
 	if (activateDraw)
 	{
-		if (controllingS == "addA"){
+		if (controllingS == "addA")
+		{
 			//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 			ellipse(element.Addition_A,
 				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
@@ -1135,7 +1194,8 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 				-1,
 				8);
 		}
-		else if (controllingS == "addB"){
+		else if (controllingS == "addB")
+		{
 			//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 			ellipse(element.Addition_B,
 				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
@@ -1149,22 +1209,23 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 		}
 		else
 			ellipse(
-				*element.c_B,         // img - Image.
-				Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
-				Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
-				0,                    // angle - Ellipse rotation angle in degrees.
-				0,                    // startAngle - Starting angle of the elliptic arc in degrees.
-				360,                  // endAngle - Ending angle of the elliptic arc in degrees.
-				Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
-				-1,                    // thickness - Thickness of the ellipse arc outline
-				8                     // lineType - Type of the ellipse boundary. See the line() description.
+			*element.c_B,         // img - Image.
+			Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
+			Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
+			0,                    // angle - Ellipse rotation angle in degrees.
+			0,                    // startAngle - Starting angle of the elliptic arc in degrees.
+			360,                  // endAngle - Ending angle of the elliptic arc in degrees.
+			Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
+			-1,                    // thickness - Thickness of the ellipse arc outline
+			8                     // lineType - Type of the ellipse boundary. See the line() description.
 			);
 	}
 	//((MyFrame *)GetParent())->addlog("Panit event - Mouse Down at (%.0f, %.0f)", wxColour(*wxBLACK));
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
-	if (controllingS == "addA") {
+	if (controllingS == "addA")
+	{
 		//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 		ellipse(element.Addition_A,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
@@ -1176,7 +1237,8 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			-1,
 			8);
 	}
-	else if (controllingS == "addB") {
+	else if (controllingS == "addB")
+	{
 		ellipse(element.Addition_B,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
 			Size(brushSize, brushSize),
@@ -1188,7 +1250,8 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			8);
 		//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 	}
-	else {
+	else
+	{
 		ellipse(*element.c_B,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
 			Size(brushSize, brushSize),
@@ -1230,9 +1293,10 @@ void BasicDrawPane::paintNow(bool render_loop_on)
 //Main Render(iteration) Section
 void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
-	if (render_loop_on){
+	if (render_loop_on)
+	{
 		//if (customAnisotropicFunction)
-			element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		element.FastGrayScott(mindegree, maxdegree, false, regionOn);
 		//else
 		//	element.FastGrayScott(0, 0, false, regionOn);
 		//element.GrayScottModel();
@@ -1240,54 +1304,66 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
-	if ( ((MyFrame *)GetParent())->isCLAHE ) {
+	if (((MyFrame *)GetParent())->isCLAHE)
+	{
 		processing.CLAHE(dis);
 	}
 
 
-	if (processingS == "Motion_Illusion"){
+	if (processingS == "Motion_Illusion")
+	{
 		processing.motionIllu(*element.c_A, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else if (processingS == "distribution_B"){
+	else if (processingS == "distribution_B")
+	{
 		dis = element.c_B->clone();
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
-	else if (processingS == "LIC"){
+	else if (processingS == "LIC")
+	{
 		processing.LIC(element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
-	else if (processingS == "dirTexture"){
+	else if (processingS == "dirTexture")
+	{
 		processing.dirTexture(*element.c_A, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else if (processingS == "PolarTexture"){
+	else if (processingS == "PolarTexture")
+	{
 		processing.dirTexture_Polar(*element.c_A, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else if (processingS == "adaThresholding"){
+	else if (processingS == "adaThresholding")
+	{
 		processing.adaThresholding(*element.c_A, element.Mask, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else if (processingS == "Thresholding"){
+	else if (processingS == "Thresholding")
+	{
 		processing.Thresholding(*element.c_A, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else if (processingS == "Color_mapping"){
+	else if (processingS == "Color_mapping")
+	{
 		processing.Colormapping(*element.c_A, element.Mask, element.Original_img, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
-	else{
-		if ( ((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
-			element.DisplaySeg(dis, ((MyFrame *)GetParent())->drawPane->regionSelected - 1);
+	else
+	{
+		//if (((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
+		if (regionOn && regionSelected != 0)
+		{
+			element.DisplaySeg(dis, regionSelected - 1);
 		}
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);

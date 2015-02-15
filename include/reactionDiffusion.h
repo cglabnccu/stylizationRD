@@ -21,6 +21,7 @@ public:
 	bool CAF;
 	int dmin;
 	int dmax;
+	int regionPixelSize;
 };
 
 class RD{

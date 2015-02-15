@@ -1,18 +1,21 @@
 ﻿#include "reactionDiffusion.h"
 # define M_PI 3.14159265358979323846
 
-PixelPattern::PixelPattern(){
+PixelPattern::PixelPattern()
+{
 	this->GrayScale = 0;
 	this->F = 0;
 	this->k = 0;
-	this->l = 0;	
+	this->l = 0;
 	this->size = 0;
 	this->CAF = false;
 	this->dmax = 0;
 	this->dmin = 0;
 	this->theta0 = 0;
+	this->regionPixelSize = 0;
 }
-PixelPattern::PixelPattern(int GrayScale, float F, float k, int l, float size, int dmin, int dmax){
+PixelPattern::PixelPattern(int GrayScale, float F, float k, int l, float size, int dmin, int dmax)
+{
 	this->GrayScale = GrayScale;
 	this->F = F;
 	this->k = k;
@@ -22,9 +25,11 @@ PixelPattern::PixelPattern(int GrayScale, float F, float k, int l, float size, i
 	this->dmax = dmax;
 	this->dmin = dmin;
 	this->theta0 = 0;
+	this->regionPixelSize = 0;
 }
 
-RD::RD(Size s){
+RD::RD(Size s)
+{
 	RotationMat = Mat::zeros(s, CV_32F);
 	Flowfield = Mat::zeros(s, CV_32FC3);
 	Mask = Mat::zeros(s, CV_32F);
@@ -69,7 +74,8 @@ RD::RD(Size s){
 	ControlImgLoad = false;
 }
 
-void RD::Init(Size s){
+void RD::Init(Size s)
+{
 	RotationMat = Mat::zeros(s, CV_32F);
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	Gradient_A = Mat::zeros(s, CV_32FC3);
@@ -90,7 +96,8 @@ void RD::Init(Size s){
 	p_B = &B2;
 }
 
-void RD::ReadSrc(string file){
+void RD::ReadSrc(string file)
+{
 	Original_img = imread(file, CV_LOAD_IMAGE_COLOR);
 	//imshow("mjk,", Original_img);
 
@@ -124,9 +131,11 @@ void RD::ReadSrc(string file){
 	resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
 }
 
-void RD::ReadFlow(string file){
+void RD::ReadFlow(string file)
+{
 	FILE *stream = fopen(file.c_str(), "rb");
-	if (!stream){
+	if (!stream)
+	{
 		//std::cout<<"ERROR!! Can't read "<<featurefile<<'\n';
 		return;
 	}
@@ -148,8 +157,10 @@ void RD::ReadFlow(string file){
 	//	}
 	//}
 
-	for (int j = 0; j<vf_h; j++){
-		for (int i = 0; i<vf_w; i++){
+	for (int j = 0; j < vf_h; j++)
+	{
+		for (int i = 0; i < vf_w; i++)
+		{
 			int index = j*vf_w + i;
 			float dx = data[index * 2 + 1];
 			float dy = data[index * 2];
@@ -162,7 +173,8 @@ void RD::ReadFlow(string file){
 	ETFLoaded = false;
 }
 
-void RD::ReadControlImg(string file){
+void RD::ReadControlImg(string file)
+{
 	Mask_control = imread(file, 0);
 	//Mask.convertTo(Mask, CV_8U);
 	//normalize(Mask_control, Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
@@ -176,22 +188,30 @@ void RD::ReadControlImg(string file){
 	resize(Mask_control_dmax, Mask_control_dmax, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	ControlImgLoad = true;
-	//imshow("loil", Mask_control);
+	imshow("loil", Mask_control);
 
 	const int Tolerate = 15;
 	segmentation.clear();
-	for (int i = 0; i < Mask_control.rows; i++){
-		for (int j = 0; j < Mask_control.cols; j++){
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
 			int n = Mask_control.at<uchar>(i, j);
 			PixelPattern pixel(n, 0.0375, 0.0655, 1, 0.3, 0, 0);
-			if (segmentation.empty()){
+			if (segmentation.empty())
+			{
 				segmentation.push_back(pixel);
 			}
-			else{
+			else
+			{
 				bool haved = false;
-				for (int u = 0; u < segmentation.size(); u++){
-					if ((segmentation[u].GrayScale >= pixel.GrayScale - Tolerate) && (segmentation[u].GrayScale <= pixel.GrayScale + Tolerate)) {
+				for (int u = 0; u < segmentation.size(); u++)
+				{
+					if ((segmentation[u].GrayScale >= pixel.GrayScale - Tolerate) &&
+						(segmentation[u].GrayScale <= pixel.GrayScale + Tolerate))
+					{
 						haved = true;
+						segmentation[u].regionPixelSize++;
 						break;
 					}
 				}
@@ -200,22 +220,39 @@ void RD::ReadControlImg(string file){
 			}
 		}
 	}
+	// discard region that too small
+	int Img_size = Mask_control.rows * Mask_control.cols;
+	float thresholding = 0.01; // the region that smaller than 0.01 * Img size  will be discard
+	for (int i = 0; i < segmentation.size(); i++)
+	{
+		if (segmentation[i].regionPixelSize < Img_size*0.01)
+		{
+			segmentation.erase(segmentation.begin() + i);
+			i--;
+		}
+	}
 	UpdateControlMask();
 }
 
-void RD::UpdateControlMask(){
-	for (int i = 0; i < Mask_control.rows; i++){
-		for (int j = 0; j < Mask_control.cols; j++){
-
+void RD::UpdateControlMask()
+{
+	const int Tolerate = 15;
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
 			int n = Mask_control.at<uchar>(i, j);
-			for (int num = 0; num < segmentation.size(); num++){
-				if (n == segmentation[num].GrayScale){
+			for (int num = 0; num < segmentation.size(); num++)
+			{
+				if ((n + Tolerate >= segmentation[num].GrayScale) &&
+					(n - Tolerate <= segmentation[num].GrayScale))
+				{
 					Mask_control_F.at<float>(i, j) = segmentation[num].F;
 					Mask_control_k.at<float>(i, j) = segmentation[num].k;
 					Mask_control_l.at<float>(i, j) = segmentation[num].l;
 					Mask_control_size.at<float>(i, j) = 1 - segmentation[num].size;
-					Mask_control_dmin.at<float>(i, j)   = (float)segmentation[num].dmin / 180.0 * M_PI;
-					Mask_control_dmax.at<float>(i, j)   = (float)segmentation[num].dmax / 180.0 * M_PI;
+					Mask_control_dmin.at<float>(i, j) = (float)segmentation[num].dmin / 180.0 * M_PI;
+					Mask_control_dmax.at<float>(i, j) = (float)segmentation[num].dmax / 180.0 * M_PI;
 					Mask_control_theta0.at<float>(i, j) = (float)segmentation[num].theta0 / 180.0 * M_PI;
 				}
 			}
@@ -223,16 +260,21 @@ void RD::UpdateControlMask(){
 	}
 }
 
-void RD::DisplaySeg(Mat &dis, int regionindex){
+void RD::DisplaySeg(Mat &dis, int regionindex)
+{
+	const int Tolerate = 15;
 	int regionGray = segmentation[regionindex].GrayScale;
 
-	for (int i = 0; i < Mask_control.rows; i++){
-		for (int j = 0; j < Mask_control.cols; j++){
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
 			int Gray = Mask_control.at<uchar>(i, j);
-			if (Gray != regionGray){
-				int k = (j/3) % 2;
-				int l = (i/3) % 2;
-				if ( (k==0&&l==0) || (k==1&&l==1) )
+			if ((Gray >= regionGray - Tolerate) && (Gray <= regionGray + Tolerate))
+			{
+				int k = (j / 3) % 2;
+				int l = (i / 3) % 2;
+				if ((k == 0 && l == 0) || (k == 1 && l == 1))
 					dis.at<float>(i, j) = 0.5;
 				else
 					dis.at<float>(i, j) = 1.0;
@@ -242,7 +284,8 @@ void RD::DisplaySeg(Mat &dis, int regionindex){
 }
 
 //Generate ETF of input image as flowfield
-void RD::ETF(string file){
+void RD::ETF(string file)
+{
 	Mat src = imread(file, 1);
 	Mat src_n;
 	Mat grad;
@@ -259,8 +302,10 @@ void RD::ETF(string file){
 	//imshow("ETF", src_n);
 
 	Flowfield = Mat::zeros(src.size(), CV_32FC3);
-	for (int i = 0; i < src.rows; i++){
-		for (int j = 0; j < src.cols; j++){
+	for (int i = 0; i < src.rows; i++)
+	{
+		for (int j = 0; j < src.cols; j++)
+		{
 			Vec3f u = grad_x.at<cv::Vec3f>(i, j) / 255.0; //-255~255
 			Vec3f v = grad_y.at<cv::Vec3f>(i, j) / 255.0;
 
@@ -269,11 +314,12 @@ void RD::ETF(string file){
 			float z = v.dot(u);
 			float temp = y*y - 2.0*x*y + x*x + 4.0*z*z;
 			float lambda1 = 0;
-			lambda1 = 0.5 * (y + x + sqrt(temp)); 
+			lambda1 = 0.5 * (y + x + sqrt(temp));
 			Flowfield.at<cv::Vec3f>(i, j) = normalize(Vec3f(z, x - lambda1, 0.0));
 			//dis.at<cv::Vec3f>(i,j) = normalize( Vec3f(lambda1-x,z,0.0) );
 
-			if (Flowfield.at<cv::Vec3f>(i, j) == Vec3f(0.0, 0.0, 0.0)){
+			if (Flowfield.at<cv::Vec3f>(i, j) == Vec3f(0.0, 0.0, 0.0))
+			{
 				Flowfield.at<cv::Vec3f>(i, j) = Vec3f(0.0, 1.0, 0.0);
 			}
 		}
@@ -286,7 +332,8 @@ void RD::ETF(string file){
 }
 
 // for Eq.6
-void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn){
+void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn)
+{
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
 	bool ControlImgLoad = this->ControlImgLoad;
@@ -341,7 +388,8 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 	//inter start
 	int t = 0;
 	const int innerAMPloopsize = 4;
-	while (t < innerAMPloopsize){
+	while (t < innerAMPloopsize)
+	{
 		t++;
 		parallel_for_each(alpha_A.extent,
 			[=](index<1> idx) restrict(amp)
@@ -351,7 +399,8 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			//Gradient
 			float sx = 0;
 			float sy = 0;
-			for (int i = -1; i <= 1; i++){
+			for (int i = -1; i <= 1; i++)
+			{
 				index<1> j1 = ((x + 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
 				index<1> j2 = ((x - 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
 				index<1> j3 = ((x + i + nRows) % nRows)*nCols + (y + 1 + nCols) % nCols;
@@ -367,73 +416,92 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			float axb = sqrt(sx*sx + sy*sy) * sqrt(p_flowfield[ix3] * p_flowfield[ix3] + p_flowfield[ix3 + 1] * p_flowfield[ix3 + 1]);
 			float cos_theta = 0;
 			float cross_product = 0;
-			if (axb == 0){
+			if (axb == 0)
+			{
 				cos_theta = 0;
 				cross_product = 0;
 			}
-			else{
+			else
+			{
 				cos_theta = (sx*p_flowfield[ix3] + sy*p_flowfield[ix3 + 1]) / axb;
 				cross_product = (sx*p_flowfield[ix3 + 1] - sy*p_flowfield[ix3]) / axb;
 			}
-			if (cos_theta >= 1.0){
+			if (cos_theta >= 1.0)
+			{
 				cos_theta = 1.0;
 			}
-			else if (cos_theta <= -1.0){
+			else if (cos_theta <= -1.0)
+			{
 				cos_theta = -1.0;
 			}
 			float theta = acos(cos_theta);
-			if (cross_product < 0){
+			if (cross_product < 0)
+			{
 				theta = 2 * M_PI - theta;
 			}
 
-			if (ControlImgLoad && segmentOn){
+			if (ControlImgLoad && segmentOn)
+			{
 				// modify anisotropic function with segmentation On
-				if (m_control_dmin[idx] <= m_control_dmax[idx]){
-					if (theta >= m_control_dmin[idx] && theta <= m_control_dmax[idx]){
+				if (m_control_dmin[idx] <= m_control_dmax[idx])
+				{
+					if (theta >= m_control_dmin[idx] && theta <= m_control_dmax[idx])
+					{
 						float temp = 1.0*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
-					else{
+					else
+					{
 						float temp = 0.5*(1 + cos(m_control_l[idx] * (theta + m_control_theta0[idx])))*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
 				}
-				else{
-					if ((theta >= m_control_dmin[idx] && theta <= 2 * M_PI) || (theta <= m_control_dmax[idx] && theta > 0)){
+				else
+				{
+					if ((theta >= m_control_dmin[idx] && theta <= 2 * M_PI) || (theta <= m_control_dmax[idx] && theta > 0))
+					{
 						float temp = 1.0*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
-					else{
+					else
+					{
 						float temp = 0.5*(1 + cos(m_control_l[idx] * (theta + m_control_theta0[idx])))*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
 				}
 			}
-			else{
+			else
+			{
 				// modify anisotropic function with segmentation Off
-				if (min_degree <= max_degree){
-					if (theta >= min_degree && theta <= max_degree){
+				if (min_degree <= max_degree)
+				{
+					if (theta >= min_degree && theta <= max_degree)
+					{
 						float temp = 1.0*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
-					else{
+					else
+					{
 						float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
 				}
-				else{
-					if ((theta >= min_degree && theta <= 2 * M_PI) || (theta <= max_degree&& theta > 0)){
+				else
+				{
+					if ((theta >= min_degree && theta <= 2 * M_PI) || (theta <= max_degree&& theta > 0))
+					{
 						float temp = 1.0*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
 					}
-					else{
+					else
+					{
 						float temp = 0.5*(1 + cos(l*(theta + theta0)))*0.9 + 0.1;
 						float temp2 = 1 / temp*0.1;
 						alpha_A[idx] = temp2;
@@ -452,8 +520,10 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			index<1> y = idx % nCols;
 			float da = 0;
 			float db = 0;
-			for (int q = -kh / 2; q <= kh / 2; q++){
-				for (int p = -kw / 2; p <= kw / 2; p++){
+			for (int q = -kh / 2; q <= kh / 2; q++)
+			{
+				for (int p = -kw / 2; p <= kw / 2; p++)
+				{
 					//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
 					//	continue;
 					index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
@@ -475,14 +545,16 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			float RB;
 
 			// assign diﬀerent parameters to each region
-			if (ControlImgLoad && segmentOn){
+			if (ControlImgLoad && segmentOn)
+			{
 				//Unresolved BUG - GTX970 is OK but AMD7850 will crash
 				//RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
 				//RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
 				RA = sr*(-a*b*b + 0.0375 * (1 - a));
-				RB = sr*(a*b*b - (m_control_k[idx] +0.0375)*b);
+				RB = sr*(a*b*b - (m_control_k[idx] + 0.0375)*b);
 			}
-			else{
+			else
+			{
 				RA = sr*(-a*b*b + f*(1 - a));
 				RB = sr*(a*b*b - (k + f)*b);
 			}
@@ -682,7 +754,8 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 //}
 
 // generate GS-Model
-void RD::GrayScottModel(){
+void RD::GrayScottModel()
+{
 	int nRows = 500;
 	int nCols = 500;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
@@ -712,8 +785,9 @@ void RD::GrayScottModel(){
 	//	karray[i] = 0.056 + ((float)kbias / 2000.0);
 	//}
 	//farray[500] = 0.0375;
-	for (int i = 0; i < 500; i++){
-		karray[i] = 0.056+(float)(i + 1) / 42000.0;
+	for (int i = 0; i < 500; i++)
+	{
+		karray[i] = 0.056 + (float)(i + 1) / 42000.0;
 		//farray[i] = (float)(i + 1) / 8334.0;
 	}
 	//for (int i = 0; i < 501; i++) farray[i] = 0.0 + ((float)(i + 1) / 8333.3);
@@ -735,7 +809,8 @@ void RD::GrayScottModel(){
 	//inter start
 	int t = 0;
 	const int innerAMPloopsize = 4;
-	while (t < innerAMPloopsize){
+	while (t < innerAMPloopsize)
+	{
 		t++;
 		parallel_for_each(alpha_A.extent,
 			[=](index<1> idx) restrict(amp)
@@ -745,7 +820,8 @@ void RD::GrayScottModel(){
 			//Gradient
 			float sx = 0;
 			float sy = 0;
-			for (int i = -1; i <= 1; i++){
+			for (int i = -1; i <= 1; i++)
+			{
 				index<1> j1 = ((x + 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
 				index<1> j2 = ((x - 1 + nRows) % nRows)*nCols + (y + i + nCols) % nCols;
 				index<1> j3 = ((x + i + nRows) % nRows)*nCols + (y + 1 + nCols) % nCols;
@@ -759,22 +835,27 @@ void RD::GrayScottModel(){
 			float axb = sqrt(sx*sx + sy*sy) * sqrt(p_flowfield[ix3] * p_flowfield[ix3] + p_flowfield[ix3 + 1] * p_flowfield[ix3 + 1]);
 			float cos_theta = 0;
 			float cross_product = 0;
-			if (axb == 0){
+			if (axb == 0)
+			{
 				cos_theta = 0;
 				cross_product = 0;
 			}
-			else{
+			else
+			{
 				cos_theta = (sx*p_flowfield[ix3] + sy*p_flowfield[ix3 + 1]) / axb;
 				cross_product = (sx*p_flowfield[ix3 + 1] - sy*p_flowfield[ix3]) / axb;
 			}
-			if (cos_theta >= 1.0){
+			if (cos_theta >= 1.0)
+			{
 				cos_theta = 1.0;
 			}
-			else if (cos_theta <= -1.0){
+			else if (cos_theta <= -1.0)
+			{
 				cos_theta = -1.0;
 			}
 			float theta = acos(cos_theta);
-			if (cross_product < 0){
+			if (cross_product < 0)
+			{
 				theta = 2 * M_PI - theta;
 			}
 			int ll = l[x];
@@ -793,8 +874,10 @@ void RD::GrayScottModel(){
 			index<1> y = idx % nCols;
 			float da = 0;
 			float db = 0;
-			for (int q = -kh / 2; q <= kh / 2; q++){
-				for (int p = -kw / 2; p <= kw / 2; p++){
+			for (int q = -kh / 2; q <= kh / 2; q++)
+			{
+				for (int p = -kw / 2; p <= kw / 2; p++)
+				{
 					//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
 					//	continue;
 					index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
@@ -804,7 +887,7 @@ void RD::GrayScottModel(){
 			}
 			da /= (kw*kh - 1);
 			db /= (kw*kh - 1);
-			
+
 			//reaction diffusion
 			float a = c_A[idx];
 			float b = c_B[idx];

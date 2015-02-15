@@ -51,6 +51,9 @@
 |Fig. 6(a)| **Load Flow** `vortex.vfb`, Parameters F k l can reference to Table 1, check the **Customize Anisotropic Function** to YES, and select 0~180 degree. Then press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8, alpha=0.1)|
 |Fig. 6(b)| as above, **Customize Anisotropic Function** select degree 45~135.|
 |Fig. 12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
+|Fig. 17(c)| **Load SrcImg** `Kremlin-source.png`, **Load ETF** `Kremlin-source.png`, **Load Control Img** `Kremlin-controlImg.png`. Press **Start** and click **Edge2AddB**, then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at behind). After its stable , select **Thresholding** (alpha=0.05 beta=0.4).
+Recommanded pattern for each region: Region 1:SPOT Region 2~3: BLACK Region 4~8: LINE|
+|Fig. 17(c)|hi|
 
 ---
 
