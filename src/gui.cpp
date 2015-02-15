@@ -20,10 +20,10 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
 	string path = "";
-	path.append(cCurrentPath).append("\\l_all.png");
+	path.append(cCurrentPath).append("\\l_all.jpg");
 
 	//left 
-	picker = new Picker(this, path, wxBITMAP_TYPE_PNG);
+	picker = new Picker(this, path, wxBITMAP_TYPE_JPEG);
 	left->Add(picker, 1, wxEXPAND);
 
 	//right
@@ -92,7 +92,8 @@ void MyPatternPicker::StartPreview(){
 
 	preview->element.ReadFlow(path);
 	preview->processingS = "Thresholding";
-	preview->processing.beta = 0.7;
+	preview->processing.beta = 0.5;
+	preview->processing.alpha = 0.5;
 	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
 }
 void MyPatternPicker::onIdle(wxIdleEvent& evt)
