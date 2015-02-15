@@ -1285,6 +1285,9 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else{
+		if ( ((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
+			element.DisplaySeg(dis, ((MyFrame *)GetParent())->drawPane->regionSelected - 1);
+		}
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
