@@ -41,18 +41,18 @@
 ---
 
 ### [Papers' Examples]
-|Fig.　　　      |Workflow |Remark/Notes　　　　　|
+|Fig.|Workflow |Remark/Notes　　　　　|
 |----------------|:--------|:--------------------- |
-|Fig. 5(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|--|
-|Fig. 5(b)| as above |--|
-|Fig. 5(c)| as above |--|
-|Fig. 5(d)| as above, adjust **theta0** roughly to 220 degrees|--|
-|Fig. 6(a)| **Load Flow** `vortex.vfb`, Parameters F k l can reference to Table 1, check the **Customize Anisotropic Function** to YES, and select 0~180 degree. Then press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8, alpha=0.1)|--|
-|Fig. 6(b)| as above, **Customize Anisotropic Function** select degree 45~135.|--|
-|Fig. 8(c)| **Load SrcImg** `controlshape-a.png`, **Load Flow** `vortex.vfb`, **Load Control Img** `controlshape_controlImg.png`. Press **Start**, Pattern Size = 0.1, then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.4 beta=0.5).|Region<br/>1:SPOT(theta0=90)<br/>2:HOLE(theta0=90)<br/>3:SPOT(theta0=90)<br/>4:LINE(theta0=90)<br/>5:inverse LINE(theta0=90)<br/>|
-|Fig. 12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
-|Fig. 17(c)| **Load SrcImg** `Kremlin-source.png`, **Load ETF** `Kremlin-source.png`, **Load Control Img** `Kremlin-controlImg.png`. Press **Start** and click **Edge2AddB** (addB=0.03), then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.05 beta=0.4).|Region<br/>1:SPOT<br/>2~3: BLACK<br/>4~8: LINE<br/>   |
-|Fig. 17(d)| as above.Pattern Size = 0.2 After its stable , select **adaThresholding** (alpha=0.36 beta=0.4).|Regions<br/>1~3: HOLE<br/>4~8: QUADE(theta0=45)<br/>   |
+|5(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|--|
+|5(b)| as above |--|
+|5(c)| as above |--|
+|5(d)| as above, adjust **theta0** roughly to 220 degrees|--|
+|6(a)| **Load Flow** `vortex.vfb`, Parameters F k l can reference to Table 1, check the **Customize Anisotropic Function** to YES, and select 0~180 degree. Then press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8, alpha=0.1)|--|
+|6(b)| as above, **Customize Anisotropic Function** select degree 45~135.|--|
+|8(c)| **Load SrcImg** `controlshape-a.png`, **Load Flow** `vortex.vfb`, **Load Control Img** `controlshape_controlImg.png`. Press **Start**, Pattern Size = 0.1, then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.4 beta=0.5).|Region<br/>1:SPOT(theta0=90)<br/>2:HOLE(theta0=90)<br/>3:SPOT(theta0=90)<br/>4:LINE(theta0=90)<br/>5:inverse LINE(theta0=90)<br/>|
+|12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
+|17(c)| **Load SrcImg** `Kremlin-source.png`, **Load ETF** `Kremlin-source.png`, **Load Control Img** `Kremlin-controlImg.png`. Press **Start** and click **Edge2AddB** (addB=0.03), then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.05 beta=0.4).|Region<br/>1:SPOT<br/>2~3: BLACK<br/>4~8: LINE<br/>   |
+|17(d)| as above.Pattern Size = 0.2 After its stable , select **adaThresholding** (alpha=0.36 beta=0.4).|Regions<br/>1~3: HOLE<br/>4~8: QUADE(theta0=45)<br/>   |
 ---
 
 ### [Table 1]
