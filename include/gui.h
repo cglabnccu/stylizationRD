@@ -96,6 +96,9 @@ public:
 	wxCheckBox *Segmentation_cb; 
 	void addlog(wxString info, wxColour& color);
 	void activateRenderLoop(bool on);
+
+	bool isCLAHE;
+
 protected:
 	bool render_loop_on;
 	wxTextCtrl *log; // Show the log
@@ -159,6 +162,7 @@ protected:
 
 	void OnEdge2AddA(wxCommandEvent& event);
 	void OnEdge2AddB(wxCommandEvent& event);
+	void OnCLAHE(wxCommandEvent& event);
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
 	void OnOpenPatternPicker(wxCommandEvent& event);
@@ -181,6 +185,7 @@ enum
 
 	ID_ONEdge2AddA,
 	ID_ONEdge2AddB,
+	ID_ONCLAHE,
 	ID_ONOPEN_MASK,
 	ID_ONOPEN_MASK_S,
 	ID_ONOPEN_PATTERN_PICKER,

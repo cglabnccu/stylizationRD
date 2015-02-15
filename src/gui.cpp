@@ -220,11 +220,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxMenu *menuTool = new wxMenu;
 	menuTool->Append(ID_ONEdge2AddA, "&Edge2AddA\tCtrl-A", "add Edge to addition A");
 	menuTool->Append(ID_ONEdge2AddB, "&Edge2AddB\tCtrl-B", "add Edge to addition B");
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(false);
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-C", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-C", "Open Mask_s Img.");
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
+
 	wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(wxID_ABOUT, "&About\tCtrl-A", "About the System");
 	menuHelp->Append(new wxMenuItem(menuHelp, wxID_TOGGLE_LOG, wxString(wxT("&Log\tCtrl-L")), "Show/Hide the Log", wxITEM_CHECK))->Check(true);
@@ -441,6 +443,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->GetSizer()->Layout();
 
 	render_loop_on = false;
+	isCLAHE = false;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
@@ -658,6 +661,10 @@ void MyFrame::OnEdge2AddA(wxCommandEvent& event)
 void MyFrame::OnEdge2AddB(wxCommandEvent& event)
 {
 	drawPane->element.Addition_B = drawPane->element.Mask_s.clone();
+}
+void MyFrame::OnCLAHE(wxCommandEvent& event)
+{
+	isCLAHE = !isCLAHE;
 }
 
 void MyFrame::OnOpenMask(wxCommandEvent& event){
@@ -1232,14 +1239,18 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
+	if ( ((MyFrame *)GetParent())->isCLAHE ) {
+		processing.CLAHE(dis);
+	}
+
+
 	if (processingS == "Motion_Illusion"){
 		processing.motionIllu(*element.c_A, element.Flowfield, dis);
-		dis.convertTo(dis, CV_8UC1, 255);
+		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "distribution_B"){
 		dis = element.c_B->clone();
-		//processing.LIC(element.Flowfield, dis); ?
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
@@ -1250,12 +1261,12 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "dirTexture"){
 		processing.dirTexture(*element.c_A, element.Flowfield, dis);
-		dis.convertTo(dis, CV_8UC1, 255);
+		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "PolarTexture"){
 		processing.dirTexture_Polar(*element.c_A, element.Flowfield, dis);
-		dis.convertTo(dis, CV_8UC1, 255);
+		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "adaThresholding"){
@@ -1270,7 +1281,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "Color_mapping"){
 		processing.Colormapping(*element.c_A, element.Mask, element.Original_img, dis);
-		dis.convertTo(dis, CV_8UC1, 255);
+		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else{
