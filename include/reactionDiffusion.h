@@ -32,7 +32,7 @@ public:
 	void ETF(string);
 	void ReadControlImg(string);
 	void UpdateControlMask();
-	void FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
+	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
 	void GrayScottModel();// generate GS-Model
 	vector<PixelPattern> segmentation;
@@ -77,4 +77,6 @@ public:
 	bool FlowLoaded;
 	bool ETFLoaded;
 	bool ControlImgLoad;
+
+	int innerAMPloopsize;
 };

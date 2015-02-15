@@ -1,4 +1,5 @@
 ﻿#include "reactionDiffusion.h"
+#include <time.h>
 # define M_PI 3.14159265358979323846
 
 PixelPattern::PixelPattern(){
@@ -88,6 +89,8 @@ void RD::Init(Size s){
 	p_A = &A2;
 	c_B = &B1;
 	p_B = &B2;
+
+	innerAMPloopsize = 4;
 }
 
 void RD::ReadSrc(string file){
@@ -267,7 +270,9 @@ void RD::ETF(string file){
 }
 
 // for Eq.6
-void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn){
+int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn){
+	clock_t	Start_Time = clock();
+
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
 	bool ControlImgLoad = this->ControlImgLoad;
@@ -321,7 +326,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 	int kw = 3;
 	//inter start
 	int t = 0;
-	const int innerAMPloopsize = 4;
+	//const int innerAMPloopsize = 4;
 	while (t < innerAMPloopsize){
 		t++;
 		parallel_for_each(alpha_A.extent,
@@ -486,6 +491,20 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 		);
 		//inter finish
 	}
+
+	clock_t	End_Time = clock();
+	clock_t Elapsed_Time = End_Time - Start_Time;
+	if ( Elapsed_Time < 1000 / 60) {
+		innerAMPloopsize *= 1.5;
+	} 
+	else {
+		if (Elapsed_Time > 1000 / 30) {
+			innerAMPloopsize *= 0.75; 
+			if (innerAMPloopsize < 4) innerAMPloopsize = 2;
+		}
+	}
+
+	return innerAMPloopsize;
 }
 
 //// for Eq.7
@@ -715,7 +734,7 @@ void RD::GrayScottModel(){
 	int kw = 3;
 	//inter start
 	int t = 0;
-	const int innerAMPloopsize = 4;
+	//const int innerAMPloopsize = 4;
 	while (t < innerAMPloopsize){
 		t++;
 		parallel_for_each(alpha_A.extent,
