@@ -178,6 +178,7 @@ void RD::ReadControlImg(string file){
 	ControlImgLoad = true;
 	//imshow("loil", Mask_control);
 
+	const int Tolerate = 15;
 	segmentation.clear();
 	for (int i = 0; i < Mask_control.rows; i++){
 		for (int j = 0; j < Mask_control.cols; j++){
@@ -189,7 +190,7 @@ void RD::ReadControlImg(string file){
 			else{
 				bool haved = false;
 				for (int u = 0; u < segmentation.size(); u++){
-					if (segmentation[u].GrayScale == pixel.GrayScale) {
+					if ((segmentation[u].GrayScale >= pixel.GrayScale - Tolerate) && (segmentation[u].GrayScale <= pixel.GrayScale + Tolerate)) {
 						haved = true;
 						break;
 					}

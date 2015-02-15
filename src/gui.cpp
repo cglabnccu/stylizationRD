@@ -623,6 +623,7 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 	}
 	drawPane->element.ReadControlImg((const char*)openFileDialog.GetPath().mb_str());
 
+	SegmentationBox->Clear();
 	for (int i = 0; i < drawPane->element.segmentation.size(); i++){
 		wxString s;
 		s.Printf("Region - %s", to_string(i + 1));
