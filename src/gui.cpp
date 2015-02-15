@@ -1119,18 +1119,10 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
-	//-----------------------------------------------CLAHE--------------------------------------------------
 	if ( ((MyFrame *)GetParent())->isCLAHE ) {
-		Mat AHE;
-
-		Ptr<CLAHE> clahe = createCLAHE();
-		clahe->setClipLimit(2);
-		clahe->setTilesGridSize(Size(3, 3));
-
-		dis.convertTo(dis, CV_8UC1, 255);
-		clahe->apply(dis, AHE);
-		AHE.convertTo(dis, CV_32FC1, 1.0f / 255);
+		processing.CLAHE(dis);
 	}
+
 
 	if (processingS == "Motion_Illusion"){
 		processing.motionIllu(*element.c_A, element.Flowfield, dis);

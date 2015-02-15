@@ -75,6 +75,20 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 	}
 }
 
+//Contrast Limited Adaptive Histogram Equalization
+void PP::CLAHE(Mat &src){
+	Mat AHE;
+
+	Ptr<cv::CLAHE> clahe = createCLAHE();
+	clahe->setClipLimit(2);
+	clahe->setTilesGridSize(Size(8, 8));
+
+	src.convertTo(src, CV_8UC1, 255);
+	clahe->apply(src, AHE);
+	AHE.convertTo(src, CV_32FC1, 1.0f / 255);
+}
+
+
 void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis){
 	vector<Mat> channels;
 	Mat Gradient = Mat::zeros(src.size(), CV_32FC3);
