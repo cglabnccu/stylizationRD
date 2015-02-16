@@ -132,23 +132,7 @@ void Picker::MouseLDown(wxMouseEvent &event)
 	((MyPatternPicker *)GetParent())->preview->element.Addition_A = Mat::zeros(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
 
 	// fill preview with ink
-	for (int i = 0; i < 15; i++)
-	{
-		int x = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->cols;
-		int y = rand() % ((MyPatternPicker *)GetParent())->preview->element.c_B->rows;
-		ellipse(
-			*((MyPatternPicker *)GetParent())->preview->element.c_B, // img - Image.
-			Point(x, y),           // center - Center of the ellipse.
-			Size(5, 5),             // axes - Half of the size of the ellipse main axes.
-			0,                      // angle - Ellipse rotation angle in degrees.
-			0,                      // startAngle - Starting angle of the elliptic arc in degrees.
-			360,                    // endAngle - Ending angle of the elliptic arc in degrees.
-			Scalar(0.5, 0.5, 0.5),  // color - Ellipse color.
-			3,                     // thickness - Thickness of the ellipse arc outline
-			8                       // lineType - Type of the ellipse boundary. See the line() description.
-			);
-	}
-
+	((MyPatternPicker *)GetParent())->preview->Seeds(25, true, .5);
 }
 void Picker::paintEvent(wxPaintEvent & evt)
 {
@@ -273,8 +257,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
 	controllingBox->Append("paint_to_B");
 	//controllingBox->Append("seeds");
-	controllingBox->Append("addA");
-	controllingBox->Append("addB");
+	controllingBox->Append("paint_white");
+	controllingBox->Append("paint_black");
 
 	toolbar1->AddControl(start);
 	toolbar1->AddControl(fill);
@@ -1199,7 +1183,7 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
 	if (activateDraw)
 	{
-		if (controllingS == "addA")
+		if (controllingS == "paint_white")
 		{
 			//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 			ellipse(element.Addition_A,
@@ -1212,7 +1196,7 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 				-1,
 				8);
 		}
-		else if (controllingS == "addB")
+		else if (controllingS == "paint_black")
 		{
 			//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 			ellipse(element.Addition_B,
@@ -1242,7 +1226,7 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
-	if (controllingS == "addA")
+	if (controllingS == "paint_white")
 	{
 		//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 		ellipse(element.Addition_A,
@@ -1255,7 +1239,7 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			-1,
 			8);
 	}
-	else if (controllingS == "addB")
+	else if (controllingS == "paint_black")
 	{
 		ellipse(element.Addition_B,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),

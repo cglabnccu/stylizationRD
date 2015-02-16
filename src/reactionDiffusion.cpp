@@ -270,7 +270,8 @@ void RD::DisplaySeg(Mat &dis, int regionindex)
 		for (int j = 0; j < Mask_control.cols; j++)
 		{
 			int Gray = Mask_control.at<uchar>(i, j);
-			if ((Gray >= regionGray - Tolerate) && (Gray <= regionGray + Tolerate))
+			if ((Gray >= regionGray - Tolerate) && (Gray <= regionGray + Tolerate));
+			else
 			{
 				int k = (j / 3) % 2;
 				int l = (i / 3) % 2;
@@ -387,7 +388,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 	int kw = 3;
 	//inter start
 	int t = 0;
-	const int innerAMPloopsize = 4;
+	const int innerAMPloopsize = 32;
 	while (t < innerAMPloopsize)
 	{
 		t++;
@@ -550,8 +551,8 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 				//Unresolved BUG - GTX970 is OK but AMD7850 will crash
 				//RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
 				//RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
-				RA = sr*(-a*b*b + 0.0375 * (1 - a));
-				RB = sr*(a*b*b - (m_control_k[idx] + 0.0375)*b);
+				RA = m_control_size[idx] * (-a*b*b + 0.0375 * (1 - a));
+				RB = m_control_size[idx] * (a*b*b - (m_control_k[idx] + 0.0375)*b);
 			}
 			else
 			{
