@@ -410,6 +410,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	SegmentationBox->SetSelection(0);
 	//SegmentationBox->Append("kiul");
 	st_pattern_sizer->Add(SegmentationBox, 0, wxEXPAND | wxLEFT, 10);
+	DisplayRegion_cb = new wxCheckBox(controlpanel, CHECKBOX_DISPLAY_REGION, wxT("Display Region"), wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(DisplayRegion_cb, 0, wxEXPAND | wxLEFT, 10);
 
 	rightside->Add(st_pattern_sizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, 3);
 #pragma endregion 
@@ -443,6 +445,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_beta->Disable();
 
 	SegmentationBox->Hide();
+	DisplayRegion_cb->Hide();
 	fill->Disable();
 	degreeGUI->Hide();
 	slider_mindegree->Hide();
@@ -952,14 +955,16 @@ void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event)
 		if (Segmentation_cb->GetValue())
 		{
 			SegmentationBox->Show();
+			DisplayRegion_cb->Show();
 			drawPane->regionOn = true;
 			//SegmentationBox->Select(0);
 			drawPane->regionSelected = SegmentationBox->GetSelection() + 1;
 		}
 		else
 		{
-			drawPane->regionOn = false;
 			SegmentationBox->Hide();
+			DisplayRegion_cb->Hide();
+			drawPane->regionOn = false;
 		}
 		this->Layout();
 	}
@@ -967,6 +972,18 @@ void MyFrame::OnCheckboxSegmentation(wxCommandEvent& event)
 	{
 		addlog("Must Load Control Img First!", wxColour(*wxRED));
 		Segmentation_cb->SetValue(false);
+	}
+
+}
+void MyFrame::OnCheckboxDisplayRegion(wxCommandEvent& event)
+{
+	if (DisplayRegion_cb->GetValue())
+	{
+		drawPane->displayRegion = true;
+	}
+	else
+	{
+		drawPane->displayRegion = false;
 	}
 
 }
@@ -1125,6 +1142,7 @@ wxPanel(parent)
 	maxdegree = 0;
 	regionSelected = 0;
 	regionOn = false;
+	displayRegion = false;
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {
@@ -1361,7 +1379,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	else
 	{
 		//if (((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
-		if (regionOn && regionSelected != 0)
+		if (displayRegion && regionOn && regionSelected != 0)
 		{
 			element.DisplaySeg(dis, regionSelected - 1);
 		}

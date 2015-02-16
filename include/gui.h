@@ -29,6 +29,7 @@ public:
 	int maxdegree;
 	bool customAnisotropicFunction;
 	bool regionOn;
+	bool displayRegion;
 	BasicDrawPane(wxFrame* parent,Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
@@ -128,6 +129,7 @@ protected:
 	wxSlider *slider_mindegree;
 	wxSlider *slider_maxdegree;
 	wxChoice *SegmentationBox;
+	wxCheckBox *DisplayRegion_cb; // Is User Want to Use Modified Anisotropic function?
 
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
@@ -150,6 +152,7 @@ protected:
 	void OnSliderMaxDegree(wxCommandEvent& event);
 	void OnCheckboxSegmentation(wxCommandEvent& event);
 	void OnSegmentationBox(wxCommandEvent& event);
+	void OnCheckboxDisplayRegion(wxCommandEvent& event);
 
 	void OnSliderAlpha(wxCommandEvent& event);
 	void OnSliderBeta(wxCommandEvent& event);
@@ -220,6 +223,7 @@ enum
 	SLIDER_MAXDEGREE_T,
 	CHECKBOX_SEGMENTATION,
 	COMBOBOX_Region,
+	CHECKBOX_DISPLAY_REGION,
 
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,

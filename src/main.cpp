@@ -69,6 +69,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_SLIDER(SLIDER_MAXDEGREE, MyFrame::OnSliderMaxDegree)
 	EVT_CHECKBOX(CHECKBOX_SEGMENTATION, MyFrame::OnCheckboxSegmentation)
 	EVT_CHOICE(COMBOBOX_Region, MyFrame::OnSegmentationBox)
+	EVT_CHECKBOX(CHECKBOX_DISPLAY_REGION, MyFrame::OnCheckboxDisplayRegion)
 
 	EVT_SLIDER(SLIDER_Alpha, MyFrame::OnSliderAlpha)
 	EVT_SLIDER(SLIDER_Beta, MyFrame::OnSliderBeta)

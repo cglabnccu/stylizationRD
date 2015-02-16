@@ -188,7 +188,7 @@ void RD::ReadControlImg(string file)
 	resize(Mask_control_dmax, Mask_control_dmax, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	ControlImgLoad = true;
-	imshow("loil", Mask_control);
+	//imshow("loil", Mask_control);
 
 	const int Tolerate = 15;
 	segmentation.clear();
