@@ -332,7 +332,7 @@ void RD::ETF(string file)
 	FlowLoaded = false;
 }
 
-// for Eq.6
+// for Eq.6 and Eq.7
 void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn)
 {
 	int nRows = c_A->rows;
@@ -347,22 +347,22 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 	array_view< float, 1 > c_B(nRows*nCols, (float*)c_B->data);
 	array_view< float, 1 > p_A(nRows*nCols, (float*)p_A->data);
 	array_view< float, 1 > p_B(nRows*nCols, (float*)p_B->data);
-	array_view< float, 1 > a_A(nRows*nCols, (float*)Addition_A.data);
-	array_view< float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
-	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
-	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
+	array_view< const float, 1 > a_A(nRows*nCols, (float*)Addition_A.data);
+	array_view< const float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
+	array_view< const float, 1 > m(nRows*nCols, (float*)Mask.data);
+	array_view< const float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
 
 	//Mat tmp_Mask_control;
 	//normalize(Mask_control, tmp_Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
-	array_view<float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
-	array_view<float, 1> m_control_F(nRows*nCols, (float*)Mask_control_F.data); // control img - F
-	array_view<float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
-	array_view<float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
-	array_view<float, 1> m_control_size(nRows*nCols, (float*)Mask_control_size.data); // control img - size
-	array_view<float, 1> m_control_dmin(nRows*nCols, (float*)Mask_control_dmin.data); // control img - dmin
-	array_view<float, 1> m_control_dmax(nRows*nCols, (float*)Mask_control_dmax.data); // control img - dmax
-	array_view<float, 1> m_control_theta0(nRows*nCols, (float*)Mask_control_theta0.data); // control img - dmax
+	array_view<const float, 1> m_control(nRows*nCols, (float*)Mask_control.data); // control img
+	array_view<const float, 1> m_control_F(nRows*nCols, (float*)Mask_control_F.data); // control img - F
+	array_view<const float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
+	array_view<const float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
+	array_view<const float, 1> m_control_size(nRows*nCols, (float*)Mask_control_size.data); // control img - size
+	array_view<const float, 1> m_control_dmin(nRows*nCols, (float*)Mask_control_dmin.data); // control img - dmin
+	array_view<const float, 1> m_control_dmax(nRows*nCols, (float*)Mask_control_dmax.data); // control img - dmax
+	array_view<const float, 1> m_control_theta0(nRows*nCols, (float*)Mask_control_theta0.data); // control img - dmax
 
 
 
@@ -386,17 +386,21 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 
 	int kh = 3;
 	int kw = 3;
-	//inter start
+
+	//--------------------------------------------- inter start
 	int t = 0;
 	const int innerAMPloopsize = 32;
 	while (t < innerAMPloopsize)
 	{
 		t++;
+
+		//--------------------------------------------
 		parallel_for_each(alpha_A.extent,
 			[=](index<1> idx) restrict(amp)
 		{
 			index<1> x = idx / nCols;
 			index<1> y = idx % nCols;
+
 			//Gradient
 			float sx = 0;
 			float sy = 0;
@@ -427,6 +431,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 				cos_theta = (sx*p_flowfield[ix3] + sy*p_flowfield[ix3 + 1]) / axb;
 				cross_product = (sx*p_flowfield[ix3 + 1] - sy*p_flowfield[ix3]) / axb;
 			}
+
 			if (cos_theta >= 1.0)
 			{
 				cos_theta = 1.0;
@@ -435,6 +440,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			{
 				cos_theta = -1.0;
 			}
+
 			float theta = acos(cos_theta);
 			if (cross_product < 0)
 			{
@@ -513,6 +519,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 		}
 		);
 
+		//---------------------------------------------  
 		parallel_for_each(p_A.extent,
 			[=](index<1> idx) restrict(amp)
 		{
@@ -548,11 +555,8 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			// assign diﬀerent parameters to each region
 			if (ControlImgLoad && segmentOn)
 			{
-				//Unresolved BUG - GTX970 is OK but AMD7850 will crash
-				//RA = sr*(-a*b*b + m_control_F[idx] * (1 - a));
-				//RB = sr*(a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
-				RA = m_control_size[idx] * (-a*b*b + 0.0375 * (1 - a));
-				RB = m_control_size[idx] * (a*b*b - (m_control_k[idx] + 0.0375)*b);
+				RA = m_control_size[idx] * (-a*b*b + m_control_F[idx] * (1 - a));
+				RB = m_control_size[idx] * (a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
 			}
 			else
 			{
@@ -563,6 +567,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
 		}
 		);
+
 		//--------------------------------------------- SWAP-------------------------------------------------------
 
 		//slower than parallel_for_each()
@@ -576,8 +581,9 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 			c_B[idx] = p_B[idx];
 		}
 		);
-		//inter finish
-	}
+		
+	} //while (t < innerAMPloopsize)
+	//--------------------------------------------- inter finish
 }
 
 //// for Eq.7
