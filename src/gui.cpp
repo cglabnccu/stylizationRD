@@ -11,8 +11,10 @@ bool MyApp::OnInit()
 
 #pragma region MyPatternPicker
 MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
-	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 550))
+	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 540))
 {
+	this->SetSizeHints(wxSize(600, 540), wxSize(600, 540));
+
 	wxPanel *panel = new wxPanel(this, -1);
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
@@ -33,32 +35,44 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	preview = new BasicDrawPane(this, Size(100, 100));
 	right->Add(preview, 2, wxEXPAND);
 
+	wxBoxSizer* right2 = new wxBoxSizer(wxVERTICAL);
+
 	wxString ss;
 	ss.Printf("Size : %.3f", preview->element.s);
 	slider_s_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_s = new wxSlider(this, wxID_ANY, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(slider_s, 1, wxEXPAND | wxLEFT, 10);
+	right2->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_s = new wxSlider(this, SLIDER_S_PICKER, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	right2->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("F : %.4f", preview->element.f);
 	slider_f_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(slider_f_t, 1, wxEXPAND | wxLEFT, 10);
+	right2->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("k : %.4f", preview->element.k);
 	slider_k_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(slider_k_t, 1, wxEXPAND | wxLEFT, 10);
+	right2->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("l : %d", preview->element.l);
 	slider_l_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(slider_l_t, 1, wxEXPAND | wxLEFT, 10);
-/*			*/
+	right2->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
+
+	right->Add(right2, 5, wxEXPAND);
+
 	wxButton *select = new wxButton(this, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(select, 2, wxEXPAND);
+
 
 	sizer->Add(left, 5, wxEXPAND);
 	sizer->Add(right, 1, wxEXPAND);
 	SetSizer(sizer);
 	Centre();
+}
+void MyPatternPicker::OnSliderS(wxCommandEvent& event)
+{
+	wxString s;
+	preview->element.s = slider_s->GetValue() / 1000.0;
+	s.Printf("Size : %.3f", preview->element.s);
+	slider_s_t->SetLabel(s);
 }
 void MyPatternPicker::OnSelect(wxCommandEvent& event)
 {
@@ -67,8 +81,11 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		((MyFrame *)GetParent())->drawPane->element.l = preview->element.l;
 		((MyFrame *)GetParent())->drawPane->element.f = preview->element.f;
 		((MyFrame *)GetParent())->drawPane->element.k = preview->element.k;
+		((MyFrame *)GetParent())->drawPane->element.s = preview->element.s;
 
 		wxString s;
+		s.Printf("Size : %.3f", ((MyFrame *)GetParent())->drawPane->element.s);
+		((MyFrame *)GetParent())->slider_s_t->SetLabel(s);
 		s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.k);
 		((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
 		s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.f);
@@ -76,9 +93,6 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
 		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
 
-		((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
-		((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
-		((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
 	}
 
 	//segmentation On
@@ -88,8 +102,11 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l = preview->element.l;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].F = preview->element.f;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].k = preview->element.k;
+		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].size = preview->element.s;
 
 		wxString s;
+		s.Printf("Size : %.3f", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].size);
+		((MyFrame *)GetParent())->slider_s_t->SetLabel(s);
 		s.Printf("k : %.4f", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].k);
 		((MyFrame *)GetParent())->slider_k_t->SetLabel(s);
 		s.Printf("f : %.4f", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].F);
@@ -97,12 +114,14 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l);
 		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
 
-		((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
-		((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
-		((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
 
 		((MyFrame *)GetParent())->drawPane->element.UpdateControlMask();
 	}
+
+	((MyFrame *)GetParent())->slider_k->SetValue(int((preview->element.k - 0.03) / 0.04 * 1000));
+	((MyFrame *)GetParent())->slider_f->SetValue(int((preview->element.f / 0.06) * 1000));
+	((MyFrame *)GetParent())->slider_l->SetValue(preview->element.l);
+	((MyFrame *)GetParent())->slider_s->SetValue(preview->element.s * 1000);
 
 	((MyFrame *)GetParent())->activateRenderLoop(true);
 	Close(true);

@@ -14,7 +14,7 @@ END_EVENT_TABLE()
 // Pattern Picker Window
 BEGIN_EVENT_TABLE(MyPatternPicker, wxFrame)
 	EVT_BUTTON(BUTTON_Select, MyPatternPicker::OnSelect)
-	//EVT_MENU(wxID_EXIT, MyPatternPicker::OnExit)
+	EVT_SLIDER(SLIDER_S_PICKER, MyPatternPicker::OnSliderS)
 END_EVENT_TABLE()
 
 // Pattern Picker region

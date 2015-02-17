@@ -82,6 +82,7 @@ public:
 	void StartPreview();
 private:
 	void onIdle(wxIdleEvent& evt);
+	void OnSliderS(wxCommandEvent& event);
 	void OnSelect(wxCommandEvent& event);
 	void MouseLDown(wxMouseEvent &event);
 	void OnExit(wxCommandEvent& event);
@@ -94,9 +95,11 @@ public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	MyPatternPicker *patternpicker;
 	BasicDrawPane *drawPane;
+	wxSlider *slider_s;
 	wxSlider *slider_f;
 	wxSlider *slider_k;
 	wxSlider *slider_l;
+	wxStaticText *slider_s_t;
 	wxStaticText *slider_f_t;
 	wxStaticText *slider_k_t;
 	wxStaticText *slider_l_t;
@@ -115,7 +118,6 @@ protected:
 	wxButton *clean;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
-	wxStaticText *slider_s_t;
 	wxStaticText *slider_theta0_t;
 	wxStaticText *slider_brushSize_t;
 	wxStaticText *slider_addA_t;
@@ -124,7 +126,6 @@ protected:
 	wxStaticText *slider_beta_t;
 	wxStaticText *slider_mindegree_t;
 	wxStaticText *slider_maxdegree_t;
-	wxSlider *slider_s;
 	wxSlider *slider_theta0;
 	wxSlider *slider_brushSize;
 	wxSlider *slider_addA;
@@ -211,6 +212,7 @@ enum
 	COMBOBOX_Processing,
 	COMBOBOX_Controlling,
 
+	SLIDER_S_PICKER,
 	SLIDER_S,
 	SLIDER_S_T,
 	SLIDER_F,
