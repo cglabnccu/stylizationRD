@@ -164,7 +164,7 @@ void RD::ReadFlow(string file)
 			int index = j*vf_w + i;
 			float dx = data[index * 2 + 1];
 			float dy = data[index * 2];
-			Flowfield.at<Vec3f>(j, i) = Vec3f(dx, dy, 0.0);  //x,y swap??
+			Flowfield.at<Vec3f>(vf_h - j - 1, i) = Vec3f(dx, -dy, 0.0); //x,y swap??
 		}
 	}
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
