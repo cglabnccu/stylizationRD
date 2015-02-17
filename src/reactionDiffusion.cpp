@@ -173,6 +173,54 @@ void RD::ReadFlow(string file)
 	ETFLoaded = false;
 }
 
+//Generate ETF of input image as flowfield
+void RD::ETF(string file)
+{
+	Mat src = imread(file, 1);
+	Mat src_n;
+	Mat grad;
+	normalize(src, src_n, 0.0, 1.0, NORM_MINMAX, CV_32FC3);
+	GaussianBlur(src_n, src_n, Size(91, 91), 0, 0);
+	/// Generate grad_x and grad_y
+	Mat grad_x, grad_y;
+	/// Gradient X
+	Sobel(src_n, grad_x, CV_32F, 1, 0, 3, 1, 0, 1);
+	/// Gradient Y
+	Sobel(src_n, grad_y, CV_32F, 0, 1, 3, 1, 0, 1);
+	//GaussianBlur( grad_x, grad_x, Size( 51, 51 ), 0, 0 );
+	//GaussianBlur( grad_y, grad_y, Size( 51, 51 ), 0, 0 );
+	//imshow("ETF", src_n);
+
+	Flowfield = Mat::zeros(src.size(), CV_32FC3);
+	for (int i = 0; i < src.rows; i++)
+	{
+		for (int j = 0; j < src.cols; j++)
+		{
+			Vec3f u = grad_x.at<cv::Vec3f>(i, j) / 255.0; //-255~255
+			Vec3f v = grad_y.at<cv::Vec3f>(i, j) / 255.0;
+
+			float x = u.dot(u);
+			float y = v.dot(v);
+			float z = v.dot(u);
+			float temp = y*y - 2.0*x*y + x*x + 4.0*z*z;
+			float lambda1 = 0;
+			lambda1 = 0.5 * (y + x + sqrt(temp));
+			Flowfield.at<cv::Vec3f>(i, j) = normalize(Vec3f(z, x - lambda1, 0.0));
+			//dis.at<cv::Vec3f>(i,j) = normalize( Vec3f(lambda1-x,z,0.0) );
+
+			if (Flowfield.at<cv::Vec3f>(i, j) == Vec3f(0.0, 0.0, 0.0))
+			{
+				Flowfield.at<cv::Vec3f>(i, j) = Vec3f(0.0, 1.0, 0.0);
+			}
+		}
+	}
+
+	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
+
+	ETFLoaded = true;
+	FlowLoaded = false;
+}
+
 void RD::ReadControlImg(string file)
 {
 	Mask_control = imread(file, 0);
@@ -282,54 +330,6 @@ void RD::DisplaySeg(Mat &dis, int regionindex)
 			}
 		}
 	}
-}
-
-//Generate ETF of input image as flowfield
-void RD::ETF(string file)
-{
-	Mat src = imread(file, 1);
-	Mat src_n;
-	Mat grad;
-	normalize(src, src_n, 0.0, 1.0, NORM_MINMAX, CV_32FC3);
-	GaussianBlur(src_n, src_n, Size(91, 91), 0, 0);
-	/// Generate grad_x and grad_y
-	Mat grad_x, grad_y;
-	/// Gradient X
-	Sobel(src_n, grad_x, CV_32F, 1, 0, 3, 1, 0, 1);
-	/// Gradient Y
-	Sobel(src_n, grad_y, CV_32F, 0, 1, 3, 1, 0, 1);
-	//GaussianBlur( grad_x, grad_x, Size( 51, 51 ), 0, 0 );
-	//GaussianBlur( grad_y, grad_y, Size( 51, 51 ), 0, 0 );
-	//imshow("ETF", src_n);
-
-	Flowfield = Mat::zeros(src.size(), CV_32FC3);
-	for (int i = 0; i < src.rows; i++)
-	{
-		for (int j = 0; j < src.cols; j++)
-		{
-			Vec3f u = grad_x.at<cv::Vec3f>(i, j) / 255.0; //-255~255
-			Vec3f v = grad_y.at<cv::Vec3f>(i, j) / 255.0;
-
-			float x = u.dot(u);
-			float y = v.dot(v);
-			float z = v.dot(u);
-			float temp = y*y - 2.0*x*y + x*x + 4.0*z*z;
-			float lambda1 = 0;
-			lambda1 = 0.5 * (y + x + sqrt(temp));
-			Flowfield.at<cv::Vec3f>(i, j) = normalize(Vec3f(z, x - lambda1, 0.0));
-			//dis.at<cv::Vec3f>(i,j) = normalize( Vec3f(lambda1-x,z,0.0) );
-
-			if (Flowfield.at<cv::Vec3f>(i, j) == Vec3f(0.0, 0.0, 0.0))
-			{
-				Flowfield.at<cv::Vec3f>(i, j) = Vec3f(0.0, 1.0, 0.0);
-			}
-		}
-	}
-
-	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
-
-	ETFLoaded = true;
-	FlowLoaded = false;
 }
 
 // for Eq.6 and Eq.7
