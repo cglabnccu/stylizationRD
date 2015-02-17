@@ -1181,47 +1181,53 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 
 void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
+	Point MousePosition(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
+	
 	if (activateDraw)
 	{
 		if (controllingS == "paint_white")
 		{
-			//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
-			ellipse(element.Addition_A,
-				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-				Size(brushSize, brushSize),
-				0,
-				0,
-				360,
-				Scalar(1, 1, 1),
-				-1,
-				8);
+			line(element.Addition_A, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			//ellipse(element.Addition_A,
+			//	Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+			//	Size(brushSize, brushSize),
+			//	0,
+			//	0,
+			//	360,
+			//	Scalar(1, 1, 1),
+			//	-1,
+			//	8);
 		}
 		else if (controllingS == "paint_black")
 		{
-			//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
-			ellipse(element.Addition_B,
-				Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-				Size(brushSize, brushSize),
-				0,
-				0,
-				360,
-				Scalar(1, 1, 1),
-				-1,
-				8);
+			line(element.Addition_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			//ellipse(element.Addition_B,
+			//	Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
+			//	Size(brushSize, brushSize),
+			//	0,
+			//	0,
+			//	360,
+			//	Scalar(1, 1, 1),
+			//	-1,
+			//	8);
 		}
 		else
-			ellipse(
-			*element.c_B,         // img - Image.
-			Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
-			Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
-			0,                    // angle - Ellipse rotation angle in degrees.
-			0,                    // startAngle - Starting angle of the elliptic arc in degrees.
-			360,                  // endAngle - Ending angle of the elliptic arc in degrees.
-			Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
-			-1,                    // thickness - Thickness of the ellipse arc outline
-			8                     // lineType - Type of the ellipse boundary. See the line() description.
-			);
+			line(*element.c_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			//ellipse(
+			//*element.c_B,         // img - Image.
+			//Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
+			//Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
+			//0,                    // angle - Ellipse rotation angle in degrees.
+			//0,                    // startAngle - Starting angle of the elliptic arc in degrees.
+			//360,                  // endAngle - Ending angle of the elliptic arc in degrees.
+			//Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
+			//-1,                    // thickness - Thickness of the ellipse arc outline
+			//8                     // lineType - Type of the ellipse boundary. See the line() description.
+			//);
 	}
+
+	LastMousePosition = Point(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
+
 	//((MyFrame *)GetParent())->addlog("Panit event - Mouse Down at (%.0f, %.0f)", wxColour(*wxBLACK));
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)

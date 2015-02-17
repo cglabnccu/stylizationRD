@@ -41,6 +41,7 @@ public:
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
+	Point LastMousePosition;
 };
 
 class SimpleDrawPanel : public wxPanel
