@@ -1,4 +1,4 @@
-#include "reactionDiffusion.h"
+﻿#include "reactionDiffusion.h"
 # define M_PI 3.14159265358979323846
 
 RD::RD(Size s){
@@ -104,11 +104,15 @@ void RD::ReadFlow(string file){
 
 	for (int j = 0; j<vf_h; j++){
 		for (int i = 0; i<vf_w; i++){
-			int index = j*vf_w + i;
+			int index = (vf_h-j-1)*vf_w + i;
 			float dx = data[index * 2];
 			float dy = data[index * 2 + 1];
+
+			//Vec3f v = Vec3f(1, 1, 0);
+			//Vec3f v = Vec3f(0, 1, 0);
+			//Vec3f v = normalize(Vec3f(i - 0.5*vf_w, j - 0.5*vf_h, 0));  //source
 			
-			Flowfield.at<Vec3f>(j, i) = Vec3f(dx, dy, 0.0);  //x,y swap??
+			Flowfield.at<Vec3f>(j, i) = Vec3f(dx, -dy, 0.0);  //x,y swap??
 		}
 	}
 	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);

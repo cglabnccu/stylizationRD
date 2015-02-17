@@ -88,14 +88,14 @@ void PP::Flowtest(Mat &flowfield, Mat &dis)
 	int nRows = flowfield.rows;
 	int nCols = flowfield.cols;
 	float step = nRows*(alpha>0? alpha: 0.1);
-#pragma omp parallel for
+
 	for (int j = 0; j<nRows; j += step){
 		for (int i = 0; i<nCols; i += step){
 
 			float x = i;
 			float y = j;
 
-			Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
+			Vec3f v = normalize(flowfield.at<Vec3f>(int(y + nRows) % nRows, int(x + nCols) % nCols));
 			//Vec3f v = Vec3f(1, 0, 0);
 			//Vec3f v = Vec3f(0, 1, 0);
 			//Vec3f v = normalize(Vec3f(x - 0.5*nCols, y - 0.5*nRows, 0));  //source
@@ -121,6 +121,12 @@ void PP::Flowtest(Mat &flowfield, Mat &dis)
 	float x = 0.5*nCols;
 	float y = 0.5*nRows;
 	static float angle = 0;
+
+	//line(dis,
+	//	Point(0, 0),
+	//	Point(x, 0.7*nRows),
+	//	Scalar(255, 0, 0),
+	//	2);
 
 	line(dis,
 		Point(x, y),
