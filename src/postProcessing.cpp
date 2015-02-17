@@ -44,27 +44,32 @@ void PP::LIC(Mat &flowfield, Mat &dis)
 			float x = i;
 			float y = j;
 			for (int k = 0; k < s; k++){
-				Vec3f v = normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
-				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
-				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
-				float r2 = k*k;
-				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
-				dis.at<float>(j, i) += w*noise.at<float>(int(x + nCols) % nCols, int(y + nRows) % nRows);
-				w_sum += w;
-			}
-
-			x = i;
-			y = j;
-			for (int k = 0; k<s; k++){
-				Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
+				Vec3f v = normalize(flowfield.at<Vec3f>(int(y + nRows) % nRows, int(x + nCols) % nCols));
 				x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
 				y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
 
-				float r2 = k*k;
-				float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
-				dis.at<float>(j, i) += w*noise.at<float>(int(x + nCols) % nCols, int(y + nRows) % nRows);
-				w_sum += w;
+				if (x >= 0 && x < nCols && y >= 0 && y < nRows) {
+					float r2 = k*k;
+					float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
+					dis.at<float>(j, i) += w*noise.at<float>(int(y + nRows) % nRows, int(x + nCols) % nCols);
+					w_sum += w;
+				}
+				else
+					break;
 			}
+
+			//x = i;
+			//y = j;
+			//for (int k = 0; k<s; k++){
+			//	Vec3f v = -normalize(flowfield.at<Vec3f>(int(x + nCols) % nCols, int(y + nRows) % nRows));
+			//	x = x + (abs(v[0]) / float(abs(v[0]) + abs(v[1])))*(abs(v[0]) / v[0]);
+			//	y = y + (abs(v[1]) / float(abs(v[0]) + abs(v[1])))*(abs(v[1]) / v[1]);
+
+			//	float r2 = k*k;
+			//	float w = (1 / (M_PI*sigma))*exp(-(r2) / sigma);
+			//	dis.at<float>(j, i) += w*noise.at<float>(int(x + nCols) % nCols, int(y + nRows) % nRows);
+			//	w_sum += w;
+			//}
 			dis.at<float>(j, i) /= w_sum;
 		}
 	}
