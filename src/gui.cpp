@@ -769,15 +769,17 @@ void MyFrame::OnControllingBox(wxCommandEvent& event)
 void MyFrame::OnSliderS(wxCommandEvent& event)
 {
 	wxString s;
-	//if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0) {
-	//	drawPane->element.segmentation[drawPane->regionSelected - 1].size = slider_s->GetValue() / 1000.0;
-	//	s.Printf("Size : %.3f", drawPane->element.segmentation[drawPane->regionSelected - 1].size);
-	//	drawPane->element.UpdateControlMask();
-	//}
-	//else{
-	drawPane->element.s = slider_s->GetValue() / 1000.0;
-	s.Printf("Size : %.3f", drawPane->element.s);
-	//}
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
+		drawPane->element.segmentation[drawPane->regionSelected - 1].size = slider_s->GetValue() / 1000.0;
+		s.Printf("Size : %.3f", drawPane->element.segmentation[drawPane->regionSelected - 1].size);
+		drawPane->element.UpdateControlMask();
+	}
+	else
+	{
+		drawPane->element.s = slider_s->GetValue() / 1000.0;
+		s.Printf("Size : %.3f", drawPane->element.s);
+	}
 	slider_s_t->SetLabel(s);
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
@@ -978,6 +980,7 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event)
 
 
 	wxString s;
+	slider_s->SetValue(drawPane->element.segmentation[sr].size * 1000.0 );
 	slider_f->SetValue(drawPane->element.segmentation[sr].F * 1000.0 / 0.06);
 	slider_k->SetValue((drawPane->element.segmentation[sr].k - 0.03) / 0.04 * 1000);
 	slider_l->SetValue(drawPane->element.segmentation[sr].l);
@@ -1015,6 +1018,8 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event)
 		slider_maxdegree_t->Hide();
 	}
 
+	s.Printf("Size : %.3f", drawPane->element.segmentation[sr].size);
+	slider_s_t->SetLabel(s);
 	s.Printf("F : %.4f", drawPane->element.segmentation[sr].F);
 	slider_f_t->SetLabel(s);
 	s.Printf("k : %.4f", drawPane->element.segmentation[sr].k);

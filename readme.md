@@ -30,8 +30,8 @@
 
 ### [Future Work]
   1. more UI friendly
-   * partition pattern selection
    * Customize Anisotropic Function degree selection
+   * Pattern Picker info & size slidebar
    * ???
   2. using faster algorithm
   3. oriental cloud patterns
