@@ -31,38 +31,29 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
 	preview = new BasicDrawPane(this, Size(100, 100));
-	right->Add(preview, 1, wxEXPAND);
-	/*
-	wxStaticBox* st_pattern = new wxStaticBox(controlpanel, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
-	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
+	right->Add(preview, 2, wxEXPAND);
 
-	s.Printf("Size : %.3f", drawPane->element.s);
-	slider_s_t = new wxStaticText(controlpanel, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_s = new wxSlider(controlpanel, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
+	wxString ss;
+	ss.Printf("Size : %.3f", preview->element.s);
+	slider_s_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_s = new wxSlider(this, wxID_ANY, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(slider_s, 1, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("F : %.4f", drawPane->element.f);
-	slider_f_t = new wxStaticText(controlpanel, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_f = new wxSlider(controlpanel, SLIDER_F, int((drawPane->element.f / 0.06) * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_f, 0, wxEXPAND | wxLEFT, 10);
+	ss.Printf("F : %.4f", preview->element.f);
+	slider_f_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(slider_f_t, 1, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("k : %.4f", drawPane->element.k);
-	slider_k_t = new wxStaticText(controlpanel, SLIDER_K_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_k = new wxSlider(controlpanel, SLIDER_K, int((drawPane->element.k - 0.03) / 0.04 * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_k, 0, wxEXPAND | wxLEFT, 10);
+	ss.Printf("k : %.4f", preview->element.k);
+	slider_k_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(slider_k_t, 1, wxEXPAND | wxLEFT, 10);
 
-	s.Printf("l : %d", drawPane->element.l);
-	slider_l_t = new wxStaticText(controlpanel, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_l = new wxSlider(controlpanel, SLIDER_L, int(drawPane->element.l), 0, 6, wxDefaultPosition, wxDefaultSize, 0);
-	st_pattern_sizer->Add(slider_l, 0, wxEXPAND | wxLEFT, 10);
-	*/
-
-	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(select, 1, 0);
+	ss.Printf("l : %d", preview->element.l);
+	slider_l_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(slider_l_t, 1, wxEXPAND | wxLEFT, 10);
+/*			*/
+	wxButton *select = new wxButton(this, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
+	right->Add(select, 2, wxEXPAND);
 
 	sizer->Add(left, 5, wxEXPAND);
 	sizer->Add(right, 1, wxEXPAND);
@@ -162,6 +153,18 @@ void Picker::MouseLDown(wxMouseEvent &event)
 
 	// fill preview with ink
 	((MyPatternPicker *)GetParent())->preview->Seeds(25, true, .5);
+
+	wxString ss;
+
+	ss.Printf("F : %.4f", ((MyPatternPicker *)GetParent())->preview->element.f);
+	((MyPatternPicker *)GetParent())->slider_f_t->SetLabel(ss);
+
+	ss.Printf("k : %.4f", ((MyPatternPicker *)GetParent())->preview->element.k);
+	((MyPatternPicker *)GetParent())->slider_k_t->SetLabel(ss);
+
+	ss.Printf("l : %d", ((MyPatternPicker *)GetParent())->preview->element.l);
+	((MyPatternPicker *)GetParent())->slider_l_t->SetLabel(ss);
+
 }
 void Picker::paintEvent(wxPaintEvent & evt)
 {

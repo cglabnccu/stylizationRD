@@ -73,6 +73,11 @@ class MyPatternPicker : public wxFrame
 public:
 	MyPatternPicker(wxWindow* parent, const wxString& title);
 	BasicDrawPane *preview;
+	wxSlider *slider_s;
+	wxStaticText *slider_s_t;
+	wxStaticText *slider_f_t;
+	wxStaticText *slider_k_t;
+	wxStaticText *slider_l_t;
 	Picker *picker;
 	void StartPreview();
 private:
