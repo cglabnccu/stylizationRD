@@ -166,7 +166,10 @@ protected:
 
 	void OnEdge2AddA(wxCommandEvent& event);
 	void OnEdge2AddB(wxCommandEvent& event);
+	void OnMask2AddA(wxCommandEvent& event);
+	void OnMask2AddB(wxCommandEvent& event);
 	void OnCLAHE(wxCommandEvent& event);
+
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
 	void OnOpenPatternPicker(wxCommandEvent& event);
@@ -189,6 +192,8 @@ enum
 
 	ID_ONEdge2AddA,
 	ID_ONEdge2AddB,
+	ID_ONMask2AddA,
+	ID_ONMask2AddB,
 	ID_ONCLAHE,
 	ID_ONOPEN_MASK,
 	ID_ONOPEN_MASK_S,

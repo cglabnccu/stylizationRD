@@ -213,6 +213,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxMenu *menuTool = new wxMenu;
 	menuTool->Append(ID_ONEdge2AddA, "&Edge2AddA\tCtrl-A", "add Edge to addition A");
 	menuTool->Append(ID_ONEdge2AddB, "&Edge2AddB\tCtrl-B", "add Edge to addition B");
+	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
+	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(false);
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-C", "Open Mask Img.");
@@ -670,6 +672,14 @@ void MyFrame::OnEdge2AddA(wxCommandEvent& event)
 void MyFrame::OnEdge2AddB(wxCommandEvent& event)
 {
 	drawPane->element.Addition_B = drawPane->element.Mask_s.clone();
+}
+void MyFrame::OnMask2AddA(wxCommandEvent& event)
+{
+	drawPane->element.Addition_A += 0.5*drawPane->element.Mask;
+}
+void MyFrame::OnMask2AddB(wxCommandEvent& event)
+{
+	drawPane->element.Addition_B += 0.5*drawPane->element.Mask;
 }
 void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
