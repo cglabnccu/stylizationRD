@@ -23,20 +23,18 @@
 
 
 ### [in post process]
-  * Segmentation
-   * size
-  * Demo Film
+  * Pattern Picker info & size slidebar
   * [BUG] CAF degree selection
 
 ### [Future Work]
   1. more UI friendly
    * Customize Anisotropic Function degree selection
-   * Pattern Picker info & size slidebar
    * ???
   2. using faster algorithm
   3. oriental cloud patterns
   4. merge flowfield maker
-  5. ???
+  5. parameter f
+  6. ???
 
 ---
 
