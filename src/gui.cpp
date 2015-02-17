@@ -32,8 +32,37 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	right->Add(s, 0, wxEXPAND);
 	preview = new BasicDrawPane(this, Size(100, 100));
 	right->Add(preview, 1, wxEXPAND);
+	/*
+	wxStaticBox* st_pattern = new wxStaticBox(controlpanel, -1, wxT("Pattern"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
+	wxStaticBoxSizer* st_pattern_sizer = new wxStaticBoxSizer(st_pattern, wxVERTICAL);
+
+	s.Printf("Size : %.3f", drawPane->element.s);
+	slider_s_t = new wxStaticText(controlpanel, SLIDER_S_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_s = new wxSlider(controlpanel, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("F : %.4f", drawPane->element.f);
+	slider_f_t = new wxStaticText(controlpanel, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_f = new wxSlider(controlpanel, SLIDER_F, int((drawPane->element.f / 0.06) * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_f, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("k : %.4f", drawPane->element.k);
+	slider_k_t = new wxStaticText(controlpanel, SLIDER_K_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_k = new wxSlider(controlpanel, SLIDER_K, int((drawPane->element.k - 0.03) / 0.04 * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_k, 0, wxEXPAND | wxLEFT, 10);
+
+	s.Printf("l : %d", drawPane->element.l);
+	slider_l_t = new wxStaticText(controlpanel, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_l = new wxSlider(controlpanel, SLIDER_L, int(drawPane->element.l), 0, 6, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_l, 0, wxEXPAND | wxLEFT, 10);
+	*/
+
 	wxButton *select = new wxButton(this, BUTTON_Select, _T("Select!"), wxDefaultPosition, wxDefaultSize, 0);
-	right->Add(select, 0, 0);
+	right->Add(select, 1, 0);
 
 	sizer->Add(left, 5, wxEXPAND);
 	sizer->Add(right, 1, wxEXPAND);
