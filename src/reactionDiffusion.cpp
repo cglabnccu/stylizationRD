@@ -68,6 +68,8 @@ RD::RD(Size s){
 	FlowLoaded = false;
 	ETFLoaded = false;
 	ControlImgLoad = false;
+
+	innerAMPloopsize = 4;
 }
 
 void RD::Init(Size s){
@@ -494,11 +496,12 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 
 	clock_t	End_Time = clock();
 	clock_t Elapsed_Time = End_Time - Start_Time;
-	if ( Elapsed_Time < 1000 / 60) {
+	if ( Elapsed_Time < (1000 / 60) ) {
 		innerAMPloopsize *= 1.5;
+		if (innerAMPloopsize > 1024) innerAMPloopsize = 1024;
 	} 
 	else {
-		if (Elapsed_Time > 1000 / 30) {
+		if (Elapsed_Time > (1000 / 30) ) {
 			innerAMPloopsize *= 0.75; 
 			if (innerAMPloopsize < 4) innerAMPloopsize = 2;
 		}
