@@ -1,4 +1,5 @@
 ﻿#include "reactionDiffusion.h"
+#include <time.h>
 # define M_PI 3.14159265358979323846
 
 PixelPattern::PixelPattern()
@@ -72,6 +73,8 @@ RD::RD(Size s)
 	FlowLoaded = false;
 	ETFLoaded = false;
 	ControlImgLoad = false;
+
+	innerAMPloopsize = 4;
 }
 
 void RD::Init(Size s)
@@ -94,6 +97,8 @@ void RD::Init(Size s)
 	p_A = &A2;
 	c_B = &B1;
 	p_B = &B2;
+
+	innerAMPloopsize = 4;
 }
 
 void RD::ReadSrc(string file)
@@ -333,8 +338,10 @@ void RD::DisplaySeg(Mat &dis, int regionindex)
 }
 
 // for Eq.6(Anisotropic) and Eq.7(custom AnisotropicFunction)
-void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn)
+int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn)
 {
+	clock_t	Start_Time = clock();
+	
 	int nRows = c_A->rows;
 	int nCols = c_A->cols;
 	bool ControlImgLoad = this->ControlImgLoad;
@@ -389,7 +396,7 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 
 	//--------------------------------------------- inter start
 	int t = 0;
-	const int innerAMPloopsize = 32;
+	//const int innerAMPloopsize = 32;
 	while (t < innerAMPloopsize)
 	{
 		t++;
@@ -584,6 +591,22 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 		
 	} //while (t < innerAMPloopsize)
 	//--------------------------------------------- inter finish
+
+	clock_t	End_Time = clock();
+	clock_t Elapsed_Time = End_Time - Start_Time;
+	if (Elapsed_Time < (1000 / 60)) {
+		innerAMPloopsize *= 1.5;
+		if (innerAMPloopsize > 1024) innerAMPloopsize = 1024;
+	}
+	else {
+		if (Elapsed_Time > (1000 / 30)) {
+			innerAMPloopsize *= 0.75;
+			if (innerAMPloopsize < 4) innerAMPloopsize = 2;
+		}
+		
+	}
+
+	return innerAMPloopsize;
 }
 
 //// for Eq.7
@@ -763,9 +786,11 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 // generate parameter space of GS-Model of specific F
 // X-axis: k from(0.056~0.066)?
 // Y-axis: l from 7 regions (0, 1, 2, ..., 6)
-void RD::GrayScottModel()
+int RD::GrayScottModel()
 {
-	int nRows = 500;
+	clock_t	Start_Time = clock();
+
+	int nRows = 500;//todo: fix to use non 500x500
 	int nCols = 500;
 	array_view< float, 1 > p_flowfield(nRows*nCols * 3, (float*)Flowfield.data);
 
@@ -820,7 +845,7 @@ void RD::GrayScottModel()
 	int kw = 3;
 	//inter start
 	int t = 0;
-	const int innerAMPloopsize = 64;
+	//const int innerAMPloopsize = 64;
 	while (t < innerAMPloopsize)
 	{
 		t++;
@@ -925,4 +950,19 @@ void RD::GrayScottModel()
 		//inter finish
 	}
 
+	clock_t	End_Time = clock();
+	clock_t Elapsed_Time = End_Time - Start_Time;
+	if (Elapsed_Time < (1000 / 60)) {
+		innerAMPloopsize *= 1.5;
+		if (innerAMPloopsize > 1024) innerAMPloopsize = 1024;
+	}
+	else {
+		if (Elapsed_Time > (1000 / 30)) {
+			innerAMPloopsize *= 0.75;
+			if (innerAMPloopsize < 4) innerAMPloopsize = 2;
+		}
+
+	}
+
+	return innerAMPloopsize;
 }

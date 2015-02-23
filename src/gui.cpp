@@ -1369,13 +1369,16 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
 	if (render_loop_on)
 	{
-		//if (customAnisotropicFunction)
-		//element.FastGrayScott(mindegree, maxdegree, false, regionOn);
-		//else
+		//if (customAnisotropicFunction){
+			int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+			//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
+		//}
+		//else {
 		//	element.FastGrayScott(0, 0, false, regionOn);
+		//}
 
-		//read 500x500 input image, and a flow field
-		element.GrayScottModel();
+		////read 500x500 input image, and a flow field
+		//element.GrayScottModel();
 	}
 
 	dis = element.c_A->clone();

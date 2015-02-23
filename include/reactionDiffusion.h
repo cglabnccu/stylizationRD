@@ -34,9 +34,10 @@ public:
 	void ReadControlImg(string);
 	void UpdateControlMask();
 	void DisplaySeg(Mat &dis, int regionindex);
-	void FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
+	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
-	void GrayScottModel();// generate GS-Model
+	int GrayScottModel();// generate GS-Model
+
 	vector<PixelPattern> segmentation;
 	Mat *c_A;        // Current element of A
 	Mat *p_A;        // Previous element of A
@@ -66,7 +67,8 @@ public:
 	Mat A1;         // Element of A
 	Mat A2;	           
 	Mat B1;         // Element of B
-	Mat B2;	           
+	Mat B2;
+
 	float s;        // Pattern size
 	float v;        // Weight of advection term (speed)
 	int l;          // Paramater of alpha, controls the edge number of the generated polygon pattern
@@ -75,8 +77,11 @@ public:
 	int theta0;     // Rotation angle
 	float addA;     // Coefficient(weight) of A
 	float addB;     // Coefficient(weight) of B
+
 	bool SrcLoaded;
 	bool FlowLoaded;
 	bool ETFLoaded;
 	bool ControlImgLoad;
+
+	int innerAMPloopsize;
 };
