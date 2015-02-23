@@ -1370,10 +1370,12 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	if (render_loop_on)
 	{
 		//if (customAnisotropicFunction)
-		element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		//element.FastGrayScott(mindegree, maxdegree, false, regionOn);
 		//else
 		//	element.FastGrayScott(0, 0, false, regionOn);
-		//element.GrayScottModel();
+
+		//read 500x500 input image, and a flow field
+		element.GrayScottModel();
 	}
 
 	dis = element.c_A->clone();
@@ -1383,7 +1385,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		processing.CLAHE(dis);
 	}
 
-
+	//post process
 	if (processingS == "Motion_Illusion")
 	{
 		processing.motionIllu(*element.c_A, element.Flowfield, dis);

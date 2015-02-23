@@ -332,7 +332,7 @@ void RD::DisplaySeg(Mat &dis, int regionindex)
 	}
 }
 
-// for Eq.6 and Eq.7
+// for Eq.6(Anisotropic) and Eq.7(custom AnisotropicFunction)
 void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn)
 {
 	int nRows = c_A->rows;
@@ -760,7 +760,9 @@ void RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segm
 //	}
 //}
 
-// generate GS-Model
+// generate parameter space of GS-Model of specific F
+// X-axis: k from(0.056~0.066)?
+// Y-axis: l from 7 regions (0, 1, 2, ..., 6)
 void RD::GrayScottModel()
 {
 	int nRows = 500;
@@ -775,18 +777,21 @@ void RD::GrayScottModel()
 	array_view< float, 1 > p_B(nRows*nCols, (float*)p_B->data);
 	array_view< float, 1 > a_A(nRows*nCols, (float*)Addition_A.data);
 	array_view< float, 1 > a_B(nRows*nCols, (float*)Addition_B.data);
-	array_view< float, 1 > m(nRows*nCols, (float*)Mask.data);
-	array_view< float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
+	array_view< const float, 1 > m(nRows*nCols, (float*)Mask.data);
+	array_view< const float, 1 > m_s(nRows*nCols, (float*)Mask_s.data);
 
 	float theta0 = 0;
 
-	int larray[501];// = this->l;
-	for (int i = 0; i < 501; i++) larray[i] = i / 70;
-	array_view<int, 1> l(500, larray);
+	int larray[500];// = this->l;
+	for (int i = 0; i < 500; i++) larray[i] = i / (500/7);  //7: 0, 1, 2,...6
+
+	array_view<int, 1> l(500, larray); //Y-axis: divide to 7 region with parameter l 
+
+
 	// Gray-Scott models' paramaters
-	//float farray[501];
-	//float farray[501];// = 0.0375;
+	float farray[500];// = 0.0375;
 	float karray[500];
+
 	//for (int i = 0; i < 500; i++){
 	//	int kbias = (i + 1) / 25;
 	//	karray[i] = 0.056 + ((float)kbias / 2000.0);
@@ -795,11 +800,11 @@ void RD::GrayScottModel()
 	for (int i = 0; i < 500; i++)
 	{
 		karray[i] = 0.056 + (float)(i + 1) / 42000.0;
-		//farray[i] = (float)(i + 1) / 8334.0;
+		farray[i] = this->f; //(float)(i + 1) / 8334.0;
 	}
 	//for (int i = 0; i < 501; i++) farray[i] = 0.0 + ((float)(i + 1) / 8333.3);
-	array_view< float, 1 > k(500, karray);
-	//array_view< float, 1 > f(501, farray);
+	array_view< const float, 1 > k(500, karray);
+	array_view< const float, 1 > f(500, farray);
 	//array_view< float, 1 > f(nRows, farray);
 	//float k;
 
@@ -815,7 +820,7 @@ void RD::GrayScottModel()
 	int kw = 3;
 	//inter start
 	int t = 0;
-	const int innerAMPloopsize = 4;
+	const int innerAMPloopsize = 64;
 	while (t < innerAMPloopsize)
 	{
 		t++;
@@ -900,7 +905,7 @@ void RD::GrayScottModel()
 			float b = c_B[idx];
 			float DA = sd*1.0*da;
 			float DB = sd*0.5*db;
-			float ff = 0.0375;
+			float ff = f[0];//0.0375;
 			float RA = sr*(-a*b*b + ff*(1 - a));
 			float RB = sr*(a*b*b - (k[y] + ff)*b);
 			float AA = addA*a_A[idx];
