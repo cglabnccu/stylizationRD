@@ -219,6 +219,39 @@ void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis)
 	merge(channels, dis);
 };
 
+// Map density to color
+// Y-aixs: density
+void PP::Texture(Mat &src, Mat &dis)
+{
+	const float M_PI = 3.14159265358979323846;
+
+	vector<Mat> channels;
+	Mat r = Mat::zeros(src.size(), CV_32F);
+	Mat b = Mat::zeros(src.size(), CV_32F);
+	Mat g = Mat::zeros(src.size(), CV_32F);
+
+#pragma omp parallel for
+	for (int i = 0; i < src.rows; i++)
+	{
+		for (int j = 0; j < src.cols; j++)
+		{
+			float y = 0.5f;
+			float x = src.at<float>(i, j);	  //density
+			x = (alpha+0.5f)*(x+(beta-0.5f));
+			x = max(min(x, 1.0f), 0.0f);
+
+			r.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[2] / 255.0;
+			b.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[0] / 255.0;
+			g.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[1] / 255.0;
+		}
+	}
+	channels.push_back(b);
+	channels.push_back(g);
+	channels.push_back(r);
+	merge(channels, dis);
+};
+
+
 // X-aixs: angle between grident and flowvector
 // Y-aixs: density
 void PP::dirTexture(Mat &src, Mat &flowfield, Mat &dis)
@@ -245,9 +278,9 @@ void PP::dirTexture(Mat &src, Mat &flowfield, Mat &dis)
 			x = max(min(x, 1.0f), 0.0f);
 			y = max(min(y, 1.0f), 0.0f);
 
-			r.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[2] / 255.0;
-			b.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[0] / 255.0;
-			g.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[1] / 255.0;
+			r.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[2] / 255.0;
+			b.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[0] / 255.0;
+			g.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[1] / 255.0;
 		}
 	}
 	channels.push_back(b);
@@ -284,9 +317,9 @@ void PP::dirTexture_Polar(Mat &src, Mat &flowfield, Mat &dis)
 			x = max(min(x, 1.0f), 0.0f);
 			y = max(min(y, 1.0f), 0.0f);
 
-			r.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[2] / 255.0;
-			b.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[0] / 255.0;
-			g.at<float>(i, j) = texture.at<Vec3b>(x*(texture.rows - 1), y*(texture.cols - 1))[1] / 255.0;
+			r.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[2] / 255.0;
+			b.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[0] / 255.0;
+			g.at<float>(i, j) = texture.at<Vec3b>(y*(texture.rows - 1), x*(texture.cols - 1))[1] / 255.0;
 		}
 	}
 

@@ -9,7 +9,8 @@ public:
 	PP(Size);
 	void	CLAHE(Mat &src);
 	void	motionIllu(Mat &src,Mat &flowfield, Mat &dis);
-	void	dirTexture(Mat &src,Mat &flowfield, Mat &dis); 
+	void	Texture(Mat &src, Mat &dis);
+	void	dirTexture(Mat &src, Mat &flowfield, Mat &dis);
 	void	dirTexture_Polar(Mat &src, Mat &flowfield, Mat &dis);
 	void	adaThresholding(Mat &src,Mat &mask, Mat &dis);
 	void	LIC(Mat &flowfield, Mat &dis);

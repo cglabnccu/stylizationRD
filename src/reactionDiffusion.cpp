@@ -313,6 +313,52 @@ void RD::UpdateControlMask()
 	}
 }
 
+void RD::DrawHistogram(Mat &A, Mat &B){
+
+	Mat srcA, srcB;
+	A.convertTo(srcA, CV_8UC1, 255);
+	B.convertTo(srcB, CV_8UC1, 255);
+
+	/// Establish the number of bins
+	int histSize = 256;
+
+	/// Set the ranges ( for B,G,R) )
+	float range[] = { 0, 256 };
+	const float* histRange = { range };
+	Mat histA;
+	Mat histB;
+	bool uniform = true; bool accumulate = false;
+	/// Compute the histograms:
+	calcHist(&srcA, 1, 0, Mat(), histA, 1, &histSize, &histRange, uniform, accumulate);
+	calcHist(&srcB, 1, 0, Mat(), histB, 1, &histSize, &histRange, uniform, accumulate);
+
+	// Draw the histograms for B, G and R
+	int hist_w = 512; int hist_h = 400;
+	int bin_w = cvRound((double)hist_w / histSize);
+
+	Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
+
+
+	/// Normalize the result to [ 0, histImage.rows ]
+	normalize(histA, histA, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+	normalize(histB, histB, 0, histImage.rows, NORM_MINMAX, -1, Mat());
+
+	for (int i = 1; i < histSize; i++)
+	{
+		line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(histA.at<float>(i - 1))),
+			Point(bin_w*(i), hist_h - cvRound(histA.at<float>(i))),
+			Scalar(0, 0, 255), 2, 8, 0);
+		line(histImage, Point(bin_w*(i - 1), hist_h - cvRound(histB.at<float>(i - 1))),
+			Point(bin_w*(i), hist_h - cvRound(histB.at<float>(i))),
+			Scalar(0, 255, 0), 2, 8, 0);
+	}
+	/// Display
+	namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE);
+	imshow("calcHist Demo", histImage);
+}
+
+
+// add checkboard mask outside regionindex
 void RD::DisplaySeg(Mat &dis, int regionindex)
 {
 	const int Tolerate = 5;

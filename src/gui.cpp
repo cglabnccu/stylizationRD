@@ -255,8 +255,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_ONOPENSRC, "&Open SrcImg\tCtrl-O", "Open source image");
 	menuFile->Append(ID_ONOPENVFB, "&Open Flow\tCtrl-F", "Open Flowfield file");
 	menuFile->Append(ID_ONOPENETF, "&Open ETF\tCtrl-E", "Open image file");
-	menuFile->Append(ID_ONOPENTEX, "&Open Texture\tCtrl-E", "Open texture file");
-	menuFile->Append(ID_ONOPENCONTOLIMG, "&Open Control Image\tCtrl-E", "Open Control Image file");
+	menuFile->Append(ID_ONOPENTEX, "&Open Texture\tCtrl-T", "Open texture file");
+	menuFile->Append(ID_ONOPENCONTOLIMG, "&Open Control Image\tCtrl-C", "Open Control Image file");
 	menuFile->Append(ID_ONSAVE, "&Save\tCtrl-E", "Save Result");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
@@ -268,13 +268,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(false);
 	menuTool->AppendSeparator();
-	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-C", "Open Mask Img.");
-	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-C", "Open Mask_s Img.");
+	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-M", "Open Mask Img.");
+	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-S", "Open Mask_s Img.");
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
 
 	wxMenu *menuHelp = new wxMenu;
-	menuHelp->Append(wxID_ABOUT, "&About\tCtrl-A", "About the System");
+	menuHelp->Append(wxID_ABOUT, "&About", "About the System");
 	menuHelp->Append(new wxMenuItem(menuHelp, wxID_TOGGLE_LOG, wxString(wxT("&Log\tCtrl-L")), "Show/Hide the Log", wxITEM_CHECK))->Check(true);
 	//menuHelp->Append(wxID_TOGGLE_LOG, "&Toggle Log\tCtrl-L", "Show/Hide the Log");
 
@@ -301,6 +301,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	processingBox->Append("distribution_B");
 	processingBox->Append("LIC");
 	processingBox->Append("Motion_Illusion");
+	processingBox->Append("Texture");
 	processingBox->Append("dirTexture");
 	processingBox->Append("PolarTexture");
 	processingBox->Append("adaThresholding");
@@ -809,7 +810,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		}
 	}
 
-	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" || processingBox->GetValue() == "dirTexture")
+	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B")
 	{
 		slider_alpha->Disable();
 		slider_beta->Disable();
@@ -1388,6 +1389,8 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		processing.CLAHE(dis);
 	}
 
+	element.DrawHistogram(dis, *element.c_B);
+
 	//post process
 	if (processingS == "Motion_Illusion")
 	{
@@ -1406,6 +1409,12 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		processing.LIC(element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
+	}
+	else if (processingS == "Texture")
+	{
+		processing.Texture(dis, dis);
+		dis.convertTo(dis, CV_8UC3, 255);
+		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "dirTexture")
 	{

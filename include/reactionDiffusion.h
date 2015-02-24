@@ -33,6 +33,7 @@ public:
 	void ETF(string);
 	void ReadControlImg(string);
 	void UpdateControlMask();
+	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);
 	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
