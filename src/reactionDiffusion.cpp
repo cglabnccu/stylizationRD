@@ -353,8 +353,8 @@ void RD::DrawHistogram(Mat &A, Mat &B){
 			Scalar(0, 255, 0), 2, 8, 0);
 	}
 	/// Display
-	namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE);
-	imshow("calcHist Demo", histImage);
+	namedWindow("Histogram of A and B", CV_WINDOW_AUTOSIZE);
+	imshow("Histogram of A and B", histImage);
 }
 
 

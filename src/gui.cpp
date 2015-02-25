@@ -1378,7 +1378,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		//	element.FastGrayScott(0, 0, false, regionOn);
 		//}
 
-		////read 500x500 input image, and a flow field
+		////must read 500x500 input image first, and a flow field
 		//element.GrayScottModel();
 	}
 
@@ -1389,7 +1389,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		processing.CLAHE(dis);
 	}
 
-	element.DrawHistogram(dis, *element.c_B);
+	//element.DrawHistogram(dis, *element.c_B);
 
 	//post process
 	if (processingS == "Motion_Illusion")
@@ -1418,31 +1418,31 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "dirTexture")
 	{
-		processing.dirTexture(*element.c_A, element.Flowfield, dis);
+		processing.dirTexture(dis, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "PolarTexture")
 	{
-		processing.dirTexture_Polar(*element.c_A, element.Flowfield, dis);
+		processing.dirTexture_Polar(dis, element.Flowfield, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "adaThresholding")
 	{
-		processing.adaThresholding(*element.c_A, element.Mask, dis);
+		processing.adaThresholding(dis, element.Mask, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "Thresholding")
 	{
-		processing.Thresholding(*element.c_A, dis);
+		processing.Thresholding(dis, dis);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
 	else if (processingS == "Color_mapping")
 	{
-		processing.Colormapping(*element.c_A, element.Mask, element.Original_img, dis);
+		processing.Colormapping(dis, element.Mask, element.Original_img, dis);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
