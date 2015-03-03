@@ -10,7 +10,7 @@ bool MyApp::OnInit()
 }
 
 #pragma region MyPatternPicker
-MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
+MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const float pattern_size)
 	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 540))
 {
 	this->SetSizeHints(wxSize(600, 540), wxSize(600, 540));
@@ -33,6 +33,7 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title)
 	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
 	preview = new BasicDrawPane(this, Size(100, 100));
+	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
 	wxBoxSizer* right2 = new wxBoxSizer(wxVERTICAL);
@@ -755,7 +756,7 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event)
 void MyFrame::OnOpenPatternPicker(wxCommandEvent& event)
 {
 	activateRenderLoop(false);
-	patternpicker = new MyPatternPicker(this, wxT("Pattern Picker"));
+	patternpicker = new MyPatternPicker(this, wxT("Pattern Picker"), drawPane->element.s);
 	patternpicker->Show();
 	patternpicker->StartPreview();
 }

@@ -71,7 +71,7 @@ public:
 class MyPatternPicker : public wxFrame
 {
 public:
-	MyPatternPicker(wxWindow* parent, const wxString& title);
+	MyPatternPicker(wxWindow* parent, const wxString& title, const float pattern_size);
 	BasicDrawPane *preview;
 	wxSlider *slider_s;
 	wxStaticText *slider_s_t;
