@@ -32,6 +32,7 @@ public:
 	void ReadFlow(string);
 	void ETF(string);
 	void ReadControlImg(string);
+	void GradientSize(Point start, Point end);
 	void UpdateControlMask();
 	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);

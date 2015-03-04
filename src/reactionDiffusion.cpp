@@ -287,6 +287,11 @@ void RD::ReadControlImg(string file)
 	UpdateControlMask();
 }
 
+void RD::GradientSize(Point start, Point end)
+{
+
+}
+
 void RD::UpdateControlMask()
 {
 	const int Tolerate = 5;

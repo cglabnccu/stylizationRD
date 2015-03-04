@@ -42,6 +42,7 @@ public:
 private:
 	bool activateDraw;
 	Point LastMousePosition;
+	Point StartMousePosition;
 };
 
 class SimpleDrawPanel : public wxPanel

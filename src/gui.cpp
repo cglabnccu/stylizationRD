@@ -311,9 +311,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
 	controllingBox->Append("paint_to_B");
-	//controllingBox->Append("seeds");
 	controllingBox->Append("paint_white");
 	controllingBox->Append("paint_black");
+	controllingBox->Append("Gradient_Size");
 
 	toolbar1->AddControl(start);
 	toolbar1->AddControl(fill);
@@ -1256,42 +1256,18 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 		if (controllingS == "paint_white")
 		{
 			line(element.Addition_A, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
-			//ellipse(element.Addition_A,
-			//	Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-			//	Size(brushSize, brushSize),
-			//	0,
-			//	0,
-			//	360,
-			//	Scalar(1, 1, 1),
-			//	-1,
-			//	8);
 		}
 		else if (controllingS == "paint_black")
 		{
 			line(element.Addition_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
-			//ellipse(element.Addition_B,
-			//	Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
-			//	Size(brushSize, brushSize),
-			//	0,
-			//	0,
-			//	360,
-			//	Scalar(1, 1, 1),
-			//	-1,
-			//	8);
+		}
+		else if (controllingS == "Gradient_Size")
+		{
 		}
 		else
+		{
 			line(*element.c_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
-			//ellipse(
-			//*element.c_B,         // img - Image.
-			//Point(event.m_x % element.c_B->cols, event.m_y % element.c_B->rows),// center - Center of the ellipse.
-			//Size(brushSize, brushSize),           // axes - Half of the size of the ellipse main axes.
-			//0,                    // angle - Ellipse rotation angle in degrees.
-			//0,                    // startAngle - Starting angle of the elliptic arc in degrees.
-			//360,                  // endAngle - Ending angle of the elliptic arc in degrees.
-			//Scalar(0.5, 0.5, 0.5),// color - Ellipse color.
-			//-1,                    // thickness - Thickness of the ellipse arc outline
-			//8                     // lineType - Type of the ellipse boundary. See the line() description.
-			//);
+		}
 	}
 
 	LastMousePosition = Point(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
@@ -1326,6 +1302,10 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			8);
 		//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 	}
+	else if (controllingS == "Gradient_Size")
+	{
+		StartMousePosition = Point(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
+	}
 	else
 	{
 		ellipse(*element.c_B,
@@ -1344,6 +1324,11 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 {
 	activateDraw = false;
+	if (controllingS == "Gradient_Size")
+	{
+		element.GradientSize(StartMousePosition, LastMousePosition);
+		StartMousePosition = Point(0,0);
+	}
 }
 
 //first frame
@@ -1449,7 +1434,6 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else
 	{
-		//if (((MyFrame *)GetParent())->Segmentation_cb->GetValue()){
 		if (displayRegion && regionOn && regionSelected != 0)
 		{
 			element.DisplaySeg(dis, regionSelected - 1);
@@ -1458,9 +1442,19 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
 
+
 	wxImage img(dis.cols, dis.rows, dis.data, true);
 	wxBitmap bmp(img);
 	dc.DrawBitmap(bmp, 0, 0);
+	if (controllingS == "Gradient_Size")
+	{
+		wxPoint s = wxPoint(StartMousePosition.x, StartMousePosition.y);
+		wxPoint e = wxPoint(LastMousePosition.x, LastMousePosition.y);
+		if (s.x == s.y &&s.x == 0);
+		else dc.DrawLine(s, e);
+
+
+	}
 
 	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);
 }
