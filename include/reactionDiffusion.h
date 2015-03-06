@@ -32,13 +32,15 @@ public:
 	void ReadFlow(string);
 	void ETF(string);
 	void ReadControlImg(string);
-	void GradientSize(Point start, Point end);
+	void GradientSize(Point start, Point end); 
+	void UpdateSizeMask();
 	void UpdateControlMask();
 	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);
 	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
 	int GrayScottModel();// generate GS-Model
+	double distance_to_line(Point begin, Point end, Point x);
 
 	vector<PixelPattern> segmentation;
 	Mat *c_A;        // Current element of A

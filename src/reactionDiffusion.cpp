@@ -75,6 +75,7 @@ RD::RD(Size s)
 	ControlImgLoad = false;
 
 	innerAMPloopsize = 4;
+	UpdateSizeMask();
 }
 
 void RD::Init(Size s)
@@ -99,6 +100,7 @@ void RD::Init(Size s)
 	p_B = &B2;
 
 	innerAMPloopsize = 4;
+	UpdateSizeMask();
 }
 
 void RD::ReadSrc(string file)
@@ -289,7 +291,69 @@ void RD::ReadControlImg(string file)
 
 void RD::GradientSize(Point start, Point end)
 {
+	bool isVertical = false;// , isHorizontial = false;
+	float guide_line_m, prependicular_m;
+	//= -1 / guide_line_m;
+	if (start.y == end.y) { prependicular_m = 0; }
+	if (start.x == end.x) { isVertical = true; }
+	
+	if (!isVertical && start.x != end.x)
+	{
+		guide_line_m = (float)((Mask_control.rows - end.y) - (Mask_control.rows - start.y)) / (float)(end.x - start.x);
+		prependicular_m = -1.0 / guide_line_m;
+	}
 
+	// Two Line Cut the drawpanel to three region
+	// line1: start.y - Y = m(start.x - X)
+	// line2: end.y - Y = m(end.x - X)
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
+			double d = distance_to_line(Point(start.x, Mask_control.rows - start.y), Point(start.x + 1, Mask_control.rows - start.y + prependicular_m), Point(j, Mask_control.rows - i));
+			if ( d> 0)
+			{
+				Mask_control_size.at<float>(i, j) = 0.0;
+			}
+			//else if (distance_to_line(end, Point(end.x + 1, end.x + prependicular_m), Point(i,j)) < 0)
+			//{
+			//	Mask_control_size.at<float>(i, j) = 0.0;
+			//}
+			else
+			{
+				Mask_control_size.at<float>(i, j) =1- s;
+
+			}
+		}
+	}
+
+
+}
+
+double RD::distance_to_line(Point line_start, Point line_end, Point point)
+{
+	double normalLength = _hypot(line_end.x - line_start.x, line_end.y - line_start.y);
+	double distance = (double)((point.x - line_start.x) * (line_end.y - line_start.y) - (point.y - line_start.y) * (line_end.x - line_start.x)) / normalLength;
+	return distance;
+
+	//translate the begin to the origin
+	//end -= begin;
+	//x -= begin;
+
+
+	//double area = (double)(x.x*end.y - x.y*end.x);//CrossProduct(x, end);
+	//return area / norm(end);
+}
+
+void RD::UpdateSizeMask()
+{
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
+			Mask_control_size.at<float>(i, j) = 1 - s;
+		}
+	}
 }
 
 void RD::UpdateControlMask()
@@ -618,8 +682,8 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 			}
 			else
 			{
-				RA = sr*(-a*b*b + f*(1 - a));
-				RB = sr*(a*b*b - (k + f)*b);
+				RA = m_control_size[idx]*(-a*b*b + f*(1 - a));
+				RB = m_control_size[idx]*(a*b*b - (k + f)*b);
 			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);

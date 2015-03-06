@@ -841,6 +841,7 @@ void MyFrame::OnSliderS(wxCommandEvent& event)
 	else
 	{
 		drawPane->element.s = slider_s->GetValue() / 1000.0;
+		drawPane->element.UpdateSizeMask();
 		s.Printf("Size : %.3f", drawPane->element.s);
 	}
 	slider_s_t->SetLabel(s);
