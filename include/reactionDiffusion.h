@@ -37,9 +37,10 @@ public:
 	void UpdateControlMask();
 	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);
-	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6
+	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6 & 7
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
-	int GrayScottModel();// generate GS-Model
+	int GrayScottModel();     // generate GS-Model
+	void CheckboardSizeMask();// Testing checkboard Size mask
 	double distance_to_line(Point begin, Point end, Point x);
 
 	vector<PixelPattern> segmentation;

@@ -291,11 +291,12 @@ void RD::ReadControlImg(string file)
 
 void RD::GradientSize(Point start, Point end)
 {
-	bool isVertical = false, isUp_to_Down = false;// , isHorizontial = false;
+	bool isVertical = false, isUp_to_Down = false;
 	float guide_line_m, prependicular_m;
 
-	if (start.y > end.y) { isUp_to_Down = true; }
-	else if (start.y < end.y) { isUp_to_Down = false; }
+	//opencv Point (0, 0) is upperleft
+	if (start.y > end.y) { isUp_to_Down = false; }
+	else if (start.y < end.y) { isUp_to_Down = true; }
 	else { prependicular_m = 0; }
 	
 	if (start.x == end.x) { isVertical = true; }
@@ -309,6 +310,7 @@ void RD::GradientSize(Point start, Point end)
 	// Two Line Cut the drawpanel to three region
 	// line1: start.y - Y = m(start.x - X)
 	// line2: end.y - Y = m(end.x - X)
+	float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
 	for (int i = 0; i < Mask_control.rows; i++)
 	{
 		for (int j = 0; j < Mask_control.cols; j++)
@@ -321,28 +323,18 @@ void RD::GradientSize(Point start, Point end)
 											             Point(j, Mask_control.rows - i));
 			if (isUp_to_Down)
 			{
-				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
-				else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-				else
-				{
-					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1;
-				}
+				if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
+				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
+				else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
 			}
 			else
 			{
-				if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
-				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
-				else
-				{
-					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_startLine) / guideLine_length + 0.1;
-				}
+				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
+				else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
+				else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
 			}
 		}
 	}
-
-
 }
 
 double RD::distance_to_line(Point line_start, Point line_end, Point point)
@@ -350,14 +342,6 @@ double RD::distance_to_line(Point line_start, Point line_end, Point point)
 	double normalLength = _hypot(line_end.x - line_start.x, line_end.y - line_start.y);
 	double distance = (double)((point.x - line_start.x) * (line_end.y - line_start.y) - (point.y - line_start.y) * (line_end.x - line_start.x)) / normalLength;
 	return distance;
-
-	//translate the begin to the origin
-	//end -= begin;
-	//x -= begin;
-
-
-	//double area = (double)(x.x*end.y - x.y*end.x);//CrossProduct(x, end);
-	//return area / norm(end);
 }
 
 void RD::UpdateSizeMask()
@@ -440,7 +424,6 @@ void RD::DrawHistogram(Mat &A, Mat &B){
 	namedWindow("Histogram of A and B", CV_WINDOW_AUTOSIZE);
 	imshow("Histogram of A and B", histImage);
 }
-
 
 // add checkboard mask outside regionindex
 void RD::DisplaySeg(Mat &dis, int regionindex)
@@ -1096,3 +1079,22 @@ int RD::GrayScottModel()
 
 	return innerAMPloopsize;
 }
+
+// Testing checkboard Size mask
+void RD::CheckboardSizeMask()
+{
+
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
+			int k = (j / 50) % 2;
+			int l = (i / 50) % 2;
+			if ((k == 0 && l == 0) || (k == 1 && l == 1))
+				Mask_control_size.at<float>(i, j) = 0.6;
+			else
+				Mask_control_size.at<float>(i, j) = 0.2;
+		}
+	}
+}
+

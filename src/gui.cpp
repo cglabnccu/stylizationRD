@@ -263,7 +263,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONEdge2AddB, "&Edge2AddB\tCtrl-B", "add Edge to addition B");
 	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
-	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(false);
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(true);
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-M", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-S", "Open Mask_s Img.");
@@ -490,7 +490,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->GetSizer()->Layout();
 
 	render_loop_on = false;
-	isCLAHE = false;
+	isCLAHE = true;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
@@ -1192,6 +1192,7 @@ wxPanel(parent)
 	regionSelected = 0;
 	regionOn = false;
 	displayRegion = false;
+	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 {
