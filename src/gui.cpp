@@ -93,11 +93,8 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
 		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
 		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
-
 	}
-
-	//segmentation On
-	else
+	else//segmentation On
 	{
 		int sr = ((MyFrame *)GetParent())->drawPane->regionSelected - 1;
 		((MyFrame *)GetParent())->drawPane->element.segmentation[sr].l = preview->element.l;
@@ -161,7 +158,7 @@ void Picker::MouseLDown(wxMouseEvent &event)
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
 	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
-	((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
+	//((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
 
 	// clean preview
 	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
