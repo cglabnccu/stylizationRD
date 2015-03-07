@@ -321,22 +321,22 @@ void RD::GradientSize(Point start, Point end)
 											             Point(j, Mask_control.rows - i));
 			if (isUp_to_Down)
 			{
-				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.0; } //Biggest s = 1.0
+				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
 				else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
 				else
 				{
 					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length;
+					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1;
 				}
 			}
 			else
 			{
 				if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
-				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 0.0; }
+				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
 				else
 				{
 					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_startLine) / guideLine_length;
+					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_startLine) / guideLine_length + 0.1;
 				}
 			}
 		}

@@ -32,7 +32,7 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	//right
 	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(this, Size(100, 100));
+	preview = new BasicDrawPane(this, Size(110, 107));
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -73,6 +73,7 @@ void MyPatternPicker::OnSliderS(wxCommandEvent& event)
 	wxString s;
 	preview->element.s = slider_s->GetValue() / 1000.0;
 	s.Printf("Size : %.3f", preview->element.s);
+	preview->element.UpdateSizeMask();
 	slider_s_t->SetLabel(s);
 }
 void MyPatternPicker::OnSelect(wxCommandEvent& event)
@@ -154,11 +155,9 @@ wxPanel(parent)
 }
 void Picker::MouseLDown(wxMouseEvent &event)
 {
-
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
 	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
-	//((MyPatternPicker *)GetParent())->preview->element.s = 0.7;
 
 	// clean preview
 	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
@@ -1326,6 +1325,8 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 	{
 		element.GradientSize(StartMousePosition, LastMousePosition);
 		StartMousePosition = Point(0,0);
+
+		((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size : Gradient"));
 	}
 }
 
