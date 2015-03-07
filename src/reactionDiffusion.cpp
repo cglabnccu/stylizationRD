@@ -291,12 +291,15 @@ void RD::ReadControlImg(string file)
 
 void RD::GradientSize(Point start, Point end)
 {
-	bool isVertical = false;// , isHorizontial = false;
+	bool isVertical = false, isUp_to_Down = false;// , isHorizontial = false;
 	float guide_line_m, prependicular_m;
-	//= -1 / guide_line_m;
-	if (start.y == end.y) { prependicular_m = 0; }
-	if (start.x == end.x) { isVertical = true; }
+
+	if (start.y > end.y) { isUp_to_Down = true; }
+	else if (start.y < end.y) { isUp_to_Down = false; }
+	else { prependicular_m = 0; }
 	
+	if (start.x == end.x) { isVertical = true; }
+
 	if (!isVertical && start.x != end.x)
 	{
 		guide_line_m = (float)((Mask_control.rows - end.y) - (Mask_control.rows - start.y)) / (float)(end.x - start.x);
@@ -310,19 +313,31 @@ void RD::GradientSize(Point start, Point end)
 	{
 		for (int j = 0; j < Mask_control.cols; j++)
 		{
-			double d = distance_to_line(Point(start.x, Mask_control.rows - start.y), Point(start.x + 1, Mask_control.rows - start.y + prependicular_m), Point(j, Mask_control.rows - i));
-			if ( d> 0)
+			double distace_to_startLine = distance_to_line(Point(start.x - 1, Mask_control.rows - start.y - prependicular_m),
+														   Point(start.x + 1, Mask_control.rows - start.y + prependicular_m),
+														   Point(j, Mask_control.rows - i));
+			double distace_to_endLine = distance_to_line(Point(end.x - 1, Mask_control.rows - end.y - prependicular_m), 
+											             Point(end.x + 1, Mask_control.rows - end.y + prependicular_m), 
+											             Point(j, Mask_control.rows - i));
+			if (isUp_to_Down)
 			{
-				Mask_control_size.at<float>(i, j) = 0.0;
+				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.0; } //Biggest s = 1.0
+				else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
+				else
+				{
+					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
+					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length;
+				}
 			}
-			//else if (distance_to_line(end, Point(end.x + 1, end.x + prependicular_m), Point(i,j)) < 0)
-			//{
-			//	Mask_control_size.at<float>(i, j) = 0.0;
-			//}
 			else
 			{
-				Mask_control_size.at<float>(i, j) =1- s;
-
+				if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
+				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 0.0; }
+				else
+				{
+					float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
+					Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_startLine) / guideLine_length;
+				}
 			}
 		}
 	}

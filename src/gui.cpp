@@ -1451,6 +1451,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	{
 		wxPoint s = wxPoint(StartMousePosition.x, StartMousePosition.y);
 		wxPoint e = wxPoint(LastMousePosition.x, LastMousePosition.y);
+		dc.SetPen(wxPen(wxColor(255, 0, 0), 2)); // 2-pixels-thick red outline
 		if (s.x == s.y &&s.x == 0);
 		else dc.DrawLine(s, e);
 
