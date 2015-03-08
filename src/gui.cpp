@@ -264,6 +264,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(true);
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONHISTOGRAM, wxString(wxT("&histogram")), "Show histogram window", wxITEM_CHECK))->Check(false);
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONSIZEMASK, wxString(wxT("&Size Mask")), "Show Size Mask visualize window", wxITEM_CHECK))->Check(false);
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-M", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-S", "Open Mask_s Img.");
@@ -491,6 +493,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	render_loop_on = false;
 	isCLAHE = true;
+	isSizeMask = false;
+	isHistogram = false;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
@@ -734,6 +738,12 @@ void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
 	isCLAHE = !isCLAHE;
 }
+void MyFrame::OnHISTOGRAM(wxCommandEvent& event) {
+	isHistogram = !isHistogram;
+}
+void MyFrame::OnSIZEMASK(wxCommandEvent& event) {
+	isSizeMask = !isSizeMask;
+}
 
 void MyFrame::OnOpenMask(wxCommandEvent& event)
 {
@@ -805,6 +815,10 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 			drawPane->processingS = "distribution_A";
 			processingBox->SetSelection(0);
 		}
+	}
+	else if (drawPane->processingS == "Color_mapping")
+	{
+		if (!drawPane->element.SrcLoaded) { addlog(wxString("Must Loaded src before using Color_mapping! "), wxColour(*wxRED)); }
 	}
 
 	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B")
@@ -1370,12 +1384,9 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
-	if (((MyFrame *)GetParent())->isCLAHE)
-	{
-		processing.CLAHE(dis);
-	}
-
-	//element.DrawHistogram(dis, *element.c_B);
+	if (((MyFrame *)GetParent())->isCLAHE) { processing.CLAHE(dis); }
+	if (((MyFrame *)GetParent())->isHistogram) { element.DrawHistogram(dis, *element.c_B); }
+	if (((MyFrame *)GetParent())->isSizeMask) { processing.ShowColorMask(element.Mask_control_size); }
 
 	//post process
 	if (processingS == "Motion_Illusion")
@@ -1446,15 +1457,13 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	wxImage img(dis.cols, dis.rows, dis.data, true);
 	wxBitmap bmp(img);
 	dc.DrawBitmap(bmp, 0, 0);
+
 	if (controllingS == "Gradient_Size")
 	{
 		wxPoint s = wxPoint(StartMousePosition.x, StartMousePosition.y);
 		wxPoint e = wxPoint(LastMousePosition.x, LastMousePosition.y);
 		dc.SetPen(wxPen(wxColor(255, 0, 0), 2)); // 2-pixels-thick red outline
-		if (s.x == s.y &&s.x == 0);
-		else dc.DrawLine(s, e);
-
-
+		if (s.y != 0 || s.x != 0) dc.DrawLine(s, e);
 	}
 
 	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);

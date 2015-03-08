@@ -109,6 +109,8 @@ public:
 	void activateRenderLoop(bool on);
 
 	bool isCLAHE;
+	bool isHistogram;
+	bool isSizeMask;
 
 protected:
 	bool render_loop_on;
@@ -176,6 +178,8 @@ protected:
 	void OnMask2AddA(wxCommandEvent& event);
 	void OnMask2AddB(wxCommandEvent& event);
 	void OnCLAHE(wxCommandEvent& event);
+	void OnHISTOGRAM(wxCommandEvent& event);
+	void OnSIZEMASK(wxCommandEvent& event);
 
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
@@ -202,6 +206,8 @@ enum
 	ID_ONMask2AddA,
 	ID_ONMask2AddB,
 	ID_ONCLAHE,
+	ID_ONHISTOGRAM,
+	ID_ONSIZEMASK,
 	ID_ONOPEN_MASK,
 	ID_ONOPEN_MASK_S,
 	ID_ONOPEN_PATTERN_PICKER,

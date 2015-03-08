@@ -15,7 +15,8 @@ public:
 	void	adaThresholding(Mat &src,Mat &mask, Mat &dis);
 	void	LIC(Mat &flowfield, Mat &dis);
 	void	Thresholding(Mat &src, Mat &dis);
-	void	Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis);
+	void	Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis); 
+	void	ShowColorMask(Mat &src);
 	void	ReadTexture(string);
 
 	Mat		texture;
