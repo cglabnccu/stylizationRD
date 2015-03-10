@@ -23,8 +23,10 @@
 
 
 ### [in post process]
-  * Pattern Picker info & size slidebar
-  * [BUG] CAF degree selection
+  * Load Size img
+  * circle gradinet
+  * ~~stripe can see when "STOP"~~ 
+  * ETF iteration scope bigger( to Max(W, H) )
 
 ### [Future Work]
   1. more UI friendly
@@ -34,7 +36,7 @@
   3. oriental cloud patterns
   4. merge flowfield maker
   5. parameter f
-  6. ???
+  6. flowVector?
 
 ---
 
