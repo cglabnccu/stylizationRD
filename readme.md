@@ -23,8 +23,8 @@
 
 
 ### [in post process]
-  * Load Size img
-  * circle gradinet
+  * ~~Load Size img~~
+  * ~~circle gradinet~~
   * ~~stripe can see when "STOP"~~ 
   * ETF iteration scope bigger( to Max(W, H) )
 
