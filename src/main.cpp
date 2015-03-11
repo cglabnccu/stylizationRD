@@ -62,6 +62,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_SLIDER(SLIDER_AddB, MyFrame::OnSliderAddB)
 
 	EVT_SLIDER(SLIDER_S, MyFrame::OnSliderS)
+	EVT_CHOICE(COMBOBOX_GRADIENT_TYPE, MyFrame::OnGradientTypeBox)
 	EVT_SLIDER(SLIDER_F, MyFrame::OnSliderF)
 	EVT_SLIDER(SLIDER_K, MyFrame::OnSliderK)
 	EVT_SLIDER(SLIDER_L, MyFrame::OnSliderL)

@@ -381,6 +381,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_s = new wxSlider(controlpanel, SLIDER_S, int(drawPane->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
 
+	wxArrayString m_Choices;
+	m_Choices.Add("Linear"); 
+	m_Choices.Add("Circular");
+	gradientType = new wxChoice(controlpanel, COMBOBOX_GRADIENT_TYPE, wxDefaultPosition, wxDefaultSize, m_Choices, 0);
+	gradientType->SetSelection(0);
+	st_pattern_sizer->Add(gradientType, 0, wxEXPAND | wxLEFT, 10);
+
 	s.Printf("F : %.4f", drawPane->element.f);
 	slider_f_t = new wxStaticText(controlpanel, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
@@ -476,6 +483,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	rightside->Fit(controlpanel);
 	SetSizer(sizer);
 
+	gradientType->Hide();
+
 	slider_alpha->Disable();
 	slider_beta->Disable();
 
@@ -498,7 +507,7 @@ void MyFrame::OnExit(wxCommandEvent& event)
 }
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Wei-Ching Liu - Computer Science - National Chengchi University", "About CRD", wxOK | wxICON_INFORMATION);
+	wxMessageBox("Wei-Ching Liu\n - Computer Science - National Chengchi University", "About CRD", wxOK | wxICON_INFORMATION);
 }
 void MyFrame::OnToggleLog(wxCommandEvent& event)
 {
@@ -822,6 +831,16 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 void MyFrame::OnControllingBox(wxCommandEvent& event)
 {
 	drawPane->controllingS = controllingBox->GetValue();
+	if (controllingBox->GetValue() == "Gradient_Size")
+	{
+		gradientType->Show();
+		slider_s->Hide();
+		this->Layout();
+	}
+}
+void MyFrame::OnGradientTypeBox(wxCommandEvent& event)
+{
+	drawPane->gradientTypeS = gradientType->GetString(gradientType->GetSelection());
 }
 
 //Slides: Pattern Parameter
@@ -1192,6 +1211,7 @@ wxPanel(parent)
 	regionSelected = 0;
 	regionOn = false;
 	displayRegion = false;
+	gradientTypeS = "Linear";
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1259,9 +1279,7 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 		{
 			line(element.Addition_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
 		}
-		else if (controllingS == "Gradient_Size")
-		{
-		}
+		else if (controllingS == "Gradient_Size");
 		else
 		{
 			line(*element.c_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
@@ -1324,10 +1342,10 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 	activateDraw = false;
 	if (controllingS == "Gradient_Size")
 	{
-		element.GradientSize(StartMousePosition, LastMousePosition);
+		element.GradientSize(StartMousePosition, LastMousePosition, gradientTypeS);
 		StartMousePosition = Point(0,0);
 
-		((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size : Gradient"));
+		((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size:   ").Append(gradientTypeS).Append(" Gradient"));
 	}
 }
 

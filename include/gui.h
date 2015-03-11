@@ -23,6 +23,7 @@ public:
 	Mat temp;
 	string processingS;
 	string controllingS;
+	string gradientTypeS;
 	int regionSelected;
 	int brushSize;
 	int mindegree;
@@ -119,6 +120,7 @@ protected:
 	wxButton *clean;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
+	wxChoice *gradientType;
 	wxStaticText *slider_theta0_t;
 	wxStaticText *slider_brushSize_t;
 	wxStaticText *slider_addA_t;
@@ -145,6 +147,7 @@ protected:
 
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
+	void OnGradientTypeBox(wxCommandEvent& event);
 
 	void OnSliderBrushSize(wxCommandEvent& event);
 	void OnSliderAddA(wxCommandEvent& event);
@@ -216,6 +219,7 @@ enum
 	SLIDER_S_PICKER,
 	SLIDER_S,
 	SLIDER_S_T,
+	COMBOBOX_GRADIENT_TYPE,
 	SLIDER_F,
 	SLIDER_F_T,
 	SLIDER_K,

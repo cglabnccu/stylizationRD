@@ -289,49 +289,67 @@ void RD::ReadControlImg(string file)
 	UpdateControlMask();
 }
 
-void RD::GradientSize(Point start, Point end)
+void RD::GradientSize(Point start, Point end, string type)
 {
-	bool isVertical = false, isUp_to_Down = false;
-	float guide_line_m, prependicular_m;
-
-	//opencv Point (0, 0) is upperleft
-	if (start.y > end.y) { isUp_to_Down = false; }
-	else if (start.y < end.y) { isUp_to_Down = true; }
-	else { prependicular_m = 0; }
-	
-	if (start.x == end.x) { isVertical = true; }
-
-	if (!isVertical && start.x != end.x)
-	{
-		guide_line_m = (float)((Mask_control.rows - end.y) - (Mask_control.rows - start.y)) / (float)(end.x - start.x);
-		prependicular_m = -1.0 / guide_line_m;
-	}
-
-	// Two Line Cut the drawpanel to three region
-	// line1: start.y - Y = m(start.x - X)
-	// line2: end.y - Y = m(end.x - X)
 	float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-	for (int i = 0; i < Mask_control.rows; i++)
+	if (type == "Circular")
 	{
-		for (int j = 0; j < Mask_control.cols; j++)
+		// Circular gradient startPoint ----> endPoint
+		// Pattern Size:         Big     ---->  Small 
+		for (int i = 0; i < Mask_control.rows; i++)
 		{
-			double distace_to_startLine = distance_to_line(Point(start.x - 1, Mask_control.rows - start.y - prependicular_m),
-														   Point(start.x + 1, Mask_control.rows - start.y + prependicular_m),
-														   Point(j, Mask_control.rows - i));
-			double distace_to_endLine = distance_to_line(Point(end.x - 1, Mask_control.rows - end.y - prependicular_m), 
-											             Point(end.x + 1, Mask_control.rows - end.y + prependicular_m), 
-											             Point(j, Mask_control.rows - i));
-			if (isUp_to_Down)
+			for (int j = 0; j < Mask_control.cols; j++)
 			{
-				if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
-				else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-				else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+				double distace_to_Central = sqrt((double)(pow(start.x - j, 2) + (double)pow(start.y - i, 2)));
+				if (distace_to_Central > guideLine_length){ Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
+				else { Mask_control_size.at<float>(i, j) = abs(distace_to_Central) / guideLine_length; }
 			}
-			else
+		}
+
+	}
+	else if (type == "Linear")
+	{
+		bool isVertical = false, isUp_to_Down = false;
+		float guide_line_m, prependicular_m;
+
+		//opencv Point (0, 0) is upperleft
+		if (start.y > end.y) { isUp_to_Down = false; }
+		else if (start.y < end.y) { isUp_to_Down = true; }
+		else { prependicular_m = 0; }
+
+		if (start.x == end.x) { isVertical = true; }
+
+		if (!isVertical && start.x != end.x)
+		{
+			guide_line_m = (float)((Mask_control.rows - end.y) - (Mask_control.rows - start.y)) / (float)(end.x - start.x);
+			prependicular_m = -1.0 / guide_line_m;
+		}
+
+		// Two Line Cut the drawpanel to three region
+		// line1: start.y - Y = m(start.x - X)
+		// line2: end.y - Y = m(end.x - X)
+		for (int i = 0; i < Mask_control.rows; i++)
+		{
+			for (int j = 0; j < Mask_control.cols; j++)
 			{
-				if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
-				else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
-				else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+				double distace_to_startLine = distance_to_line(Point(start.x - 1, Mask_control.rows - start.y - prependicular_m),
+					Point(start.x + 1, Mask_control.rows - start.y + prependicular_m),
+					Point(j, Mask_control.rows - i));
+				double distace_to_endLine = distance_to_line(Point(end.x - 1, Mask_control.rows - end.y - prependicular_m),
+					Point(end.x + 1, Mask_control.rows - end.y + prependicular_m),
+					Point(j, Mask_control.rows - i));
+				if (isUp_to_Down)
+				{
+					if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
+					else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
+					else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+				}
+				else
+				{
+					if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
+					else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
+					else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+				}
 			}
 		}
 	}
