@@ -438,3 +438,37 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis)
 	channels.push_back(r);
 	merge(channels, dis);
 };
+
+void PP::ShowColorMask(Mat &src)
+{
+	const float M_PI = 3.14159265358979323846;
+	Mat tmp = Mat::zeros(src.size(), CV_32F);
+
+	vector<Mat> channels;
+	Mat r = Mat::zeros(src.size(), CV_32F);
+	Mat b = Mat::zeros(src.size(), CV_32F);
+	Mat g = Mat::zeros(src.size(), CV_32F);
+
+#pragma omp parallel for
+	for (int i = 0; i < src.rows; i++)
+	{
+		for (int j = 0; j < src.cols; j++)
+		{
+			float y = 0.5f;
+			float x = src.at<float>(i, j);	  //density
+			x = (alpha + 0.5f)*(x + (beta - 0.5f));
+			x = max(min(x, 1.0f), 0.0f);
+
+			r.at<float>(i, j) = x;
+			b.at<float>(i, j) = 1 - x;
+			g.at<float>(i, j) = 0;
+		}
+	}
+	channels.push_back(b);
+	channels.push_back(g);
+	channels.push_back(r);
+	merge(channels, tmp);
+
+	namedWindow("Size Mask", CV_WINDOW_AUTOSIZE);
+	imshow("Size Mask", tmp);
+};

@@ -264,6 +264,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(true);
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONHISTOGRAM, wxString(wxT("&histogram")), "Show histogram window", wxITEM_CHECK))->Check(false);
+	menuTool->Append(new wxMenuItem(menuTool, ID_ONSIZEMASK, wxString(wxT("&Size Mask")), "Show Size Mask visualize window", wxITEM_CHECK))->Check(false);
 	menuTool->AppendSeparator();
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-M", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-S", "Open Mask_s Img.");
@@ -500,6 +502,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	render_loop_on = false;
 	isCLAHE = true;
+	isSizeMask = false;
+	isHistogram = false;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
@@ -743,6 +747,14 @@ void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
 	isCLAHE = !isCLAHE;
 }
+void MyFrame::OnHISTOGRAM(wxCommandEvent& event)
+{
+	isHistogram = !isHistogram;
+}
+void MyFrame::OnSIZEMASK(wxCommandEvent& event)
+{
+	isSizeMask = !isSizeMask;
+}
 
 void MyFrame::OnOpenMask(wxCommandEvent& event)
 {
@@ -814,6 +826,10 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 			drawPane->processingS = "distribution_A";
 			processingBox->SetSelection(0);
 		}
+	}
+	else if (drawPane->processingS == "Color_mapping")
+	{
+		if (!drawPane->element.SrcLoaded) { addlog(wxString("Must Loaded src before using Color_mapping! "), wxColour(*wxRED)); }
 	}
 
 	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B")
@@ -1059,7 +1075,7 @@ void MyFrame::OnSegmentationBox(wxCommandEvent& event)
 
 
 	wxString s;
-	slider_s->SetValue(drawPane->element.segmentation[sr].size * 1000.0 );
+	slider_s->SetValue(drawPane->element.segmentation[sr].size * 1000.0);
 	slider_f->SetValue(drawPane->element.segmentation[sr].F * 1000.0 / 0.06);
 	slider_k->SetValue((drawPane->element.segmentation[sr].k - 0.03) / 0.04 * 1000);
 	slider_l->SetValue(drawPane->element.segmentation[sr].l);
@@ -1204,7 +1220,7 @@ element(s),
 wxPanel(parent)
 {
 	activateDraw = false;
-	brushSize = 1;
+	brushSize = 2;
 	customAnisotropicFunction = false;
 	mindegree = 0;
 	maxdegree = 0;
@@ -1268,33 +1284,36 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
 	Point MousePosition(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
-	
+
 	if (activateDraw)
 	{
 		if (controllingS == "paint_white")
 		{
 			line(element.Addition_A, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			line(*element.c_A, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);//Update C_A to (1,1,1) immediately
 		}
 		else if (controllingS == "paint_black")
 		{
 			line(element.Addition_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			line(*element.c_A, LastMousePosition, MousePosition, Scalar(0, 0, 0), brushSize); //Update C_A to (0,0,0) immediately
 		}
 		else if (controllingS == "Gradient_Size");
 		else
 		{
 			line(*element.c_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
+			line(*element.c_A, LastMousePosition, MousePosition, Scalar(0, 0, 0), brushSize); //Update C_A to (0,0,0) immediately
 		}
+		//render one frame
+		paintNow(false);
 	}
 
 	LastMousePosition = Point(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
-
 	//((MyFrame *)GetParent())->addlog("Panit event - Mouse Down at (%.0f, %.0f)", wxColour(*wxBLACK));
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
 	if (controllingS == "paint_white")
 	{
-		//element.Addition_A.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
 		ellipse(element.Addition_A,
 			Point(event.m_x%element.c_B->cols, event.m_y%element.c_B->rows),
 			Size(brushSize, brushSize),
@@ -1304,6 +1323,8 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			Scalar(1, 1, 1),
 			-1,
 			8);
+		//Update C_A to (1,1,1) immediately
+		ellipse(*element.c_A, Point(event.m_x%element.c_A->cols, event.m_y%element.c_A->rows), Size(brushSize, brushSize), 0, 0, 360, Scalar(0, 0, 0), -1, 8);
 	}
 	else if (controllingS == "paint_black")
 	{
@@ -1316,7 +1337,9 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			Scalar(1, 1, 1),
 			-1,
 			8);
-		//element.Addition_B.at<float>(event.m_y%element.c_B->rows, event.m_x%element.c_B->cols) = 1.0;
+
+		//Update C_A to (0,0,0) immediately
+		ellipse(*element.c_A, Point(event.m_x%element.c_A->cols, event.m_y%element.c_A->rows), Size(brushSize, brushSize), 0, 0, 360, Scalar(0, 0, 0), -1, 8);
 	}
 	else if (controllingS == "Gradient_Size")
 	{
@@ -1330,10 +1353,15 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 			0,
 			0,
 			360,
-			Scalar(0.5, 0.5, 0.5),
+			Scalar(1, 1, 1),
 			-1,
 			8);
+
+		//Update C_A to (0,0,0) immediately
+		ellipse(*element.c_A, Point(event.m_x%element.c_A->cols, event.m_y%element.c_A->rows), Size(brushSize, brushSize), 0, 0, 360, Scalar(0, 0, 0), -1, 8);
 	}
+	//render one frame
+	paintNow(false);
 
 	activateDraw = true;
 }
@@ -1375,8 +1403,8 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	if (render_loop_on)
 	{
 		//if (customAnisotropicFunction){
-			int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
-			//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
+		int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
 		//}
 		//else {
 		//	element.FastGrayScott(0, 0, false, regionOn);
@@ -1388,12 +1416,9 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
-	if (((MyFrame *)GetParent())->isCLAHE)
-	{
-		processing.CLAHE(dis);
-	}
-
-	//element.DrawHistogram(dis, *element.c_B);
+	if (((MyFrame *)GetParent())->isCLAHE) { processing.CLAHE(dis); }
+	if (((MyFrame *)GetParent())->isHistogram) { element.DrawHistogram(dis, *element.c_B); }
+	if (((MyFrame *)GetParent())->isSizeMask) { processing.ShowColorMask(element.Mask_control_size); }
 
 	//post process
 	if (processingS == "Motion_Illusion")
@@ -1464,15 +1489,13 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	wxImage img(dis.cols, dis.rows, dis.data, true);
 	wxBitmap bmp(img);
 	dc.DrawBitmap(bmp, 0, 0);
+
 	if (controllingS == "Gradient_Size")
 	{
 		wxPoint s = wxPoint(StartMousePosition.x, StartMousePosition.y);
 		wxPoint e = wxPoint(LastMousePosition.x, LastMousePosition.y);
 		dc.SetPen(wxPen(wxColor(255, 0, 0), 2)); // 2-pixels-thick red outline
-		if (s.x == s.y &&s.x == 0);
-		else dc.DrawLine(s, e);
-
-
+		if (s.y != 0 || s.x != 0) dc.DrawLine(s, e);
 	}
 
 	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("Fps: %.0f\t\tframeCounter: %i", 1000.0 / timeSincePrevFrame, counter), 0);
