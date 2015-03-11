@@ -231,8 +231,6 @@ void RD::ETF(string file)
 void RD::ReadControlImg(string file)
 {
 	Mask_control = imread(file, 0);
-	//Mask.convertTo(Mask, CV_8U);
-	//normalize(Mask_control, Mask_control, 0.0, 1.0, NORM_MINMAX, CV_8U);
 
 	resize(Mask_control, Mask_control, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_F, Mask_control_F, Mask.size(), 0, 0, CV_INTER_LINEAR);
@@ -289,10 +287,30 @@ void RD::ReadControlImg(string file)
 	UpdateControlMask();
 }
 
+void RD::ReadSizeControlImg(string file)
+{
+	Mat sizeImg = Mat::zeros(56, 56, CV_32F);;
+	sizeImg = imread(file, 0);
+	//imshow("loil", sizeImg);
+	resize(sizeImg, sizeImg, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_size, Mask_control_size, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	//imshow("loi1l", sizeImg);
+
+	for (int i = 0; i < Mask_control_size.rows; i++)
+	{
+		for (int j = 0; j < Mask_control_size.cols; j++)
+		{
+			int n = sizeImg.at<uchar>(i, j);
+			Mask_control_size.at<float>(i, j) = max((float)n / 255.0 , 0.1);
+		}
+	}
+
+}
+
 void RD::GradientSize(Point start, Point end, string type)
 {
 	float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
-	if (type == "Circular")
+	if (type == "Circular" || type == "Inverse Circular")
 	{
 		// Circular gradient startPoint ----> endPoint
 		// Pattern Size:         Big     ---->  Small 
@@ -301,8 +319,16 @@ void RD::GradientSize(Point start, Point end, string type)
 			for (int j = 0; j < Mask_control.cols; j++)
 			{
 				double distace_to_Central = sqrt((double)(pow(start.x - j, 2) + (double)pow(start.y - i, 2)));
-				if (distace_to_Central > guideLine_length){ Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-				else { Mask_control_size.at<float>(i, j) = abs(distace_to_Central) / guideLine_length; }
+				if (type == "Circular")
+				{
+					if (distace_to_Central > guideLine_length) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
+					else { Mask_control_size.at<float>(i, j) = abs(distace_to_Central) / guideLine_length; }
+				}
+				else //Inverse Circular
+				{
+					if (distace_to_Central > guideLine_length) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
+					else { Mask_control_size.at<float>(i, j) = 1-abs(distace_to_Central) / guideLine_length+0.1; }
+				}
 			}
 		}
 

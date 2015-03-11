@@ -460,8 +460,8 @@ void PP::ShowColorMask(Mat &src)
 			x = max(min(x, 1.0f), 0.0f);
 
 			r.at<float>(i, j) = x;
-			b.at<float>(i, j) = 1 - x;
-			g.at<float>(i, j) = 0;
+			b.at<float>(i, j) = x;
+			g.at<float>(i, j) = x;
 		}
 	}
 	channels.push_back(b);

@@ -174,6 +174,7 @@ protected:
 	void OnOpenETF(wxCommandEvent& event);
 	void OnOpenTex(wxCommandEvent& event);
 	void OnOpenControlImg(wxCommandEvent& event);
+	void OnOpenSizeImg(wxCommandEvent& event);
 	void OnSaveResult(wxCommandEvent& event);
 
 	void OnEdge2AddA(wxCommandEvent& event);
@@ -201,6 +202,7 @@ enum
 	ID_ONOPENETF,
 	ID_ONOPENTEX,
 	ID_ONOPENCONTOLIMG,
+	ID_ONOPENSIZEIMG,
 	ID_ONSAVE,
 	wxID_TOGGLE_LOG,
 

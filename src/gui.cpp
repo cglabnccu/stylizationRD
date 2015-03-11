@@ -254,6 +254,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_ONOPENETF, "&Open ETF\tCtrl-E", "Open image file");
 	menuFile->Append(ID_ONOPENTEX, "&Open Texture\tCtrl-T", "Open texture file");
 	menuFile->Append(ID_ONOPENCONTOLIMG, "&Open Control Image\tCtrl-C", "Open Control Image file");
+	menuFile->Append(ID_ONOPENSIZEIMG, "&Open Size Image\tCtrl-C", "Open Size Controlling Image file");
 	menuFile->Append(ID_ONSAVE, "&Save\tCtrl-E", "Save Result");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
@@ -386,6 +387,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	wxArrayString m_Choices;
 	m_Choices.Add("Linear"); 
 	m_Choices.Add("Circular");
+	m_Choices.Add("Inverse Circular");
 	gradientType = new wxChoice(controlpanel, COMBOBOX_GRADIENT_TYPE, wxDefaultPosition, wxDefaultSize, m_Choices, 0);
 	gradientType->SetSelection(0);
 	st_pattern_sizer->Add(gradientType, 0, wxEXPAND | wxLEFT, 10);
@@ -511,7 +513,9 @@ void MyFrame::OnExit(wxCommandEvent& event)
 }
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Wei-Ching Liu\n - Computer Science - National Chengchi University", "About CRD", wxOK | wxICON_INFORMATION);
+	wxMessageBox("Ming-Te Chi\nShu-Shuan Hsu\nWei-Ching Liu\n  Computer Science - National Chengchi University",
+		"About CRD",
+		wxOK | wxICON_INFORMATION);
 }
 void MyFrame::OnToggleLog(wxCommandEvent& event)
 {
@@ -704,6 +708,39 @@ void MyFrame::OnOpenControlImg(wxCommandEvent& event)
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
 
+}
+void MyFrame::OnOpenSizeImg(wxCommandEvent& event)
+{
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
+
+	wxFileDialog openFileDialog(this, _("Open size image file"), "", "", "image files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
+		addlog("Load Size Control Img Canceled", wxColour(*wxBLACK));
+		return;     // the user changed idea...
+	}
+	else
+	{
+		wxString s;
+		s.Printf("Load Size Control Img - %s", openFileDialog.GetFilename());
+		addlog(s, wxColour(*wxBLUE));
+
+		s.Printf("Size Control Img: %s", openFileDialog.GetFilename());
+		SetStatusText(s, 3);
+	}
+
+	// proceed loading the file chosen by the user, this can be done with e.g. wxWidgets input streams:
+	wxFileInputStream input_stream(openFileDialog.GetPath());
+	if (!input_stream.IsOk())
+	{
+		wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
+		return;
+	}
+	drawPane->element.ReadSizeControlImg((const char*)openFileDialog.GetPath().mb_str());
+
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
 }
 
 void MyFrame::OnSaveResult(wxCommandEvent& event)

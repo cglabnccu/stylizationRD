@@ -32,6 +32,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_MENU(ID_ONOPENETF, MyFrame::OnOpenETF)
 	EVT_MENU(ID_ONOPENTEX, MyFrame::OnOpenTex)
 	EVT_MENU(ID_ONOPENCONTOLIMG, MyFrame::OnOpenControlImg)
+	EVT_MENU(ID_ONOPENSIZEIMG, MyFrame::OnOpenSizeImg)
 	EVT_MENU(ID_ONSAVE, MyFrame::OnSaveResult)
     EVT_MENU(wxID_EXIT,  MyFrame::OnExit)
 
