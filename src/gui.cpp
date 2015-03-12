@@ -888,8 +888,13 @@ void MyFrame::OnControllingBox(wxCommandEvent& event)
 	{
 		gradientType->Show();
 		slider_s->Hide();
-		this->Layout();
 	}
+	else 
+	{
+		gradientType->Hide();
+		slider_s->Show();
+	}
+	this->Layout();
 }
 void MyFrame::OnGradientTypeBox(wxCommandEvent& event)
 {

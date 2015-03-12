@@ -291,10 +291,9 @@ void RD::ReadSizeControlImg(string file)
 {
 	Mat sizeImg = Mat::zeros(56, 56, CV_32F);;
 	sizeImg = imread(file, 0);
-	//imshow("loil", sizeImg);
+
 	resize(sizeImg, sizeImg, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_size, Mask_control_size, Mask.size(), 0, 0, CV_INTER_LINEAR);
-	//imshow("loi1l", sizeImg);
 
 	for (int i = 0; i < Mask_control_size.rows; i++)
 	{
@@ -548,6 +547,7 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 	float sd = 1.0;			  //speed of diffusion
 	float sr = 1.0 - this->s; //speed of reaction
 
+	// Kernel size: h, w
 	int kh = 3;
 	int kw = 3;
 
