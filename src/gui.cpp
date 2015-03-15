@@ -135,8 +135,8 @@ void MyPatternPicker::StartPreview()
 
 	preview->element.ReadFlow(path);
 	preview->processingS = "Thresholding";
-	preview->processing.beta = 0.5;
-	preview->processing.alpha = 0.5;
+	preview->processing.beta = 0.6;
+	preview->processing.alpha = 0.6;
 	Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(MyPatternPicker::onIdle));
 }
 void MyPatternPicker::onIdle(wxIdleEvent& evt)
@@ -506,6 +506,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	isCLAHE = true;
 	isSizeMask = false;
 	isHistogram = false;
+	drawPane->CLAHE_On = true;
 }
 void MyFrame::OnExit(wxCommandEvent& event)
 {
@@ -783,14 +784,17 @@ void MyFrame::OnMask2AddB(wxCommandEvent& event)
 void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
 	isCLAHE = !isCLAHE;
+	drawPane->CLAHE_On = isCLAHE;
 }
 void MyFrame::OnHISTOGRAM(wxCommandEvent& event)
 {
 	isHistogram = !isHistogram;
+	drawPane->histogramOn = isHistogram;
 }
 void MyFrame::OnSIZEMASK(wxCommandEvent& event)
 {
 	isSizeMask = !isSizeMask;
+	drawPane->sizeImgOn = isSizeMask;
 }
 
 void MyFrame::OnOpenMask(wxCommandEvent& event)
@@ -1270,6 +1274,9 @@ wxPanel(parent)
 	regionOn = false;
 	displayRegion = false;
 	gradientTypeS = "Linear";
+	histogramOn = false;
+	sizeImgOn = false;
+	CLAHE_On = false;
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1458,9 +1465,9 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 
 	dis = element.c_A->clone();
 
-	if (((MyFrame *)GetParent())->isCLAHE) { processing.CLAHE(dis); }
-	if (((MyFrame *)GetParent())->isHistogram) { element.DrawHistogram(dis, *element.c_B); }
-	if (((MyFrame *)GetParent())->isSizeMask) { processing.ShowColorMask(element.Mask_control_size); }
+	if (CLAHE_On) { processing.CLAHE(dis); }
+	if (histogramOn) { element.DrawHistogram(dis, *element.c_B); }
+	if (sizeImgOn) { processing.ShowColorMask(element.Mask_control_size); }
 
 	//post process
 	if (processingS == "Motion_Illusion")

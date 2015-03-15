@@ -31,6 +31,9 @@ public:
 	bool customAnisotropicFunction;
 	bool regionOn;
 	bool displayRegion;
+	bool histogramOn;
+	bool sizeImgOn;
+	bool CLAHE_On;
 	BasicDrawPane(wxFrame* parent,Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);

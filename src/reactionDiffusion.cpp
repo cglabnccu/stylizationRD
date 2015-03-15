@@ -60,7 +60,7 @@ RD::RD(Size s)
 	c_B = &B1;
 	p_B = &B2;
 
-	this->s = 0.3;
+	this->s = 0.6;
 	this->v = 0.0;
 	this->l = 1;
 	this->f = 0.0375;
