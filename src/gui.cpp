@@ -513,7 +513,7 @@ void MyFrame::OnExit(wxCommandEvent& event)
 }
 void MyFrame::OnAbout(wxCommandEvent& event)
 {
-	wxMessageBox("Ming-Te Chi\nShu-Shuan Hsu\nWei-Ching Liu\n  Computer Science - National Chengchi University",
+	wxMessageBox("Ming-Te Chi\nShu-Hsuan Hsu\nWei-Ching Liu\n\nComputer Science - National Chengchi University",
 		"About CRD",
 		wxOK | wxICON_INFORMATION);
 }
