@@ -33,6 +33,7 @@ RD::RD(Size s)
 {
 	RotationMat = Mat::zeros(s, CV_32F);
 	Flowfield = Mat::zeros(s, CV_32FC3);
+	gvf = Mat::zeros(s, CV_32FC3);
 	Mask = Mat::zeros(s, CV_32F);
 	Mask_s = Mat::zeros(s, CV_32F);
 	Mask_control = Mat::zeros(s, CV_32F);
@@ -227,6 +228,21 @@ void RD::ETF(string file)
 
 	ETFLoaded = true;
 	FlowLoaded = false;
+}
+
+void RD::GVF()
+{
+	gvf = Mat::zeros(Flowfield.size(), CV_32FC3);
+	gvf = Flowfield.clone();
+
+	for (int i = 0; i < Flowfield.rows; i++)
+	{
+		for (int j = 0; j < Flowfield.cols; j++)
+		{
+			Vec3f v = gvf.at<cv::Vec3f>(i, j);
+			gvf.at<cv::Vec3f>(i, j) = Vec3f(-v[1], v[0], 0.0);
+		}
+	}
 }
 
 void RD::ReadControlImg(string file)

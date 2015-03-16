@@ -264,6 +264,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONEdge2AddB, "&Edge2AddB\tCtrl-B", "add Edge to addition B");
 	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
+	menuTool->Append(ID_ONETF2GVF, "&ETF2GVF", "convert ETF to GVF");
+	menuTool->AppendSeparator();
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(true);
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONHISTOGRAM, wxString(wxT("&histogram")), "Show histogram window", wxITEM_CHECK))->Check(false);
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONSIZEMASK, wxString(wxT("&Size Mask")), "Show Size Mask visualize window", wxITEM_CHECK))->Check(false);
@@ -630,6 +632,8 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str());
+	drawPane->element.GVF();
+
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
 
@@ -780,6 +784,16 @@ void MyFrame::OnMask2AddA(wxCommandEvent& event)
 void MyFrame::OnMask2AddB(wxCommandEvent& event)
 {
 	drawPane->element.Addition_B += 0.5*drawPane->element.Mask;
+}
+void MyFrame::OnETF2GVF(wxCommandEvent& event)
+{
+	if (drawPane->element.ETFLoaded)
+	{
+		Mat tmp = drawPane->element.Flowfield.clone();
+		drawPane->element.Flowfield = drawPane->element.gvf.clone();
+		drawPane->element.gvf = tmp.clone();
+	}
+	else addlog("Must laoad ETF first", wxColour(*wxRED));
 }
 void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
@@ -1515,6 +1529,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	else if (processingS == "Thresholding")
 	{
 		processing.Thresholding(dis, dis);
+	//dis = processing.reduceGrayScale(element.Original_img, 4);
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
@@ -1533,7 +1548,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 		dis.convertTo(dis, CV_8UC1, 255);
 		cvtColor(dis, dis, CV_GRAY2BGR);
 	}
-
+	
 
 	wxImage img(dis.cols, dis.rows, dis.data, true);
 	wxBitmap bmp(img);

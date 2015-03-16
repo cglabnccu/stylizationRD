@@ -31,6 +31,7 @@ public:
 	void ReadSrc(string);
 	void ReadFlow(string);
 	void ETF(string);
+	void GVF();
 	void ReadControlImg(string);
 	void ReadSizeControlImg(string);
 	void GradientSize(Point start, Point end, string type); 
@@ -50,6 +51,7 @@ public:
 	Mat *c_B;
 	Mat *p_B;
 	Mat Flowfield;
+	Mat gvf;
 	Mat RotationMat;
 	Mat Original_img;
 	Mat Mask;

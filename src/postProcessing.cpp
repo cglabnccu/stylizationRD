@@ -472,3 +472,19 @@ void PP::ShowColorMask(Mat &src)
 	namedWindow("Size Mask", CV_WINDOW_AUTOSIZE);
 	imshow("Size Mask", tmp);
 };
+
+Mat PP::reduceGrayScale(Mat &src, int level)
+{
+	src.convertTo(src, CV_8UC1);
+
+	int thresholding = 256 / level;
+	for (int i = 0; i < src.rows; i++)
+	{
+		for (int j = 0; j < src.cols; j++)
+		{
+			src.at<float>(i, j) = (float)(((int)(src.at<float>(i, j))*255 / thresholding)*thresholding)/255.0;
+		}
+	}
+	imshow("kol", src);
+	return src;
+}

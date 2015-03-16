@@ -184,6 +184,7 @@ protected:
 	void OnEdge2AddB(wxCommandEvent& event);
 	void OnMask2AddA(wxCommandEvent& event);
 	void OnMask2AddB(wxCommandEvent& event);
+	void OnETF2GVF(wxCommandEvent& event);
 	void OnCLAHE(wxCommandEvent& event);
 	void OnHISTOGRAM(wxCommandEvent& event);
 	void OnSIZEMASK(wxCommandEvent& event);
@@ -213,6 +214,7 @@ enum
 	ID_ONEdge2AddB,
 	ID_ONMask2AddA,
 	ID_ONMask2AddB,
+	ID_ONETF2GVF,
 	ID_ONCLAHE,
 	ID_ONHISTOGRAM,
 	ID_ONSIZEMASK,
