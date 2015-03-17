@@ -599,6 +599,8 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadFlow((const char*)openFileDialog.GetPath().mb_str());
+	drawPane->element.GVF();
+
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
 }
@@ -787,7 +789,7 @@ void MyFrame::OnMask2AddB(wxCommandEvent& event)
 }
 void MyFrame::OnETF2GVF(wxCommandEvent& event)
 {
-	if (drawPane->element.ETFLoaded)
+	if (drawPane->element.ETFLoaded || drawPane->element.FlowLoaded)
 	{
 		Mat tmp = drawPane->element.Flowfield.clone();
 		drawPane->element.Flowfield = drawPane->element.gvf.clone();
