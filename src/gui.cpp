@@ -264,7 +264,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONEdge2AddB, "&Edge2AddB\tCtrl-B", "add Edge to addition B");
 	menuTool->Append(ID_ONMask2AddA, "&Mask2AddA", "add Mask to addition A");
 	menuTool->Append(ID_ONMask2AddB, "&Mask2AddB", "add Mask to addition B");
-	menuTool->Append(ID_ONETF2GVF, "&ETF2GVF", "convert ETF to GVF");
+	menuTool->Append(ID_ONETF2GVF, "&GenGVF", "generate GVF using addB");
 	menuTool->AppendSeparator();
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONCLAHE, wxString(wxT("&CLAHE")), "Contrast Limited Adaptive Histogram Equalization", wxITEM_CHECK))->Check(true);
 	menuTool->Append(new wxMenuItem(menuTool, ID_ONHISTOGRAM, wxString(wxT("&histogram")), "Show histogram window", wxITEM_CHECK))->Check(false);
@@ -605,7 +605,6 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadFlow((const char*)openFileDialog.GetPath().mb_str());
-	//drawPane->element.RotateFlow(45);
 
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
@@ -792,15 +791,13 @@ void MyFrame::OnMask2AddB(wxCommandEvent& event)
 {
 	drawPane->element.Addition_B += 0.5*drawPane->element.Mask;
 }
-void MyFrame::OnETF2GVF(wxCommandEvent& event)
+void MyFrame::OnGenGVF(wxCommandEvent& event)
 {
-	if (drawPane->element.ETFLoaded || drawPane->element.FlowLoaded)
-	{
-		Mat tmp = drawPane->element.Flowfield.clone();
-		drawPane->element.Flowfield = drawPane->element.gvf.clone();
-		drawPane->element.gvf = tmp.clone();
-	}
-	else addlog("Must load ETF first", wxColour(*wxRED));
+	drawPane->element.GVF();
+	wxString s;
+	s.Printf("Flowfield: gen_by_addB ");
+	SetStatusText(s, 1);
+
 }
 void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
@@ -912,6 +909,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		slider_alpha->Enable();
 		slider_beta->Enable();
 	}
+
 	if (processingBox->GetValue() == "LIC")
 	{
 		addDegree->Show();

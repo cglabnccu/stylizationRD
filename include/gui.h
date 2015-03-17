@@ -188,7 +188,7 @@ protected:
 	void OnEdge2AddB(wxCommandEvent& event);
 	void OnMask2AddA(wxCommandEvent& event);
 	void OnMask2AddB(wxCommandEvent& event);
-	void OnETF2GVF(wxCommandEvent& event);
+	void OnGenGVF(wxCommandEvent& event);
 	void OnCLAHE(wxCommandEvent& event);
 	void OnHISTOGRAM(wxCommandEvent& event);
 	void OnSIZEMASK(wxCommandEvent& event);
