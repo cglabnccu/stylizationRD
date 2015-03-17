@@ -57,6 +57,8 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_BUTTON(BUTTON_Start, MyFrame::OnStart)
 	EVT_BUTTON(BUTTON_Fill, MyFrame::OnFill)
 	EVT_BUTTON(BUTTON_Clean, MyFrame::OnClean)
+	EVT_BUTTON(BUTTON_addDegree, MyFrame::OnaddDegree)
+	EVT_BUTTON(BUTTON_subDegree, MyFrame::OnsubDegree)
 	EVT_COMBOBOX(COMBOBOX_Processing, MyFrame::OnProcessingBox)
 	EVT_COMBOBOX(COMBOBOX_Controlling, MyFrame::OnControllingBox)
 

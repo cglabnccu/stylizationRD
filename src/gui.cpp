@@ -297,6 +297,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	start = new wxButton(toolbar1, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
 	fill = new wxButton(toolbar1, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
 	clean = new wxButton(toolbar1, BUTTON_Clean, _T("Clean"), wxDefaultPosition, wxDefaultSize, 0);
+	addDegree = new wxButton(toolbar1, BUTTON_addDegree, _T("+22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
+	subDegree = new wxButton(toolbar1, BUTTON_subDegree, _T("-22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
 
 	processingBox = new wxComboBox(toolbar1, COMBOBOX_Processing, "distribution_A", wxDefaultPosition, wxDefaultSize, 0);
 	processingBox->Append("distribution_A");
@@ -321,6 +323,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	toolbar1->AddControl(clean);
 	toolbar1->AddControl(processingBox);
 	toolbar1->AddControl(controllingBox);
+	toolbar1->AddControl(addDegree);
+	toolbar1->AddControl(subDegree);
 
 	toolbar1->Realize();
 	SetToolBar(toolbar1);
@@ -502,6 +506,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_maxdegree->Hide();
 	slider_mindegree_t->Hide();
 	slider_maxdegree_t->Hide();
+	addDegree->Hide();
+	subDegree->Hide();
 	this->GetSizer()->Layout();
 
 	render_loop_on = false;
@@ -599,7 +605,7 @@ void MyFrame::OnOpenVfb(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadFlow((const char*)openFileDialog.GetPath().mb_str());
-	drawPane->element.GVF();
+	//drawPane->element.RotateFlow(45);
 
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
@@ -634,7 +640,6 @@ void MyFrame::OnOpenETF(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ETF((const char*)openFileDialog.GetPath().mb_str());
-	drawPane->element.GVF();
 
 	render_loop_on = true;
 	activateRenderLoop(render_loop_on);
@@ -795,7 +800,7 @@ void MyFrame::OnETF2GVF(wxCommandEvent& event)
 		drawPane->element.Flowfield = drawPane->element.gvf.clone();
 		drawPane->element.gvf = tmp.clone();
 	}
-	else addlog("Must laoad ETF first", wxColour(*wxRED));
+	else addlog("Must load ETF first", wxColour(*wxRED));
 }
 void MyFrame::OnCLAHE(wxCommandEvent& event)
 {
@@ -860,6 +865,14 @@ void MyFrame::OnClean(wxCommandEvent& event)
 	drawPane->paintNow(true); //execute clean action
 	addlog("Draw Panel Cleaned.", wxColour(*wxBLACK));
 }
+void MyFrame::OnaddDegree(wxCommandEvent& event) 
+{
+	drawPane->element.RotateFlow(22.5);
+}
+void MyFrame::OnsubDegree(wxCommandEvent& event) 
+{
+	drawPane->element.RotateFlow(-22.5);
+}
 
 //Comboboxes
 void MyFrame::OnProcessingBox(wxCommandEvent& event)
@@ -899,6 +912,18 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		slider_alpha->Enable();
 		slider_beta->Enable();
 	}
+	if (processingBox->GetValue() == "LIC")
+	{
+		addDegree->Show();
+		subDegree->Show();
+		//this->Layout();
+	}
+	else
+	{
+		addDegree->Hide();
+		subDegree->Hide();
+	}
+
 	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnControllingBox(wxCommandEvent& event)

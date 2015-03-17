@@ -123,6 +123,8 @@ protected:
 	wxButton *start;
 	wxButton *fill;
 	wxButton *clean;
+	wxButton *addDegree;
+	wxButton *subDegree;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
 	wxChoice *gradientType;
@@ -149,6 +151,8 @@ protected:
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);
+	void OnaddDegree(wxCommandEvent& event);
+	void OnsubDegree(wxCommandEvent& event);
 
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
@@ -228,6 +232,8 @@ enum
 	BUTTON_Clean,
 	COMBOBOX_Processing,
 	COMBOBOX_Controlling,
+	BUTTON_subDegree,
+	BUTTON_addDegree,
 
 	SLIDER_S_PICKER,
 	SLIDER_S,

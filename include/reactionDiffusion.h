@@ -32,6 +32,7 @@ public:
 	void ReadFlow(string);
 	void ETF(string);
 	void GVF();
+	void RotateFlow(float theta);
 	void ReadControlImg(string);
 	void ReadSizeControlImg(string);
 	void GradientSize(Point start, Point end, string type); 

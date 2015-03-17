@@ -245,6 +245,24 @@ void RD::GVF()
 	}
 }
 
+void RD::RotateFlow(float theta)
+{
+	theta = theta / 180.0 * M_PI;
+	for (int i = 0; i < Flowfield.rows; i++)
+	{
+		for (int j = 0; j < Flowfield.cols; j++)
+		{
+			Vec3f v = Flowfield.at<cv::Vec3f>(i, j);
+			// x' = x*cos(Theta) - y*sin(Theta)
+			// y' = y*cos(Theta) + x*sin(Theta)
+			float rx = v[0] * cos(theta) - v[1] * sin(theta);
+			float ry = v[1] * cos(theta) + v[0] * sin(theta);
+			Flowfield.at<cv::Vec3f>(i, j) = Vec3f(rx, ry, 0.0);
+		}
+	}
+
+}
+
 void RD::ReadControlImg(string file)
 {
 	Mask_control = imread(file, 0);
@@ -384,13 +402,13 @@ void RD::GradientSize(Point start, Point end, string type)
 				{
 					if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
 					else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-					else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+					else { Mask_control_size.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1); }
 				}
 				else
 				{
 					if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
 					else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
-					else { Mask_control_size.at<float>(i, j) = 1 - abs(distace_to_endLine) / guideLine_length + 0.1; }
+					else { Mask_control_size.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1); }
 				}
 			}
 		}

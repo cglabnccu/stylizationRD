@@ -96,7 +96,6 @@ void PP::CLAHE(Mat &src)
 	AHE.convertTo(src, CV_32FC1, 1.0f / 255);
 }
 
-
 void PP::motionIllu(Mat &src, Mat &flowfield, Mat &dis)
 {
 	vector<Mat> channels;
@@ -250,7 +249,6 @@ void PP::Texture(Mat &src, Mat &dis)
 	channels.push_back(r);
 	merge(channels, dis);
 };
-
 
 // X-aixs: angle between grident and flowvector
 // Y-aixs: density
@@ -473,6 +471,7 @@ void PP::ShowColorMask(Mat &src)
 	imshow("Size Mask", tmp);
 };
 
+//Unnfinish
 Mat PP::reduceGrayScale(Mat &src, int level)
 {
 	src.convertTo(src, CV_8UC1);
