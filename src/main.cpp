@@ -80,6 +80,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_CHOICE(COMBOBOX_Region, MyFrame::OnSegmentationBox)
 	EVT_CHECKBOX(CHECKBOX_DISPLAY_REGION, MyFrame::OnCheckboxDisplayRegion)
 
+	EVT_CHOICE(COMBOBOX_ColormappingMode, MyFrame::OnColorMappingMode)
 	EVT_SLIDER(SLIDER_Alpha, MyFrame::OnSliderAlpha)
 	EVT_SLIDER(SLIDER_Beta, MyFrame::OnSliderBeta)
 wxEND_EVENT_TABLE()

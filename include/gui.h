@@ -24,6 +24,7 @@ public:
 	string processingS;
 	string controllingS;
 	string gradientTypeS;
+	int colormappingMode;
 	int regionSelected;
 	int brushSize;
 	int mindegree;
@@ -127,7 +128,8 @@ protected:
 	wxButton *subDegree;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
-	wxChoice *gradientType;
+	wxChoice *gradientType; 
+	wxChoice *colormapMode;
 	wxStaticText *slider_theta0_t;
 	wxStaticText *slider_brushSize_t;
 	wxStaticText *slider_addA_t;
@@ -136,6 +138,7 @@ protected:
 	wxStaticText *slider_beta_t;
 	wxStaticText *slider_mindegree_t;
 	wxStaticText *slider_maxdegree_t;
+	wxStaticText *mode_t;
 	wxSlider *slider_theta0;
 	wxSlider *slider_brushSize;
 	wxSlider *slider_addA;
@@ -157,6 +160,7 @@ protected:
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
 	void OnGradientTypeBox(wxCommandEvent& event);
+	void OnColorMappingMode(wxCommandEvent& event);
 
 	void OnSliderBrushSize(wxCommandEvent& event);
 	void OnSliderAddA(wxCommandEvent& event);
@@ -262,6 +266,7 @@ enum
 	COMBOBOX_Region,
 	CHECKBOX_DISPLAY_REGION,
 
+	COMBOBOX_ColormappingMode,
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,
 	SLIDER_Beta,

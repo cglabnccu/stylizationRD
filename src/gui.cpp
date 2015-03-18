@@ -471,6 +471,18 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 #pragma region Post Processing Parameters
 	wxStaticBox *st_pp = new wxStaticBox(controlpanel, -1, wxT("Post Processing"), wxDefaultPosition, wxDefaultSize, wxTE_RICH2);
 	wxStaticBoxSizer *st_pp_sizer = new wxStaticBoxSizer(st_pp, wxVERTICAL);
+
+	wxArrayString Choices;
+	Choices.Add("Mode - 1");
+	Choices.Add("Mode - 2");
+	Choices.Add("Mode - 3");
+	colormapMode = new wxChoice(controlpanel, COMBOBOX_ColormappingMode, wxDefaultPosition, wxDefaultSize, Choices, 0);
+	colormapMode->SetSelection(1);
+	s.Printf("Color mapping Mode:");
+	mode_t = new wxStaticText(controlpanel, wxDEFAULT, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pp_sizer->Add(mode_t, 0, wxEXPAND | wxLEFT, 10);
+	st_pp_sizer->Add(colormapMode, 0, wxEXPAND | wxLEFT, 10);
+
 	s.Printf("alpha : %.3f", drawPane->processing.alpha);
 	slider_alpha_t = new wxStaticText(controlpanel, SLIDER_Alpha_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha_t, 0, wxEXPAND | wxLEFT, 10);
@@ -508,6 +520,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_maxdegree_t->Hide();
 	addDegree->Hide();
 	subDegree->Hide();
+	mode_t->Hide();
+	colormapMode->Hide();
 	this->GetSizer()->Layout();
 
 	render_loop_on = false;
@@ -894,9 +908,23 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 			processingBox->SetSelection(0);
 		}
 	}
-	else if (drawPane->processingS == "Color_mapping")
+	if (drawPane->processingS == "Color_mapping")
 	{
-		if (!drawPane->element.SrcLoaded) { addlog(wxString("Must Loaded src before using Color_mapping! "), wxColour(*wxRED)); }
+		if (!drawPane->element.SrcLoaded)
+		{
+			addlog(wxString("Must Loaded src before using Color_mapping! "), wxColour(*wxRED));
+			processingBox->SetSelection(0);
+		}
+		else
+		{
+			mode_t->Show();
+			colormapMode->Show();
+		}
+	}
+	else
+	{
+		mode_t->Hide();
+		colormapMode->Hide();
 	}
 
 	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B")
@@ -914,7 +942,6 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 	{
 		addDegree->Show();
 		subDegree->Show();
-		//this->Layout();
 	}
 	else
 	{
@@ -922,6 +949,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		subDegree->Hide();
 	}
 
+	this->Layout();
 	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnControllingBox(wxCommandEvent& event)
@@ -1242,6 +1270,11 @@ void MyFrame::OnSliderAddB(wxCommandEvent& event)
 }
 
 //Slides: Post Processing Parameter
+void MyFrame::OnColorMappingMode(wxCommandEvent& event)
+{
+	drawPane->colormappingMode = colormapMode->GetSelection()+1;
+
+}
 void MyFrame::OnSliderAlpha(wxCommandEvent& event)
 {
 	drawPane->processing.alpha = slider_alpha->GetValue() / 1000.0;
@@ -1313,6 +1346,7 @@ wxPanel(parent)
 	regionOn = false;
 	displayRegion = false;
 	gradientTypeS = "Linear";
+	colormappingMode = 1;
 	histogramOn = false;
 	sizeImgOn = false;
 	CLAHE_On = false;
@@ -1560,7 +1594,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "Color_mapping")
 	{
-		processing.Colormapping(dis, element.Mask, element.Original_img, dis);
+		processing.Colormapping(dis, element.Mask, element.Original_img, dis, colormappingMode);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}
