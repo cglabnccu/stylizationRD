@@ -477,7 +477,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	Choices.Add("Mode - 2");
 	Choices.Add("Mode - 3");
 	colormapMode = new wxChoice(controlpanel, COMBOBOX_ColormappingMode, wxDefaultPosition, wxDefaultSize, Choices, 0);
-	colormapMode->SetSelection(1);
+	colormapMode->SetSelection(0);
 	s.Printf("Color mapping Mode:");
 	mode_t = new wxStaticText(controlpanel, wxDEFAULT, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(mode_t, 0, wxEXPAND | wxLEFT, 10);
@@ -506,13 +506,17 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	SetSizer(sizer);
 
 	gradientType->Hide();
-
-	slider_alpha->Disable();
-	slider_beta->Disable();
+	
+	//postprocessing 
+	slider_alpha_t->Hide();
+	slider_beta_t->Hide();
+	slider_alpha->Hide();
+	slider_beta->Hide();
 
 	SegmentationBox->Hide();
 	DisplayRegion_cb->Hide();
-	fill->Disable();
+
+	// CAF GUI
 	degreeGUI->Hide();
 	slider_mindegree->Hide();
 	slider_maxdegree->Hide();
@@ -520,10 +524,14 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_maxdegree_t->Hide();
 	addDegree->Hide();
 	subDegree->Hide();
+
+	//Colormap mode GUI
 	mode_t->Hide();
 	colormapMode->Hide();
+
 	this->GetSizer()->Layout();
 
+	fill->Disable();
 	render_loop_on = false;
 	isCLAHE = true;
 	isSizeMask = false;
@@ -888,7 +896,7 @@ void MyFrame::OnsubDegree(wxCommandEvent& event)
 //Comboboxes
 void MyFrame::OnProcessingBox(wxCommandEvent& event)
 {
-	drawPane->processingS = processingBox->GetValue();
+	drawPane->processingS = processingBox->GetValue();;
 
 	if (drawPane->processingS == "dirTexture" || drawPane->processingS == "PolarTexture")
 	{
@@ -913,6 +921,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		if (!drawPane->element.SrcLoaded)
 		{
 			addlog(wxString("Must Loaded src before using Color_mapping! "), wxColour(*wxRED));
+			drawPane->processingS = "distribution_A";
 			processingBox->SetSelection(0);
 		}
 		else
@@ -927,15 +936,20 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		colormapMode->Hide();
 	}
 
-	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B")
+	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" 
+		|| processingBox->GetValue() == "LIC")
 	{
-		slider_alpha->Disable();
-		slider_beta->Disable();
+		slider_alpha_t->Hide();
+		slider_beta_t->Hide();
+		slider_alpha->Hide();
+		slider_beta->Hide();
 	}
 	else
 	{
-		slider_alpha->Enable();
-		slider_beta->Enable();
+		slider_alpha_t->Show();
+		slider_beta_t->Show();
+		slider_alpha->Show();
+		slider_beta->Show();
 	}
 
 	if (processingBox->GetValue() == "LIC")
