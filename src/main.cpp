@@ -20,6 +20,8 @@ END_EVENT_TABLE()
 // Pattern Picker region
 BEGIN_EVENT_TABLE(Picker, wxPanel)
 	EVT_LEFT_DOWN(Picker::MouseLDown)
+	EVT_MOTION(Picker::MouseMove)
+	EVT_LEFT_UP(Picker::MouseLUp)
 	EVT_PAINT(Picker::paintEvent)
 END_EVENT_TABLE()
 

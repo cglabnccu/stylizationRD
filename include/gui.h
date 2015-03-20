@@ -71,7 +71,13 @@ public:
 	void paintNow();
 	void render(wxDC& dc);
 	void MouseLDown(wxMouseEvent &event);
+	void MouseMove(wxMouseEvent &event);
+	void MouseLUp(wxMouseEvent &event);
 	DECLARE_EVENT_TABLE()
+private:
+	bool mouseLpressed;
+	Point LastMousePosition;
+	Point StartMousePosition;
 };
 
 class MyPatternPicker : public wxFrame

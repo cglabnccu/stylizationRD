@@ -152,9 +152,13 @@ wxPanel(parent)
 {
 	wxInitAllImageHandlers();
 	image.LoadFile(file, format);
+	mouseLpressed = false;
 }
 void Picker::MouseLDown(wxMouseEvent &event)
 {
+	mouseLpressed = true;
+	StartMousePosition = Point(min(max(event.m_x, 0), 540), min(max(event.m_y, 0), 540));
+
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
 	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
@@ -182,6 +186,36 @@ void Picker::MouseLDown(wxMouseEvent &event)
 	((MyPatternPicker *)GetParent())->slider_l_t->SetLabel(ss);
 
 }
+void Picker::MouseMove(wxMouseEvent &event)
+{
+	//Point MousePosition(min(max(event.m_x, 0), 540), min(max(event.m_y, 0), 540));
+	if (mouseLpressed)
+	{
+		LastMousePosition = Point(min(max(event.m_x, 0), 540), min(max(event.m_y, 0), 540));
+		float line_length = sqrt((double)(pow(StartMousePosition.x - LastMousePosition.x, 2) + (double)pow(StartMousePosition.y - LastMousePosition.y, 2)));
+
+		if (line_length <100)
+		{
+			((MyPatternPicker *)GetParent())->preview->element.s = 0.6;
+			((MyPatternPicker *)GetParent())->preview->element.UpdateSizeMask();
+
+		}
+		else
+		{
+			((MyPatternPicker *)GetParent())->preview->element.s = line_length / 600;
+			((MyPatternPicker *)GetParent())->preview->element.UpdateSizeMask();
+
+		}
+	}
+
+}
+void Picker::MouseLUp(wxMouseEvent &event) 
+{
+	mouseLpressed = false;
+	StartMousePosition = Point(0, 0);
+
+}
+
 void Picker::paintEvent(wxPaintEvent & evt)
 {
 	// depending on your system you may need to look at double-buffered dcs
@@ -196,7 +230,17 @@ void Picker::paintNow()
 }
 void Picker::render(wxDC&  dc)
 {
-	dc.DrawBitmap(image, 0, 0, false);
+		dc.DrawBitmap(image, 0, 0, false);
+
+	//if (1)
+	//{
+	//	wxPoint s = wxPoint(0, 0);
+	//	wxPoint e = wxPoint(10, 100);
+	//	dc.SetPen(wxPen(wxColor(255, 0, 0), 2)); // 2-pixels-thick red outline
+	//	if (s.y != 0 || s.x != 0) dc.DrawLine(s, e);
+	//}
+
+
 }
 #pragma endregion 
 
