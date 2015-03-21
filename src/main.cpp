@@ -81,6 +81,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_CHECKBOX(CHECKBOX_DISPLAY_REGION, MyFrame::OnCheckboxDisplayRegion)
 
 	EVT_CHOICE(COMBOBOX_ColormappingMode, MyFrame::OnColorMappingMode)
+	EVT_CHECKBOX(CHECKBOX_Colormapping_isAda, MyFrame::OnCheckboxisAda)
 	EVT_SLIDER(SLIDER_Alpha, MyFrame::OnSliderAlpha)
 	EVT_SLIDER(SLIDER_Beta, MyFrame::OnSliderBeta)
 wxEND_EVENT_TABLE()

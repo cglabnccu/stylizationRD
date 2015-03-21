@@ -483,9 +483,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	st_pp_sizer->Add(mode_t, 0, wxEXPAND | wxLEFT, 10);
 	st_pp_sizer->Add(colormapMode, 0, wxEXPAND | wxLEFT, 10);
 
+	Colormapping_isAda = new wxCheckBox(controlpanel, CHECKBOX_Colormapping_isAda, wxT("adaThreshloding"), wxPoint(20, 20));
+	Colormapping_isAda->SetValue(false);
+	st_pp_sizer->Add(Colormapping_isAda, 0, wxEXPAND | wxLEFT, 10);
+
 	s.Printf("alpha : %.3f", drawPane->processing.alpha);
 	slider_alpha_t = new wxStaticText(controlpanel, SLIDER_Alpha_T, s, wxDefaultPosition, wxDefaultSize, 0);
-	st_pp_sizer->Add(slider_alpha_t, 0, wxEXPAND | wxLEFT, 10);
+	st_pp_sizer->Add(slider_alpha_t, 0, wxEXPAND | wxLEFT | wxTOP, 10);
 	slider_alpha = new wxSlider(controlpanel, SLIDER_Alpha, int(drawPane->processing.alpha * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pp_sizer->Add(slider_alpha, 0, wxEXPAND | wxLEFT, 10);
 
@@ -512,7 +516,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	slider_beta_t->Hide();
 	slider_alpha->Hide();
 	slider_beta->Hide();
-
+	
+	//pattern UI
 	SegmentationBox->Hide();
 	DisplayRegion_cb->Hide();
 
@@ -528,6 +533,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//Colormap mode GUI
 	mode_t->Hide();
 	colormapMode->Hide();
+	Colormapping_isAda->Hide();
 
 	this->GetSizer()->Layout();
 
@@ -928,12 +934,14 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 		{
 			mode_t->Show();
 			colormapMode->Show();
+			Colormapping_isAda->Show();
 		}
 	}
 	else
 	{
 		mode_t->Hide();
 		colormapMode->Hide();
+		Colormapping_isAda->Hide();
 	}
 
 	if (processingBox->GetValue() == "distribution_A" || processingBox->GetValue() == "distribution_B" 
@@ -1284,6 +1292,10 @@ void MyFrame::OnSliderAddB(wxCommandEvent& event)
 }
 
 //Slides: Post Processing Parameter
+void MyFrame::OnCheckboxisAda(wxCommandEvent& event)
+{
+	drawPane->colormapping_isAda = Colormapping_isAda->GetValue();
+}
 void MyFrame::OnColorMappingMode(wxCommandEvent& event)
 {
 	drawPane->colormappingMode = colormapMode->GetSelection()+1;
@@ -1364,6 +1376,7 @@ wxPanel(parent)
 	histogramOn = false;
 	sizeImgOn = false;
 	CLAHE_On = false;
+	colormapping_isAda = false;
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1608,7 +1621,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	}
 	else if (processingS == "Color_mapping")
 	{
-		processing.Colormapping(dis, element.Mask, element.Original_img, dis, colormappingMode);
+		processing.Colormapping(dis, element.Mask, element.Original_img, dis, colormappingMode, colormapping_isAda);
 		dis.convertTo(dis, CV_8UC3, 255);
 		cvtColor(dis, dis, CV_RGB2BGR);
 	}

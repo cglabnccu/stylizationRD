@@ -406,7 +406,7 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis)
 	merge(channels, dis);
 };
 
-void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode)
+void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool isAdaThresholding)
 {
 	//Mode :  1-half color bg, 2-shining, 3-inverse shining 
 	vector<Mat> channels;
@@ -421,9 +421,18 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode)
 	{
 		for (int j = 0; j < src.cols; j++)
 		{
-			//float center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
-			float range = alpha / 2;
-			float center = beta;
+			float center, range;
+			if (isAdaThresholding)
+			{
+				center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
+				range = 0;
+			}
+			else
+			{
+				range = alpha / 2;
+				center = beta;
+			}
+
 
 			if (src.at<float>(i, j) > center + range)
 			{

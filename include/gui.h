@@ -35,7 +35,8 @@ public:
 	bool histogramOn;
 	bool sizeImgOn;
 	bool CLAHE_On;
-	BasicDrawPane(wxFrame* parent,Size);
+	bool colormapping_isAda;
+	BasicDrawPane(wxFrame* parent, Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow(bool);
@@ -150,6 +151,7 @@ protected:
 	wxSlider *slider_maxdegree;
 	wxChoice *SegmentationBox;
 	wxCheckBox *DisplayRegion_cb; // Is User Want to Use Modified Anisotropic function?
+	wxCheckBox *Colormapping_isAda;
 
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
@@ -177,6 +179,7 @@ protected:
 	void OnCheckboxSegmentation(wxCommandEvent& event);
 	void OnSegmentationBox(wxCommandEvent& event);
 	void OnCheckboxDisplayRegion(wxCommandEvent& event);
+	void OnCheckboxisAda(wxCommandEvent& event);
 
 	void OnSliderAlpha(wxCommandEvent& event);
 	void OnSliderBeta(wxCommandEvent& event);
@@ -196,7 +199,7 @@ protected:
 	void OnCLAHE(wxCommandEvent& event);
 	void OnHISTOGRAM(wxCommandEvent& event);
 	void OnSIZEMASK(wxCommandEvent& event);
-
+	
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
 	void OnOpenPatternPicker(wxCommandEvent& event);
@@ -266,6 +269,7 @@ enum
 	COMBOBOX_Region,
 	CHECKBOX_DISPLAY_REGION,
 
+	CHECKBOX_Colormapping_isAda,
 	COMBOBOX_ColormappingMode,
 	SLIDER_Alpha,
 	SLIDER_Alpha_T,
