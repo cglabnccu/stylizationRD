@@ -421,9 +421,11 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode)
 	{
 		for (int j = 0; j < src.cols; j++)
 		{
-			float center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
+			//float center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
+			float range = alpha / 2;
+			float center = beta;
 
-			if (src.at<float>(i, j) > center)
+			if (src.at<float>(i, j) > center + range)
 			{
 				if (mode == 1)//half color bg
 				{
@@ -444,6 +446,30 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode)
 					g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
 					r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
 				}
+			}
+			else if (src.at<float>(i, j) > center - range)
+			{
+				if (mode == 1)
+				{
+					double a = 1 - (src.at<float>(i, j) - (center - range)) / (range * 2);
+					a = max(a, 0.5);
+					r.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
+					b.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
+				}
+				else if (mode==2)
+				{
+					r.at<float>(i, j) = 1.0;
+					g.at<float>(i, j) = 1.0;
+					b.at<float>(i, j) = 1.0;
+				}
+				else
+				{
+					b.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
+					g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
+					r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+				}
+
 			}
 			else
 			{
