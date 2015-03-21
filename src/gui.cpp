@@ -94,6 +94,10 @@ void MyPatternPicker::OnSelect(wxCommandEvent& event)
 		((MyFrame *)GetParent())->slider_f_t->SetLabel(s);
 		s.Printf("l : %d", ((MyFrame *)GetParent())->drawPane->element.l);
 		((MyFrame *)GetParent())->slider_l_t->SetLabel(s);
+
+
+		((MyFrame *)GetParent())->drawPane->element.UpdatekMask();
+		((MyFrame *)GetParent())->drawPane->element.UpdateSizeMask();
 	}
 	else//segmentation On
 	{
@@ -158,6 +162,7 @@ void Picker::MouseLDown(wxMouseEvent &event)
 	((MyPatternPicker *)GetParent())->preview->element.k = 0.056 + 0.0000238*event.m_x;
 	((MyPatternPicker *)GetParent())->preview->element.f = 0.0375;
 	((MyPatternPicker *)GetParent())->preview->element.l = event.m_y / 70;
+	((MyPatternPicker *)GetParent())->preview->element.UpdatekMask();
 
 	// clean preview
 	*((MyPatternPicker *)GetParent())->preview->element.c_A = Mat::ones(((MyPatternPicker *)GetParent())->preview->element.Mask.size(), CV_32F);
@@ -317,6 +322,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	controllingBox->Append("paint_white");
 	controllingBox->Append("paint_black");
 	controllingBox->Append("Gradient_Size");
+	controllingBox->Append("Gradient_k");
 
 	toolbar1->AddControl(start);
 	toolbar1->AddControl(fill);
@@ -394,9 +400,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	m_Choices.Add("Linear"); 
 	m_Choices.Add("Circular");
 	m_Choices.Add("Inverse Circular");
-	gradientType = new wxChoice(controlpanel, COMBOBOX_GRADIENT_TYPE, wxDefaultPosition, wxDefaultSize, m_Choices, 0);
-	gradientType->SetSelection(0);
-	st_pattern_sizer->Add(gradientType, 0, wxEXPAND | wxLEFT, 10);
+	gradientType_s = new wxChoice(controlpanel, COMBOBOX_GRADIENT_S_TYPE, wxDefaultPosition, wxDefaultSize, m_Choices, 0);
+	gradientType_s->SetSelection(0);
+	st_pattern_sizer->Add(gradientType_s, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("Spacing : %.3f", drawPane->element.sd);
 	slider_sd_t = new wxStaticText(controlpanel, SLIDER_sd_T, s, wxDefaultPosition, wxDefaultSize, 0);
@@ -415,6 +421,10 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	st_pattern_sizer->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
 	slider_k = new wxSlider(controlpanel, SLIDER_K, int((drawPane->element.k - 0.03) / 0.04 * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_k, 0, wxEXPAND | wxLEFT, 10);
+
+	gradientType_k = new wxChoice(controlpanel, COMBOBOX_GRADIENT_k_TYPE, wxDefaultPosition, wxDefaultSize, m_Choices, 0);
+	gradientType_k->SetSelection(0);
+	st_pattern_sizer->Add(gradientType_k, 0, wxEXPAND | wxLEFT, 10);
 
 	s.Printf("l : %d", drawPane->element.l);
 	slider_l_t = new wxStaticText(controlpanel, SLIDER_L_T, s, wxDefaultPosition, wxDefaultSize, 0);
@@ -515,8 +525,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	rightside->Fit(controlpanel);
 	SetSizer(sizer);
 
-	gradientType->Hide();
-	
+	gradientType_s->Hide();
+	gradientType_k->Hide();
+
 	//postprocessing 
 	slider_alpha_t->Hide();
 	slider_beta_t->Hide();
@@ -985,21 +996,39 @@ void MyFrame::OnControllingBox(wxCommandEvent& event)
 	drawPane->controllingS = controllingBox->GetValue();
 	if (controllingBox->GetValue() == "Gradient_Size")
 	{
-		gradientType->Show();
+		gradientType_s->Show();
 		slider_s->Hide();
 	}
-	else 
+	else
 	{
-		gradientType->Hide();
+		gradientType_s->Select(0);
+		drawPane->gradientTypeS == "Linear";
+		gradientType_s->Hide();
 		slider_s->Show();
+	}
+	if (controllingBox->GetValue() == "Gradient_k")
+	{
+		gradientType_k->Show();
+		slider_k->Hide();
+	}
+	else
+	{
+		gradientType_k->Select(0);
+		drawPane->gradientTypeS == "Linear";
+		gradientType_k->Hide();
+		slider_k->Show();
 	}
 	this->Layout();
 }
-void MyFrame::OnGradientTypeBox(wxCommandEvent& event)
+void MyFrame::OnGradientSizeTypeBox(wxCommandEvent& event)
 {
-	drawPane->gradientTypeS = gradientType->GetString(gradientType->GetSelection());
+	drawPane->gradientTypeS = gradientType_s->GetString(gradientType_s->GetSelection());
 }
+void MyFrame::OnGradientkTypeBox(wxCommandEvent& event)
+{
+	drawPane->gradientTypeS = gradientType_k->GetString(gradientType_k->GetSelection());
 
+}
 //Slides: Pattern Parameter
 void MyFrame::OnSliderS(wxCommandEvent& event)
 {
@@ -1065,6 +1094,7 @@ void MyFrame::OnSliderK(wxCommandEvent& event)
 	{
 		drawPane->element.k = slider_k->GetValue() / 1000.0*0.04 + 0.03;
 		s.Printf("k : %.4f", drawPane->element.k);
+		drawPane->element.UpdatekMask();
 	}
 	slider_k_t->SetLabel(s);
 }
@@ -1471,6 +1501,7 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 			line(*element.c_A, LastMousePosition, MousePosition, Scalar(0, 0, 0), brushSize); //Update C_A to (0,0,0) immediately
 		}
 		else if (controllingS == "Gradient_Size");
+		else if (controllingS == "Gradient_k");
 		else
 		{
 			line(*element.c_B, LastMousePosition, MousePosition, Scalar(1, 1, 1), brushSize);
@@ -1514,7 +1545,7 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 		//Update C_A to (0,0,0) immediately
 		ellipse(*element.c_A, Point(event.m_x%element.c_A->cols, event.m_y%element.c_A->rows), Size(brushSize, brushSize), 0, 0, 360, Scalar(0, 0, 0), -1, 8);
 	}
-	else if (controllingS == "Gradient_Size")
+	else if (controllingS == "Gradient_Size" || controllingS == "Gradient_k")
 	{
 		StartMousePosition = Point(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
 	}
@@ -1543,10 +1574,17 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 	activateDraw = false;
 	if (controllingS == "Gradient_Size")
 	{
-		element.GradientSize(StartMousePosition, LastMousePosition, gradientTypeS);
+		element.Gradient(StartMousePosition, LastMousePosition, gradientTypeS, "size");
 		StartMousePosition = Point(0,0);
 
 		((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size:   ").Append(gradientTypeS).Append(" Gradient"));
+	}
+	else if (controllingS == "Gradient_k")
+	{
+		element.Gradient(StartMousePosition, LastMousePosition, gradientTypeS, "k");
+		StartMousePosition = Point(0, 0);
+
+		((MyFrame *)GetParent())->slider_k_t->SetLabel(wxString("k:   ").Append(gradientTypeS).Append(" Gradient"));
 	}
 }
 
@@ -1664,7 +1702,7 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	wxBitmap bmp(img);
 	dc.DrawBitmap(bmp, 0, 0);
 
-	if (controllingS == "Gradient_Size")
+	if (controllingS == "Gradient_Size" || controllingS == "Gradient_k")
 	{
 		wxPoint s = wxPoint(StartMousePosition.x, StartMousePosition.y);
 		wxPoint e = wxPoint(LastMousePosition.x, LastMousePosition.y);

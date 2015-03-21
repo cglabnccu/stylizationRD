@@ -131,7 +131,8 @@ protected:
 	wxButton *subDegree;
 	wxComboBox *processingBox;
 	wxComboBox *controllingBox;
-	wxChoice *gradientType; 
+	wxChoice *gradientType_s;
+	wxChoice *gradientType_k;
 	wxChoice *colormapMode;
 	wxStaticText *slider_theta0_t;
 	wxStaticText *slider_brushSize_t;
@@ -163,7 +164,8 @@ protected:
 
 	void OnProcessingBox(wxCommandEvent& event);
 	void OnControllingBox(wxCommandEvent& event);
-	void OnGradientTypeBox(wxCommandEvent& event);
+	void OnGradientSizeTypeBox(wxCommandEvent& event);
+	void OnGradientkTypeBox(wxCommandEvent& event);
 	void OnColorMappingMode(wxCommandEvent& event);
 
 	void OnSliderBrushSize(wxCommandEvent& event);
@@ -250,7 +252,8 @@ enum
 	SLIDER_S_T,
 	SLIDER_sd,
 	SLIDER_sd_T,
-	COMBOBOX_GRADIENT_TYPE,
+	COMBOBOX_GRADIENT_S_TYPE,
+	COMBOBOX_GRADIENT_k_TYPE,
 	SLIDER_F,
 	SLIDER_F_T,
 	SLIDER_K,

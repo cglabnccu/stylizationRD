@@ -36,8 +36,9 @@ public:
 	void RotateFlow(float theta);
 	void ReadControlImg(string);
 	void ReadSizeControlImg(string);
-	void GradientSize(Point start, Point end, string type); 
+	void Gradient(Point start, Point end, string type, string target);
 	void UpdateSizeMask();
+	void UpdatekMask();
 	void UpdateControlMask();
 	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);

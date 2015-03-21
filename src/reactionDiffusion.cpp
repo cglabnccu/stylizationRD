@@ -81,6 +81,7 @@ RD::RD(Size s)
 
 	innerAMPloopsize = 4;
 	UpdateSizeMask();
+	UpdatekMask();
 }
 
 void RD::Init(Size s)
@@ -391,8 +392,10 @@ void RD::ReadSizeControlImg(string file)
 
 }
 
-void RD::GradientSize(Point start, Point end, string type)
+void RD::Gradient(Point start, Point end, string type, string target)
 {
+	Mat tmp = Mat::zeros(Mask.size(), CV_32F);
+
 	float guideLine_length = sqrt((double)(pow(start.x - end.x, 2) + (double)pow(start.y - end.y, 2)));
 	if (type == "Circular" || type == "Inverse Circular")
 	{
@@ -405,13 +408,29 @@ void RD::GradientSize(Point start, Point end, string type)
 				double distace_to_Central = sqrt((double)(pow(start.x - j, 2) + (double)pow(start.y - i, 2)));
 				if (type == "Circular")
 				{
-					if (distace_to_Central > guideLine_length) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-					else { Mask_control_size.at<float>(i, j) = abs(distace_to_Central) / guideLine_length; }
+					if (distace_to_Central > guideLine_length) 
+					{
+						if(target == "size") tmp.at<float>(i, j) = 1.0;//Smallest s = 0.0
+						else if (target == "k") tmp.at<float>(i, j) = 0.066;// white
+					} 
+					else 
+					{ 
+						if (target == "size") tmp.at<float>(i, j) = abs(distace_to_Central) / guideLine_length;
+						else if (target == "k") tmp.at<float>(i, j) = 0.056 + (float)(abs(distace_to_Central) / guideLine_length) / 100.0;
+					}
 				}
 				else //Inverse Circular
 				{
-					if (distace_to_Central > guideLine_length) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
-					else { Mask_control_size.at<float>(i, j) = 1-abs(distace_to_Central) / guideLine_length+0.1; }
+					if (distace_to_Central > guideLine_length)
+					{ 
+						if (target == "size") tmp.at<float>(i, j) = 0.1;//Biggest s = 0.9
+						else if (target == "k") tmp.at<float>(i, j) = 0.056;
+					} 
+					else
+					{ 
+						if (target == "size") tmp.at<float>(i, j) = 1 - abs(distace_to_Central) / guideLine_length + 0.1;
+						else if (target == "k") tmp.at<float>(i, j) = 0.066 - (float)(abs(distace_to_Central) / (guideLine_length*100.0));
+					}
 				}
 			}
 		}
@@ -450,19 +469,48 @@ void RD::GradientSize(Point start, Point end, string type)
 					Point(j, Mask_control.rows - i));
 				if (isUp_to_Down)
 				{
-					if (distace_to_startLine < 0) { Mask_control_size.at<float>(i, j) = 0.1; } //Biggest s = 0.9
-					else if (distace_to_endLine > 0) { Mask_control_size.at<float>(i, j) = 1.0; } //Smallest s = 0.0
-					else { Mask_control_size.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1); }
+					if (distace_to_startLine < 0) 
+					{
+						if(target == "size") tmp.at<float>(i, j) = 0.1;  //Biggest s = 0.9
+						else if (target == "k") tmp.at<float>(i, j) = 0.056;
+					}
+					else if (distace_to_endLine > 0) 
+					{
+						if (target == "size") tmp.at<float>(i, j) = 1.0; //Smallest s = 0.0
+						else if (target == "k") tmp.at<float>(i, j) = 0.066;
+					} 
+					else 
+					{ 
+						if (target == "size") tmp.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1);
+						else if (target == "k") tmp.at<float>(i, j) = 0.066 - (abs(distace_to_endLine) / guideLine_length / 100.0);
+					}
 				}
 				else
 				{
-					if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
-					else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
-					else { Mask_control_size.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1); }
+					//if (distace_to_startLine > 0) { Mask_control_size.at<float>(i, j) = 0.1; }
+					//else if (distace_to_endLine < 0) { Mask_control_size.at<float>(i, j) = 1.0; }
+					//else { Mask_control_size.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1); }
+					if (distace_to_startLine > 0)
+					{
+						if (target == "size") tmp.at<float>(i, j) = 0.1;  //Biggest s = 0.9
+						else if (target == "k") tmp.at<float>(i, j) = 0.056;
+					}
+					else if (distace_to_endLine < 0)
+					{
+						if (target == "size") tmp.at<float>(i, j) = 1.0; //Smallest s = 0.0
+						else if (target == "k") tmp.at<float>(i, j) = 0.066;
+					}
+					else
+					{
+						if (target == "size") tmp.at<float>(i, j) = min(1, 1 - abs(distace_to_endLine) / guideLine_length + 0.1);
+						else if (target == "k") tmp.at<float>(i, j) = 0.066 - (abs(distace_to_endLine) / guideLine_length / 100.0);
+					}
 				}
 			}
 		}
 	}
+	if (target == "size") Mask_control_size = tmp.clone();
+	else if (target == "k") Mask_control_k = tmp.clone();
 }
 
 double RD::distance_to_line(Point line_start, Point line_end, Point point)
@@ -479,6 +527,17 @@ void RD::UpdateSizeMask()
 		for (int j = 0; j < Mask_control.cols; j++)
 		{
 			Mask_control_size.at<float>(i, j) = 1 - s;
+		}
+	}
+}
+
+void RD::UpdatekMask()
+{
+	for (int i = 0; i < Mask_control.rows; i++)
+	{
+		for (int j = 0; j < Mask_control.cols; j++)
+		{
+			Mask_control_k.at<float>(i, j) = k;
 		}
 	}
 }
@@ -814,7 +873,7 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 			else
 			{
 				RA = m_control_size[idx]*(-a*b*b + f*(1 - a));
-				RB = m_control_size[idx]*(a*b*b - (k + f)*b);
+				RB = m_control_size[idx]*(a*b*b - (m_control_k[idx] + f)*b);
 			}
 			p_A[idx] = max(min(a + (double)(DA + RA), 1.0), 0.0);
 			p_B[idx] = max(min(b + (double)(DB + RB + 0.04*(AB - AA)), 1.0), 0.0);
