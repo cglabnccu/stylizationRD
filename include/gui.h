@@ -102,10 +102,12 @@ public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	MyPatternPicker *patternpicker;
 	BasicDrawPane *drawPane;
+	wxSlider *slider_sd;
 	wxSlider *slider_s;
 	wxSlider *slider_f;
 	wxSlider *slider_k;
 	wxSlider *slider_l;
+	wxStaticText *slider_sd_t;
 	wxStaticText *slider_s_t;
 	wxStaticText *slider_f_t;
 	wxStaticText *slider_k_t;
@@ -169,6 +171,7 @@ protected:
 	void OnSliderAddB(wxCommandEvent& event);
 
 	void OnSliderS(wxCommandEvent& event);
+	void OnSliderSd(wxCommandEvent& event);
 	void OnSliderF(wxCommandEvent& event);
 	void OnSliderK(wxCommandEvent& event);
 	void OnSliderL(wxCommandEvent& event);
@@ -245,6 +248,8 @@ enum
 	SLIDER_S_PICKER,
 	SLIDER_S,
 	SLIDER_S_T,
+	SLIDER_sd,
+	SLIDER_sd_T,
 	COMBOBOX_GRADIENT_TYPE,
 	SLIDER_F,
 	SLIDER_F_T,

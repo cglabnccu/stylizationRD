@@ -458,9 +458,10 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool
 			}
 			else if (src.at<float>(i, j) > center - range)
 			{
+				double a = 1 - (src.at<float>(i, j) - (center - range)) / (range * 2);
+
 				if (mode == 1)
 				{
-					double a = 1 - (src.at<float>(i, j) - (center - range)) / (range * 2);
 					a = max(a, 0.5);
 					r.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
 					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
@@ -468,15 +469,16 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool
 				}
 				else if (mode==2)
 				{
-					r.at<float>(i, j) = 1.0;
-					g.at<float>(i, j) = 1.0;
-					b.at<float>(i, j) = 1.0;
+					r.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
+					b.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
 				}
 				else
 				{
-					b.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
-					g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
-					r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+					a = 1 - a;
+					r.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
+					b.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
 				}
 
 			}

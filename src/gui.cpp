@@ -398,6 +398,12 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	gradientType->SetSelection(0);
 	st_pattern_sizer->Add(gradientType, 0, wxEXPAND | wxLEFT, 10);
 
+	s.Printf("Spacing : %.3f", drawPane->element.sd);
+	slider_sd_t = new wxStaticText(controlpanel, SLIDER_sd_T, s, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_sd_t, 0, wxEXPAND | wxLEFT, 10);
+	slider_sd = new wxSlider(controlpanel, SLIDER_sd, int(drawPane->element.sd * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	st_pattern_sizer->Add(slider_sd, 0, wxEXPAND | wxLEFT, 10);
+
 	s.Printf("F : %.4f", drawPane->element.f);
 	slider_f_t = new wxStaticText(controlpanel, SLIDER_F_T, s, wxDefaultPosition, wxDefaultSize, 0);
 	st_pattern_sizer->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
@@ -1011,6 +1017,24 @@ void MyFrame::OnSliderS(wxCommandEvent& event)
 		s.Printf("Size : %.3f", drawPane->element.s);
 	}
 	slider_s_t->SetLabel(s);
+}
+void MyFrame::OnSliderSd(wxCommandEvent& event)
+{
+	wxString s;
+	if (Segmentation_cb->GetValue() && drawPane->regionSelected != 0)
+	{
+		drawPane->element.segmentation[drawPane->regionSelected - 1].sd = slider_sd->GetValue() / 1000.0;
+		s.Printf("Spacing : %.3f", drawPane->element.segmentation[drawPane->regionSelected - 1].sd);
+		drawPane->element.UpdateControlMask();
+	}
+	else
+	{
+		drawPane->element.sd = slider_sd->GetValue() / 1000.0;
+		//drawPane->element.UpdateSizeMask();
+		s.Printf("Spacing : %.3f", drawPane->element.sd);
+	}
+	slider_sd_t->SetLabel(s);
+
 }
 void MyFrame::OnSliderF(wxCommandEvent& event)
 {

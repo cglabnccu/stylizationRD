@@ -17,6 +17,7 @@ public:
 	float k; 
 	int l;
 	float size;
+	float sd;
 	float theta0;
 	bool CAF;
 	int dmin;
@@ -65,6 +66,7 @@ public:
 	Mat Mask_control_dmin;
 	Mat Mask_control_dmax;
 	Mat Mask_control_size;
+	Mat Mask_control_sd;
 	Mat Diffusion_A;
 	Mat Diffusion_B;
 	Mat Gradient_A; // Gradient vetor of A
@@ -78,6 +80,7 @@ public:
 	Mat B1;         // Element of B
 	Mat B2;
 
+	float sd;       // Pattern spacing
 	float s;        // Pattern size
 	float v;        // Weight of advection term (speed)
 	int l;          // Paramater of alpha, controls the edge number of the generated polygon pattern

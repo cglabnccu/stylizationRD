@@ -9,6 +9,7 @@ PixelPattern::PixelPattern()
 	this->k = 0;
 	this->l = 0;
 	this->size = 0;
+	this->sd = 0;
 	this->CAF = false;
 	this->dmax = 0;
 	this->dmin = 0;
@@ -27,6 +28,7 @@ PixelPattern::PixelPattern(int GrayScale, float F, float k, int l, float size, i
 	this->dmin = dmin;
 	this->theta0 = 0;
 	this->regionPixelSize = 0;
+	this->sd = 0;
 }
 
 RD::RD(Size s)
@@ -43,6 +45,7 @@ RD::RD(Size s)
 	Mask_control_dmin = Mat::zeros(s, CV_32F);
 	Mask_control_dmax = Mat::zeros(s, CV_32F);
 	Mask_control_size = Mat::zeros(s, CV_32F);
+	Mask_control_sd = Mat::zeros(s, CV_32F);
 	Mask_control_theta0 = Mat::zeros(s, CV_32F);
 	Gradient_A = Mat::zeros(s, CV_32FC3);
 	Gradient_B = Mat::zeros(s, CV_32FC3);
@@ -62,6 +65,7 @@ RD::RD(Size s)
 	p_B = &B2;
 
 	this->s = 0.6;
+	this->sd = 0.3;
 	this->v = 0.0;
 	this->l = 1;
 	this->f = 0.0375;
@@ -134,6 +138,7 @@ void RD::ReadSrc(string file)
 	resize(Mask_control_k, Mask_control_k, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_l, Mask_control_l, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_size, Mask_control_size, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	resize(Mask_control_sd, Mask_control_sd, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_dmin, Mask_control_dmin, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_dmax, Mask_control_dmax, Mask.size(), 0, 0, CV_INTER_LINEAR);
 	resize(Mask_control_theta0, Mask_control_theta0, Mask.size(), 0, 0, CV_INTER_LINEAR);
@@ -495,6 +500,7 @@ void RD::UpdateControlMask()
 					Mask_control_k.at<float>(i, j) = segmentation[num].k;
 					Mask_control_l.at<float>(i, j) = segmentation[num].l;
 					Mask_control_size.at<float>(i, j) = 1 - segmentation[num].size;
+					Mask_control_sd.at<float>(i, j) =0.7+ segmentation[num].sd;
 					Mask_control_dmin.at<float>(i, j) = (float)segmentation[num].dmin / 180.0 * M_PI;
 					Mask_control_dmax.at<float>(i, j) = (float)segmentation[num].dmax / 180.0 * M_PI;
 					Mask_control_theta0.at<float>(i, j) = (float)segmentation[num].theta0 / 180.0 * M_PI;
@@ -603,6 +609,7 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 	array_view<const float, 1> m_control_k(nRows*nCols, (float*)Mask_control_k.data); // control img - k
 	array_view<const float, 1> m_control_l(nRows*nCols, (float*)Mask_control_l.data); // control img - l
 	array_view<const float, 1> m_control_size(nRows*nCols, (float*)Mask_control_size.data); // control img - size
+	array_view<const float, 1> m_control_sd(nRows*nCols, (float*)Mask_control_sd.data); // control img - sd
 	array_view<const float, 1> m_control_dmin(nRows*nCols, (float*)Mask_control_dmin.data); // control img - dmin
 	array_view<const float, 1> m_control_dmax(nRows*nCols, (float*)Mask_control_dmax.data); // control img - dmax
 	array_view<const float, 1> m_control_theta0(nRows*nCols, (float*)Mask_control_theta0.data); // control img - dmax
@@ -624,7 +631,7 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 	float addB = this->addB;
 
 	// Scaling factors: Sd, Sr  (Refer to Section 3.2.1 in Paper)
-	float sd = 1.0;			  //speed of diffusion
+	float sd = 0.7 + this->sd;			  //speed of diffusion
 	float sr = 1.0 - this->s; //speed of reaction
 
 	// Kernel size: h, w
@@ -801,6 +808,8 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 			{
 				RA = m_control_size[idx] * (-a*b*b + m_control_F[idx] * (1 - a));
 				RB = m_control_size[idx] * (a*b*b - (m_control_k[idx] + m_control_F[idx])*b);
+				DA = m_control_sd[idx]*1.0*da;
+				DB = m_control_sd[idx]*0.5*db;
 			}
 			else
 			{
