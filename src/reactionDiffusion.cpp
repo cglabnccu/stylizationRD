@@ -195,7 +195,7 @@ void RD::ETF(string file)
 	Mat src_n;
 	Mat grad;
 	normalize(src, src_n, 0.0, 1.0, NORM_MINMAX, CV_32FC3);
-	GaussianBlur(src_n, src_n, Size(11, 11), 0, 0);
+	GaussianBlur(src_n, src_n, Size(91, 91), 0, 0);
 
 	/// Generate grad_x and grad_y
 	Mat grad_x, grad_y;

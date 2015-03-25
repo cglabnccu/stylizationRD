@@ -380,13 +380,14 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis)
 		for (int j = 0; j < src.cols; j++)
 		{
 			float center = ((1 - (mask.at<float>(i, j)))*beta + (mask.at<float>(i, j))*alpha);
-			if (src.at<float>(i, j) > center)
+			float range = 0.05;
+			if (src.at<float>(i, j) > center+range)
 			{
 				r.at<float>(i, j) = 1.0;
 				g.at<float>(i, j) = 1.0;
 				b.at<float>(i, j) = 1.0;
 			}
-			else if (src.at<float>(i, j) < center)
+			else if (src.at<float>(i, j) < center-range)
 			{
 				r.at<float>(i, j) = 0.0;
 				g.at<float>(i, j) = 0.0;
@@ -394,9 +395,9 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis)
 			}
 			else
 			{
-				r.at<float>(i, j) = 0.5;
-				g.at<float>(i, j) = 0.5;
-				b.at<float>(i, j) = 0.5;
+				r.at<float>(i, j) = (src.at<float>(i, j) - (center - range)) / (range * 2);
+				g.at<float>(i, j) = (src.at<float>(i, j) - (center - range)) / (range * 2);
+				b.at<float>(i, j) = (src.at<float>(i, j) - (center - range)) / (range * 2);
 			}
 		}
 	}
