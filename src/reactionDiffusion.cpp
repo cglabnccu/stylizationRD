@@ -681,6 +681,8 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 	max_degree = max_degree / 180.0 *M_PI;
 
 
+	float v = this->v;
+
 	// Gray-Scott models' paramaters
 	float f = this->f;
 	float k = this->k;
@@ -838,19 +840,145 @@ int RD::FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segme
 			index<1> y = idx % nCols;
 			float da = 0;
 			float db = 0;
-			for (int q = -kh / 2; q <= kh / 2; q++)
+			//for (int q = -kh / 2; q <= kh / 2; q++)
+			//{
+			//	for (int p = -kw / 2; p <= kw / 2; p++)
+			//	{
+			//		//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
+			//		//	continue;
+			//		index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
+			//		da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+			//		db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+			//	}
+			//}
+			//da /= (kw*kh - 1);
+			//db /= (kw*kh - 1);
+
+						//flowbase diffusion
+			int kh = 5 + (1 - m[idx]) * 6;
+			float sh = 0.0;
+			float sw = 0.0;
+			for (int q = 0; q < kh; q++)
 			{
-				for (int p = -kw / 2; p <= kw / 2; p++)
+				index<1> j = ((x + int(sh) + nRows) % nRows)*nCols + (y + int(sw) + nCols) % nCols;
+				index<1> jx3 = j * 3;
+				float fx;
+				float afx;
+				float fy;
+				float afy;
+
+				float th = sh;
+				float tw = sw;
+				for (int p = 0; p < kw; p++)
 				{
-					//if (x+q<0 || x+q>=nRows || y+p<0 || y+p>=nCols)
-					//	continue;
-					index<1> j = ((x + q + nRows) % nRows)*nCols + (y + p + nCols) % nCols;
+					j = ((x + int(th) + nRows) % nRows)*nCols + (y + int(tw) + nCols) % nCols;
+					jx3 = j * 3;
+					fx = p_flowfield[jx3];
+					afx = fx < 0 ? -fx : fx;
+					fy = -p_flowfield[jx3 + 1];
+					afy = fy < 0 ? -fy : fy;
+					th += (afy / (afx + afy))*afy / (fy);
+					tw += (afx / (afx + afy))*afx / (fx);
 					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
 					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
 				}
+				th = sh;
+				tw = sw;
+				for (int p = 0; p < kw; p++)
+				{
+					j = ((x + int(th) + nRows) % nRows)*nCols + (y + int(tw) + nCols) % nCols;
+					jx3 = j * 3;
+					fx = -p_flowfield[jx3];
+					afx = fx < 0 ? -fx : fx;
+					fy = p_flowfield[jx3 + 1];
+					afy = fy < 0 ? -fy : fy;
+					th += (afy / (afx + afy))*afy / (fy);
+					tw += (afx / (afx + afy))*afx / (fx);
+					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+				}
+				jx3 = j * 3;
+				fx = p_flowfield[jx3];
+				afx = fx < 0 ? -fx : fx;
+				fy = p_flowfield[jx3 + 1];
+				afy = fy < 0 ? -fy : fy;
+				sh += (afx / (afx + afy))*afx / (fx);
+				sw += (afy / (afx + afy))*afy / (fy);
+				j = ((x + int(sh) + nRows) % nRows)*nCols + (y + int(sw) + nCols) % nCols;
+				da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+				db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
 			}
-			da /= (kw*kh - 1);
-			db /= (kw*kh - 1);
+
+			sh = 0.0;
+			sw = 0.0;
+			for (int q = 0; q < kh; q++)
+			{
+				index<1> j = ((x + int(sh) + nRows) % nRows)*nCols + (y + int(sw) + nCols) % nCols;
+				index<1> jx3 = j * 3;
+				float fx;
+				float afx;
+				float fy;
+				float afy;
+				float th = sh;
+				float tw = sw;
+				for (int p = 0; p < kw; p++)
+				{
+					j = ((x + int(th) + nRows) % nRows)*nCols + (y + int(tw) + nCols) % nCols;
+					jx3 = j * 3;
+					fx = p_flowfield[jx3];
+					afx = fx < 0 ? -fx : fx;
+					fy = -p_flowfield[jx3 + 1];
+					afy = fy < 0 ? -fy : fy;
+					th += (afy / (afx + afy))*afy / (fy);
+					tw += (afx / (afx + afy))*afx / (fx);
+					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+				}
+				th = sh;
+				tw = sw;
+				for (int p = 0; p < kw; p++)
+				{
+					j = ((x + int(th) + nRows) % nRows)*nCols + (y + int(tw) + nCols) % nCols;
+					jx3 = j * 3;
+					fx = -p_flowfield[jx3];
+					afx = fx < 0 ? -fx : fx;
+					fy = p_flowfield[jx3 + 1];
+					afy = fy < 0 ? -fy : fy;
+					th += (afy / (afx + afy))*afy / (fy);
+					tw += (afx / (afx + afy))*afx / (fx);
+					da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+					db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+				}
+				jx3 = j * 3;
+				fx = -p_flowfield[jx3];
+				afx = fx < 0 ? -fx : fx;
+				fy = -p_flowfield[jx3 + 1];
+				afy = fy < 0 ? -fy : fy;
+				sh += (afx / (afx + afy))*afx / (fx);
+				sw += (afy / (afx + afy))*afy / (fy);
+				j = ((x + int(sh) + nRows) % nRows)*nCols + (y + int(sw) + nCols) % nCols;
+				da += 0.5*(alpha_A[j] + alpha_A[idx])*(c_A[j] - c_A[idx]);
+				db += 0.5*(alpha_A[j] + alpha_A[idx])*(c_B[j] - c_B[idx]);
+			}
+			da /= (2 * (kh - 1) * 2 * (kw + 1) - 1);
+			db /= (2 * (kh - 1) * 2 * (kw + 1) - 1);
+
+
+			float M = m[idx];
+			float MS = m_s[idx];
+			if (M > v) { M = 1.0; }
+
+			else { M = 0.0; }
+
+
+			if (MS > 0.1) { MS = 1.0; }
+
+			else { MS = 0.0; }
+				
+
+
+
+
 
 			//reaction diffusion
 			float a = c_A[idx];
