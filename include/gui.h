@@ -17,6 +17,8 @@ class BasicDrawPane : public wxPanel
 {
 
 public:
+	Vector<RD> undoStack;
+	Vector<RD> redoStack;
 	RD element;
 	PP processing;
 	Mat dis;
@@ -79,6 +81,8 @@ class MyPatternPicker : public wxFrame
 {
 public:
 	MyPatternPicker(wxWindow* parent, const wxString& title, const float pattern_size);
+	wxButton *undo;
+	wxButton *redo;
 	BasicDrawPane *preview;
 	wxSlider *slider_s;
 	wxStaticText *slider_s_t;
@@ -113,6 +117,8 @@ public:
 	wxStaticText *slider_k_t;
 	wxStaticText *slider_l_t;
 	wxCheckBox *Segmentation_cb; 
+	wxButton *undo;
+	wxButton *redo;
 	void addlog(wxString info, wxColour& color);
 	void activateRenderLoop(bool on);
 
@@ -159,6 +165,8 @@ protected:
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);
+	void OnUndo(wxCommandEvent& event);
+	void OnRedo(wxCommandEvent& event);
 	void OnaddDegree(wxCommandEvent& event);
 	void OnsubDegree(wxCommandEvent& event);
 
@@ -242,6 +250,8 @@ enum
 	BUTTON_Start,
 	BUTTON_Fill,
 	BUTTON_Clean,
+	BUTTON_UNDO,
+	BUTTON_REDO,
 	COMBOBOX_Processing,
 	COMBOBOX_Controlling,
 	BUTTON_subDegree,

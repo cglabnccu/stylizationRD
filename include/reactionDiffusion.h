@@ -27,8 +27,10 @@ public:
 
 class RD{
 public:
+	RD();
 	RD(Size);
 	void Init(Size);
+	void operator=(const RD &in);
 	void ReadSrc(string);
 	void ReadFlow(string);
 	void ETF(string);
