@@ -102,9 +102,9 @@ public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	MyPatternPicker *patternpicker;
 	BasicDrawPane *drawPane;
-	wxPanel* drawpanel;
-	wxBoxSizer* dps;
-	wxBoxSizer* leftside;
+	//wxPanel* drawpanel;
+	//wxBoxSizer* dps;
+	//wxBoxSizer* leftside;
 	wxPanel* dp;// drawpane Container
 	wxSlider *slider_sd;
 	wxSlider *slider_s;

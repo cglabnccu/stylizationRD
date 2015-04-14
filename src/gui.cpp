@@ -20,6 +20,9 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
+	wxPanel *Rightpanel = new wxPanel(this, -1);
+	Rightpanel->SetSizer(right);
+	//right->Fit(Rightpanel);
 
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
@@ -31,9 +34,9 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	left->Add(picker, 1, wxEXPAND);
 
 	//right
-	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
+	wxStaticText* s = new wxStaticText(Rightpanel, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	///preview = new BasicDrawPane(this, Size(110, 107));
+	preview = new BasicDrawPane(Rightpanel, Size(110, 107));
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -41,31 +44,31 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 
 	wxString ss;
 	ss.Printf("Size : %.3f", preview->element.s);
-	slider_s_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_s = new wxSlider(this, SLIDER_S_PICKER, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s = new wxSlider(Rightpanel, SLIDER_S_PICKER, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("F : %.4f", preview->element.f);
-	slider_f_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_f_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("k : %.4f", preview->element.k);
-	slider_k_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_k_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("l : %d", preview->element.l);
-	slider_l_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_l_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
 
 	right->Add(right2, 5, wxEXPAND);
 
-	wxButton *select = new wxButton(this, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
+	wxButton *select = new wxButton(Rightpanel, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(select, 2, wxEXPAND);
 
 
 	sizer->Add(left, 5, wxEXPAND);
-	sizer->Add(right, 1, wxEXPAND);
+	sizer->Add(Rightpanel, 1, wxEXPAND);
 	SetSizer(sizer);
 	Centre();
 }
@@ -340,7 +343,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//Sizer of whole window
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	//Sizer of leftside
-	leftside = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
 	//Sizer of rightside(control panel)
 	wxBoxSizer* rightside = new wxBoxSizer(wxVERTICAL);
 
@@ -352,28 +355,26 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 #pragma region Leftside: drawPane, log
 	//drawing panel
-	drawpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	wxPanel *drawpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	drawpanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
 
-	dps = new wxBoxSizer(wxHORIZONTAL);
-	dp = new wxPanel(drawpanel, wxID_ANY, wxDefaultPosition, wxSize(100, 256), wxTAB_TRAVERSAL);
+	wxBoxSizer *dps = new wxBoxSizer(wxHORIZONTAL);
+	dp = new wxPanel(drawpanel, wxID_ANY, wxDefaultPosition, wxSize(256, 256), wxTAB_TRAVERSAL);
 	dp->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT));
 	dp->SetSizer(dps);
 
 
 	drawPane = new BasicDrawPane(dp, Size(256, 256));
 	dps->Add(drawPane, 1, wxEXPAND);
-	//dps->Fit(dp);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(drawpanel, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
 
-//	int padding = ->getwidth
 	leftside->AddStretchSpacer(3);
 	leftside->Add(dp,0, wxCENTER);
 	leftside->AddStretchSpacer(3);
-	leftside->Add(log, 1, wxEXPAND);
+	leftside->Add(log, 2, wxEXPAND);
 #pragma endregion
 
 #pragma region Paint Parameters
@@ -632,16 +633,9 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
 
-
-	//drawpanel->SetAutoLayout(true);
-	dp->SetSize(wxSize(400, 400));
-	dp->Center();
-	dp->SetMinSize(wxSize(400, 300));
-	//drawpanel->Layout();
-	//dps->Fit();
- //dps->Layout();
-	//dps->Layout();
-//	leftside->Layout();
+	wxSize img(drawPane->element.Original_img.cols, drawPane->element.Original_img.rows);
+	dp->SetMinSize(img);
+	this->Layout();
 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
