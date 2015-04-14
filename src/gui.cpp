@@ -13,9 +13,6 @@ bool MyApp::OnInit()
 MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const float pattern_size)
 	: wxFrame(parent, -1, title, wxDefaultPosition, wxSize(600, 540))
 {
-	//undo = new wxButton(this, wxID_ANY, _T("Undo"), wxDefaultPosition, wxDefaultSize, 0);
-	//redo = new wxButton(this, wxID_ANY, _T("Redo"), wxDefaultPosition, wxDefaultSize, 0);
-
 	this->SetSizeHints(wxSize(600, 540), wxSize(600, 540));
 
 	wxPanel *panel = new wxPanel(this, -1);
@@ -35,7 +32,7 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	//right
 	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(this, Size(110, 107));
+	preview = new BasicDrawPane(this, Size(110, 107), false);
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -358,7 +355,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 #pragma region Leftside: drawPane, log
 	//drawing panel
-	drawPane = new BasicDrawPane(this, Size(256, 256));
+	drawPane = new BasicDrawPane(this, Size(256, 256), true);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
@@ -1467,7 +1464,7 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 #pragma endregion 
 
 #pragma region BasicDrawPane
-BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s) :
+BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s, bool canUndo) :
 processing(s),
 element(s),
 wxPanel(parent)
@@ -1489,6 +1486,7 @@ wxPanel(parent)
 
 	undoStack.clear();
 	redoStack.clear();
+	this->canUndo = canUndo;
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1575,10 +1573,13 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
-	undoStack.push_back(element);
-	((MyFrame *)GetParent())->undo->Enable();
-	redoStack.clear();
-	((MyFrame *)GetParent())->redo->Disable();
+	if (canUndo)
+	{
+		undoStack.push_back(element);
+		((MyFrame *)GetParent())->undo->Enable();
+		redoStack.clear();
+		((MyFrame *)GetParent())->redo->Disable();
+	}
 
 
 	if (controllingS == "paint_white")

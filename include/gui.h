@@ -17,6 +17,7 @@ class BasicDrawPane : public wxPanel
 {
 
 public:
+	BasicDrawPane(wxFrame* parent, Size, bool canUndo);
 	Vector<RD> undoStack;
 	Vector<RD> redoStack;
 	RD element;
@@ -38,7 +39,6 @@ public:
 	bool sizeImgOn;
 	bool CLAHE_On;
 	bool colormapping_isAda;
-	BasicDrawPane(wxFrame* parent, Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow(bool);
@@ -49,9 +49,11 @@ public:
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
+	bool canUndo;
 	Point LastMousePosition;
 	Point StartMousePosition;
 };
+
 
 class SimpleDrawPanel : public wxPanel
 {
@@ -81,8 +83,6 @@ class MyPatternPicker : public wxFrame
 {
 public:
 	MyPatternPicker(wxWindow* parent, const wxString& title, const float pattern_size);
-	wxButton *undo;
-	wxButton *redo;
 	BasicDrawPane *preview;
 	wxSlider *slider_s;
 	wxStaticText *slider_s_t;
