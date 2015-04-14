@@ -36,7 +36,7 @@ public:
 	bool sizeImgOn;
 	bool CLAHE_On;
 	bool colormapping_isAda;
-	BasicDrawPane(wxFrame* parent, Size);
+	BasicDrawPane(wxPanel* parent, Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow(bool);
@@ -102,6 +102,10 @@ public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	MyPatternPicker *patternpicker;
 	BasicDrawPane *drawPane;
+	wxPanel* drawpanel;
+	wxBoxSizer* dps;
+	wxBoxSizer* leftside;
+	wxPanel* dp;// drawpane Container
 	wxSlider *slider_sd;
 	wxSlider *slider_s;
 	wxSlider *slider_f;

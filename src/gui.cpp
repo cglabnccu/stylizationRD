@@ -4,6 +4,7 @@
 bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 730));
+	frame->Maximize(true);
 	frame->Show(true);
 
 	return true;
@@ -32,7 +33,7 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	//right
 	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(this, Size(110, 107));
+	///preview = new BasicDrawPane(this, Size(110, 107));
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -339,7 +340,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	//Sizer of whole window
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	//Sizer of leftside
-	wxBoxSizer* leftside = new wxBoxSizer(wxVERTICAL);
+	leftside = new wxBoxSizer(wxVERTICAL);
 	//Sizer of rightside(control panel)
 	wxBoxSizer* rightside = new wxBoxSizer(wxVERTICAL);
 
@@ -351,13 +352,27 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 #pragma region Leftside: drawPane, log
 	//drawing panel
-	drawPane = new BasicDrawPane(this, Size(256, 256));
+	drawpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	drawpanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+
+	dps = new wxBoxSizer(wxHORIZONTAL);
+	dp = new wxPanel(drawpanel, wxID_ANY, wxDefaultPosition, wxSize(100, 256), wxTAB_TRAVERSAL);
+	dp->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT));
+	dp->SetSizer(dps);
+
+
+	drawPane = new BasicDrawPane(dp, Size(256, 256));
+	dps->Add(drawPane, 1, wxEXPAND);
+	//dps->Fit(dp);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
-	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
+	log = new wxTextCtrl(drawpanel, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
 
-	leftside->Add(drawPane, 7, wxEXPAND);
+//	int padding = ->getwidth
+	leftside->AddStretchSpacer(3);
+	leftside->Add(dp,0, wxCENTER);
+	leftside->AddStretchSpacer(3);
 	leftside->Add(log, 1, wxEXPAND);
 #pragma endregion
 
@@ -519,10 +534,12 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 #pragma endregion
 
 	//set portion of size: leftside & rightside(control)
+	drawpanel->SetSizer(leftside);
 	controlpanel->SetSizer(rightside);
-	sizer->Add(leftside, 7, wxEXPAND);
+	sizer->Add(drawpanel, 7, wxEXPAND);
 	sizer->Add(controlpanel, 3, wxEXPAND);
 	rightside->Fit(controlpanel);
+	leftside->Fit(drawpanel);
 	SetSizer(sizer);
 
 	gradientType_s->Hide();
@@ -614,6 +631,17 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
+
+
+	//drawpanel->SetAutoLayout(true);
+	dp->SetSize(wxSize(400, 400));
+	dp->Center();
+	dp->SetMinSize(wxSize(400, 300));
+	//drawpanel->Layout();
+	//dps->Fit();
+ //dps->Layout();
+	//dps->Layout();
+//	leftside->Layout();
 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
@@ -989,6 +1017,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 	}
 
 	this->Layout();
+	dp->Center();
 	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnControllingBox(wxCommandEvent& event)
@@ -1412,7 +1441,7 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 #pragma endregion 
 
 #pragma region BasicDrawPane
-BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s) :
+BasicDrawPane::BasicDrawPane(wxPanel* parent, Size s) :
 processing(s),
 element(s),
 wxPanel(parent)
