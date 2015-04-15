@@ -31,6 +31,61 @@ PixelPattern::PixelPattern(int GrayScale, float F, float k, int l, float size, i
 	this->sd = 0;
 }
 
+RD::RD()
+{
+	Size s = Size(256, 256);
+	RotationMat = Mat::zeros(s, CV_32F);
+	Flowfield = Mat::zeros(s, CV_32FC3);
+	gvf = Mat::zeros(s, CV_32FC3);
+	Mask = Mat::zeros(s, CV_32F);
+	Mask_s = Mat::zeros(s, CV_32F);
+	Mask_control = Mat::zeros(s, CV_32F);
+	Mask_control_F = Mat::zeros(s, CV_32F);
+	Mask_control_k = Mat::zeros(s, CV_32F);
+	Mask_control_l = Mat::zeros(s, CV_32F);
+	Mask_control_dmin = Mat::zeros(s, CV_32F);
+	Mask_control_dmax = Mat::zeros(s, CV_32F);
+	Mask_control_size = Mat::zeros(s, CV_32F);
+	Mask_control_sd = Mat::zeros(s, CV_32F);
+	Mask_control_theta0 = Mat::zeros(s, CV_32F);
+	Gradient_A = Mat::zeros(s, CV_32FC3);
+	Gradient_B = Mat::zeros(s, CV_32FC3);
+	Diffusion_A = Mat::zeros(s, CV_32F);
+	Diffusion_B = Mat::zeros(s, CV_32F);
+	Addition_A = Mat::zeros(s, CV_32F);
+	Addition_B = Mat::zeros(s, CV_32F);
+	alpha_A = Mat::zeros(s, CV_32F);
+	alpha_B = Mat::zeros(s, CV_32F);
+	A1 = Mat::ones(s, CV_32F);
+	A2 = Mat::ones(s, CV_32F);
+	B1 = Mat::zeros(s, CV_32F);
+	B2 = Mat::zeros(s, CV_32F);
+	c_A = &A1;
+	p_A = &A2;
+	c_B = &B1;
+	p_B = &B2;
+
+	this->s = 0.6;
+	this->sd = 0.3;
+	this->v = 0.0;
+	this->l = 1;
+	this->f = 0.0375;
+	this->k = 0.05775;
+	this->theta0 = 0;
+	this->addA = 0.5;
+	this->addB = 0.5;
+
+	SrcLoaded = false;
+	FlowLoaded = false;
+	ETFLoaded = false;
+	ControlImgLoad = false;
+
+	innerAMPloopsize = 4;
+	UpdateSizeMask();
+	UpdatekMask();
+}
+
+
 RD::RD(Size s)
 {
 	RotationMat = Mat::zeros(s, CV_32F);
@@ -108,6 +163,32 @@ void RD::Init(Size s)
 	innerAMPloopsize = 4;
 	UpdateSizeMask();
 }
+
+void RD::operator=(const RD &in)
+{
+	resize(Flowfield, Flowfield, Mask.size(), 0, 0, CV_INTER_LINEAR);
+	RotationMat = in.RotationMat.clone();
+	Gradient_A = in.Gradient_A.clone();
+	Gradient_B = in.Gradient_B.clone();
+	Diffusion_A = in.Diffusion_A.clone();
+	Diffusion_B = in.Diffusion_B.clone();
+	Addition_A = in.Addition_A.clone();
+	Addition_B = in.Addition_B.clone();
+	alpha_A = in.alpha_A.clone();
+	alpha_B = in.alpha_B.clone();
+	A1 = in.A1.clone();
+	A2 = in.A2.clone();
+	B1 = in.B1.clone();
+	B2 = in.B2.clone();
+	c_A = &A1;
+	p_A = &A2;
+	c_B = &B1;
+	p_B = &B2;
+
+
+	UpdateSizeMask();
+}
+
 
 void RD::ReadSrc(string file)
 {

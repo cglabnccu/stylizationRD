@@ -306,6 +306,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	start = new wxButton(toolbar1, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
 	fill = new wxButton(toolbar1, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
 	clean = new wxButton(toolbar1, BUTTON_Clean, _T("Clean"), wxDefaultPosition, wxDefaultSize, 0);
+	undo = new wxButton(toolbar1, BUTTON_UNDO, _T("Undo"), wxDefaultPosition, wxDefaultSize, 0);
+	redo = new wxButton(toolbar1, BUTTON_REDO, _T("Redo"), wxDefaultPosition, wxDefaultSize, 0);
 	addDegree = new wxButton(toolbar1, BUTTON_addDegree, _T("+22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
 	subDegree = new wxButton(toolbar1, BUTTON_subDegree, _T("-22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
 
@@ -333,6 +335,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	toolbar1->AddControl(clean);
 	toolbar1->AddControl(processingBox);
 	toolbar1->AddControl(controllingBox);
+	toolbar1->AddControl(undo);
+	toolbar1->AddControl(redo);
 	toolbar1->AddControl(addDegree);
 	toolbar1->AddControl(subDegree);
 
@@ -366,6 +370,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	drawPane = new BasicDrawPane(dp, Size(256, 256));
 	dps->Add(drawPane, 1, wxEXPAND);
+	drawPane = new BasicDrawPane(this, Size(256, 256), true);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(drawpanel, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
@@ -565,6 +570,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	addDegree->Hide();
 	subDegree->Hide();
 
+
 	//Colormap mode GUI
 	mode_t->Hide();
 	colormapMode->Hide();
@@ -573,6 +579,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->GetSizer()->Layout();
 
 	fill->Disable();
+	undo->Disable();
+	redo->Disable();
 	render_loop_on = false;
 	isCLAHE = true;
 	isSizeMask = false;
@@ -844,18 +852,38 @@ void MyFrame::OnSaveResult(wxCommandEvent& event)
 
 void MyFrame::OnEdge2AddA(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_A = drawPane->element.Mask_s.clone();
 }
 void MyFrame::OnEdge2AddB(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_B = drawPane->element.Mask_s.clone();
 }
 void MyFrame::OnMask2AddA(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_A += 0.5*drawPane->element.Mask;
 }
 void MyFrame::OnMask2AddB(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_B += 0.5*drawPane->element.Mask;
 }
 void MyFrame::OnGenGVF(wxCommandEvent& event)
@@ -929,6 +957,31 @@ void MyFrame::OnClean(wxCommandEvent& event)
 	drawPane->paintNow(true); //execute clean action
 	addlog("Draw Panel Cleaned.", wxColour(*wxBLACK));
 }
+void MyFrame::OnUndo(wxCommandEvent& event)
+{
+	if (drawPane->undoStack.size() > 0)
+	{
+		drawPane->redoStack.push_back(drawPane->element);
+		drawPane->element = drawPane->undoStack[drawPane->undoStack.size() - 1];
+		drawPane->undoStack.pop_back();
+	}
+	(drawPane->undoStack.size() <= 0) ? undo->Disable() : undo->Enable();
+	(drawPane->redoStack.size() <= 0) ? redo->Disable() : redo->Enable();
+
+}
+void MyFrame::OnRedo(wxCommandEvent& event)
+{
+	if (drawPane->redoStack.size() > 0)
+	{
+		drawPane->undoStack.push_back(drawPane->element);
+		drawPane->element = drawPane->redoStack[drawPane->redoStack.size() - 1];
+		drawPane->redoStack.pop_back();
+	}
+	(drawPane->undoStack.size() <= 0) ? undo->Disable() : undo->Enable();
+	(drawPane->redoStack.size() <= 0) ? redo->Disable() : redo->Enable();
+
+}
+
 void MyFrame::OnaddDegree(wxCommandEvent& event) 
 {
 	drawPane->element.RotateFlow(22.5);
@@ -1435,7 +1488,11 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 #pragma endregion 
 
 #pragma region BasicDrawPane
+<<<<<<< HEAD
 BasicDrawPane::BasicDrawPane(wxPanel* parent, Size s) :
+=======
+BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s, bool canUndo) :
+>>>>>>> origin/Undo-Redo
 processing(s),
 element(s),
 wxPanel(parent)
@@ -1454,6 +1511,10 @@ wxPanel(parent)
 	sizeImgOn = false;
 	CLAHE_On = false;
 	colormapping_isAda = false;
+
+	undoStack.clear();
+	redoStack.clear();
+	this->canUndo = canUndo;
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1509,6 +1570,7 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 
 void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
+
 	Point MousePosition(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
 
 	if (activateDraw)
@@ -1539,6 +1601,15 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
+	if (canUndo)
+	{
+		undoStack.push_back(element);
+		((MyFrame *)GetParent())->undo->Enable();
+		redoStack.clear();
+		((MyFrame *)GetParent())->redo->Disable();
+	}
+
+
 	if (controllingS == "paint_white")
 	{
 		ellipse(element.Addition_A,
