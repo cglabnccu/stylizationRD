@@ -17,7 +17,7 @@ class BasicDrawPane : public wxPanel
 {
 
 public:
-	BasicDrawPane(wxFrame* parent, Size, bool canUndo);
+	BasicDrawPane(wxPanel* parent, Size, bool canUndo);
 	Vector<RD> undoStack;
 	Vector<RD> redoStack;
 	RD element;

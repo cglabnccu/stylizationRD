@@ -36,7 +36,7 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	//right
 	wxStaticText* s = new wxStaticText(Rightpanel, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(Rightpanel, Size(110, 107));
+	preview = new BasicDrawPane(Rightpanel, Size(110, 107), false);
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -368,9 +368,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	dp->SetSizer(dps);
 
 
-	drawPane = new BasicDrawPane(dp, Size(256, 256));
+	drawPane = new BasicDrawPane(dp, Size(256, 256), true);
 	dps->Add(drawPane, 1, wxEXPAND);
-	drawPane = new BasicDrawPane(this, Size(256, 256), true);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
 	log = new wxTextCtrl(drawpanel, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
@@ -1064,7 +1063,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 	}
 
 	this->Layout();
-	dp->Center();
+	//dp->Center();
 	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnControllingBox(wxCommandEvent& event)
@@ -1488,11 +1487,7 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 #pragma endregion 
 
 #pragma region BasicDrawPane
-<<<<<<< HEAD
-BasicDrawPane::BasicDrawPane(wxPanel* parent, Size s) :
-=======
-BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s, bool canUndo) :
->>>>>>> origin/Undo-Redo
+BasicDrawPane::BasicDrawPane(wxPanel* parent, Size s, bool canUndo) :
 processing(s),
 element(s),
 wxPanel(parent)
@@ -1604,9 +1599,9 @@ void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 	if (canUndo)
 	{
 		undoStack.push_back(element);
-		((MyFrame *)GetParent())->undo->Enable();
+		((MyFrame *)GetParent()->GetParent()->GetParent())->undo->Enable();
 		redoStack.clear();
-		((MyFrame *)GetParent())->redo->Disable();
+		((MyFrame *)GetParent()->GetParent()->GetParent())->redo->Disable();
 	}
 
 
