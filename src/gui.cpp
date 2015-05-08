@@ -1,5 +1,7 @@
 #include "gui.h"
 #include <ctime>
+#include <fstream>
+#include <iostream>
 
 bool MyApp::OnInit()
 {
@@ -266,6 +268,9 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_ONOPENSIZEIMG, "&Open Size Image\tCtrl-C", "Open Size Controlling Image file");
 	menuFile->Append(ID_ONSAVE, "&Save\tCtrl-E", "Save Result");
 	menuFile->AppendSeparator();
+	menuFile->Append(ID_ONSAVERD, "&Export RD\tCtrl-E", "Export RD as file");
+	menuFile->Append(ID_ONREADRD, "&Import RD\tCtrl-E", "Import RD as file");
+	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 
 	wxMenu *menuTool = new wxMenu;
@@ -325,8 +330,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 	controllingBox = new wxComboBox(toolbar1, COMBOBOX_Controlling, "paint_to_B", wxDefaultPosition, wxDefaultSize, 0);
 	controllingBox->Append("paint_to_B");
-	controllingBox->Append("paint_white");
 	controllingBox->Append("paint_black");
+	controllingBox->Append("paint_white");
 	controllingBox->Append("Gradient_Size");
 	controllingBox->Append("Gradient_k");
 
@@ -847,6 +852,66 @@ void MyFrame::OnSaveResult(wxCommandEvent& event)
 
 	cvtColor(drawPane->dis, drawPane->dis, CV_BGR2RGB);
 	imwrite((const char*)saveFileDialog.GetPath().mb_str(), drawPane->dis);
+
+
+	//	drawPane->element.SaveRD();
+}
+void MyFrame::OnSaveRD(wxCommandEvent& event)
+{
+	wxFileDialog
+		saveFileDialog(this, _("Save .RD file"), "", "",
+		"RD files (*.rd)|*.rd", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	if (saveFileDialog.ShowModal() == wxID_CANCEL)
+		return;     // the user changed idea...
+
+	// save the current contents in the file;
+	// this can be done with e.g. wxWidgets output streams:
+	wxFileOutputStream output_stream(saveFileDialog.GetPath());
+	if (!output_stream.IsOk())
+	{
+		wxLogError("Cannot save current contents in file '%s'.", saveFileDialog.GetPath());
+		return;
+	}
+
+	//cvtColor(drawPane->dis, drawPane->dis, CV_BGR2RGB);
+	//imwrite((const char*)saveFileDialog.GetPath().mb_str(), drawPane->dis);
+
+
+	drawPane->element.SaveRD((string)saveFileDialog.GetPath().mb_str());
+}
+void MyFrame::OnReadRD(wxCommandEvent& event)
+{
+	render_loop_on = false;
+	activateRenderLoop(render_loop_on);
+	wxFileDialog openFileDialog(this, _("Open RD file"), "", "", "RD files (*.rd)|*.rd", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+	{
+		addlog("Import RD Canceled", wxColour(*wxBLACK));
+		return;     // the user changed idea...
+	}
+	else
+	{
+		wxString s;
+		s.Printf("Import RD - %s", openFileDialog.GetFilename());
+		addlog(s, wxColour(*wxBLUE));
+	}
+
+	// proceed loading the file chosen by the user, this can be done with e.g. wxWidgets input streams:
+	wxFileInputStream input_stream(openFileDialog.GetPath());
+	if (!input_stream.IsOk())
+	{
+		wxLogError("Cannot open file '%s'.", openFileDialog.GetPath());
+		return;
+	}
+	drawPane->element.ReadRD((const char*)openFileDialog.GetPath().mb_str());
+
+	wxSize img(drawPane->element.Gradient_A.cols, drawPane->element.Gradient_A.rows);
+	dp->SetMinSize(img);
+	this->Layout();
+
+	drawPane->SetSize(drawPane->element.Gradient_A.cols, drawPane->element.Gradient_A.rows);
+	render_loop_on = true;
+	activateRenderLoop(render_loop_on);
 }
 
 void MyFrame::OnEdge2AddA(wxCommandEvent& event)

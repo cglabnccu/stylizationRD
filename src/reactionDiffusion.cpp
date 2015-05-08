@@ -189,6 +189,46 @@ void RD::operator=(const RD &in)
 	UpdateSizeMask();
 }
 
+void RD::SaveRD(string filepath) 
+{
+	cv::FileStorage storage(filepath, cv::FileStorage::WRITE);
+	storage << "RotationMat" << RotationMat;
+	storage << "Gradient_A" << Gradient_A;
+	storage << "Gradient_B" << Gradient_B;
+	storage << "Diffusion_A" << Diffusion_A;
+	storage << "Diffusion_B" << Diffusion_B;
+	storage << "Addition_A" << Addition_A;
+	storage << "Addition_B" << Addition_B;
+	storage << "alpha_A" << alpha_A;
+	storage << "alpha_B" << alpha_B;
+	storage << "A1" << A1;
+	storage << "A2" << A2;
+	storage << "B1" << B1;
+	storage << "B2" << B2;
+	storage.release();
+
+}
+
+void RD::ReadRD(string filepath)
+{
+	cv::FileStorage storage(filepath, cv::FileStorage::READ);
+	storage["RotationMat"] >> RotationMat;
+	storage["Gradient_A"] >> Gradient_A;
+	storage["Gradient_B"] >> Gradient_B;
+	storage["Diffusion_A"] >> Diffusion_A;
+	storage["Diffusion_B"] >> Diffusion_B;
+	storage["Addition_A"] >> Addition_A;
+	storage["Addition_B"] >> Addition_B;
+	storage["alpha_A"] >> alpha_A;
+	storage["alpha_B"] >> alpha_B;
+	storage["A1"] >> A1;
+	storage["A2"] >> A2;
+	storage["B1"] >> B1;
+	storage["B2"] >> B2;
+	storage.release();
+
+}
+
 
 void RD::ReadSrc(string file)
 {

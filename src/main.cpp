@@ -34,7 +34,9 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_MENU(ID_ONOPENCONTOLIMG, MyFrame::OnOpenControlImg)
 	EVT_MENU(ID_ONOPENSIZEIMG, MyFrame::OnOpenSizeImg)
 	EVT_MENU(ID_ONSAVE, MyFrame::OnSaveResult)
-    EVT_MENU(wxID_EXIT,  MyFrame::OnExit)
+	EVT_MENU(ID_ONSAVERD, MyFrame::OnSaveRD)
+	EVT_MENU(ID_ONREADRD, MyFrame::OnReadRD)
+	EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 
 	// Menu - Tool
 	EVT_MENU(ID_ONEdge2AddA, MyFrame::OnEdge2AddA)
