@@ -517,6 +517,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	Choices.Add("Mode - 1");
 	Choices.Add("Mode - 2");
 	Choices.Add("Mode - 3");
+	Choices.Add("Mode - 4");
 	colormapMode = new wxChoice(controlpanel, COMBOBOX_ColormappingMode, wxDefaultPosition, wxDefaultSize, Choices, 0);
 	colormapMode->SetSelection(0);
 	s.Printf("Color mapping Mode:");
