@@ -4,6 +4,7 @@
 bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame("CRD", wxPoint(50, 50), wxSize(800, 730));
+	frame->Maximize(true);
 	frame->Show(true);
 
 	return true;
@@ -19,6 +20,9 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
+	wxPanel *Rightpanel = new wxPanel(this, -1);
+	Rightpanel->SetSizer(right);
+	//right->Fit(Rightpanel);
 
 	char cCurrentPath[FILENAME_MAX];
 	getcwd(cCurrentPath, sizeof(cCurrentPath));
@@ -30,9 +34,9 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 	left->Add(picker, 1, wxEXPAND);
 
 	//right
-	wxStaticText* s = new wxStaticText(this, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
+	wxStaticText* s = new wxStaticText(Rightpanel, NULL, "Preview", wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(s, 0, wxEXPAND);
-	preview = new BasicDrawPane(this, Size(110, 107));
+	preview = new BasicDrawPane(Rightpanel, Size(110, 107), false);
 	preview->element.s = pattern_size;
 	right->Add(preview, 2, wxEXPAND);
 
@@ -40,31 +44,31 @@ MyPatternPicker::MyPatternPicker(wxWindow* parent, const wxString & title, const
 
 	wxString ss;
 	ss.Printf("Size : %.3f", preview->element.s);
-	slider_s_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_s_t, 0, wxEXPAND | wxLEFT, 10);
-	slider_s = new wxSlider(this, SLIDER_S_PICKER, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
+	slider_s = new wxSlider(Rightpanel, SLIDER_S_PICKER, int(preview->element.s * 1000), 0, 1000, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_s, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("F : %.4f", preview->element.f);
-	slider_f_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_f_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_f_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("k : %.4f", preview->element.k);
-	slider_k_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_k_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_k_t, 0, wxEXPAND | wxLEFT, 10);
 
 	ss.Printf("l : %d", preview->element.l);
-	slider_l_t = new wxStaticText(this, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
+	slider_l_t = new wxStaticText(Rightpanel, wxID_ANY, ss, wxDefaultPosition, wxDefaultSize, 0);
 	right2->Add(slider_l_t, 0, wxEXPAND | wxLEFT, 10);
 
 	right->Add(right2, 5, wxEXPAND);
 
-	wxButton *select = new wxButton(this, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
+	wxButton *select = new wxButton(Rightpanel, BUTTON_Select, _T("SELECT!"), wxDefaultPosition, wxDefaultSize, 0);
 	right->Add(select, 2, wxEXPAND);
 
 
 	sizer->Add(left, 5, wxEXPAND);
-	sizer->Add(right, 1, wxEXPAND);
+	sizer->Add(Rightpanel, 1, wxEXPAND);
 	SetSizer(sizer);
 	Centre();
 }
@@ -302,6 +306,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	start = new wxButton(toolbar1, BUTTON_Start, _T("Start"), wxDefaultPosition, wxDefaultSize, 0);
 	fill = new wxButton(toolbar1, BUTTON_Fill, _T("Fill Ink"), wxDefaultPosition, wxDefaultSize, 0);
 	clean = new wxButton(toolbar1, BUTTON_Clean, _T("Clean"), wxDefaultPosition, wxDefaultSize, 0);
+	undo = new wxButton(toolbar1, BUTTON_UNDO, _T("Undo"), wxDefaultPosition, wxDefaultSize, 0);
+	redo = new wxButton(toolbar1, BUTTON_REDO, _T("Redo"), wxDefaultPosition, wxDefaultSize, 0);
 	addDegree = new wxButton(toolbar1, BUTTON_addDegree, _T("+22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
 	subDegree = new wxButton(toolbar1, BUTTON_subDegree, _T("-22.5 degree"), wxDefaultPosition, wxDefaultSize, 0);
 
@@ -329,6 +335,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	toolbar1->AddControl(clean);
 	toolbar1->AddControl(processingBox);
 	toolbar1->AddControl(controllingBox);
+	toolbar1->AddControl(undo);
+	toolbar1->AddControl(redo);
 	toolbar1->AddControl(addDegree);
 	toolbar1->AddControl(subDegree);
 
@@ -351,14 +359,26 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 #pragma region Leftside: drawPane, log
 	//drawing panel
-	drawPane = new BasicDrawPane(this, Size(256, 256));
+	wxPanel *drawpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	drawpanel->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
+
+	wxBoxSizer *dps = new wxBoxSizer(wxHORIZONTAL);
+	dp = new wxPanel(drawpanel, wxID_ANY, wxDefaultPosition, wxSize(256, 256), wxTAB_TRAVERSAL);
+	dp->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT));
+	dp->SetSizer(dps);
+
+
+	drawPane = new BasicDrawPane(dp, Size(256, 256), true);
+	dps->Add(drawPane, 1, wxEXPAND);
 
 	// wxTextCtrl: http://docs.wxwidgets.org/trunk/classwx_text_ctrl.html
-	log = new wxTextCtrl(this, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
+	log = new wxTextCtrl(drawpanel, ID_WXEDIT1, wxT(""), wxPoint(91, 43), wxSize(121, 21), wxTE_RICH2 | wxTE_MULTILINE | wxTE_READONLY, wxDefaultValidator, wxT("WxEdit1"));
 	addlog("Hello CRD!", wxColour(*wxBLACK));
 
-	leftside->Add(drawPane, 7, wxEXPAND);
-	leftside->Add(log, 1, wxEXPAND);
+	leftside->AddStretchSpacer(3);
+	leftside->Add(dp,0, wxCENTER);
+	leftside->AddStretchSpacer(3);
+	leftside->Add(log, 2, wxEXPAND);
 #pragma endregion
 
 #pragma region Paint Parameters
@@ -519,10 +539,12 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 #pragma endregion
 
 	//set portion of size: leftside & rightside(control)
+	drawpanel->SetSizer(leftside);
 	controlpanel->SetSizer(rightside);
-	sizer->Add(leftside, 7, wxEXPAND);
+	sizer->Add(drawpanel, 7, wxEXPAND);
 	sizer->Add(controlpanel, 3, wxEXPAND);
 	rightside->Fit(controlpanel);
+	leftside->Fit(drawpanel);
 	SetSizer(sizer);
 
 	gradientType_s->Hide();
@@ -547,6 +569,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	addDegree->Hide();
 	subDegree->Hide();
 
+
 	//Colormap mode GUI
 	mode_t->Hide();
 	colormapMode->Hide();
@@ -555,6 +578,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	this->GetSizer()->Layout();
 
 	fill->Disable();
+	undo->Disable();
+	redo->Disable();
 	render_loop_on = false;
 	isCLAHE = true;
 	isSizeMask = false;
@@ -614,6 +639,10 @@ void MyFrame::OnOpenSrc(wxCommandEvent& event)
 		return;
 	}
 	drawPane->element.ReadSrc((const char*)openFileDialog.GetPath().mb_str());
+
+	wxSize img(drawPane->element.Original_img.cols, drawPane->element.Original_img.rows);
+	dp->SetMinSize(img);
+	this->Layout();
 
 
 	drawPane->SetSize(drawPane->element.Mask.cols, drawPane->element.Mask.rows);
@@ -822,18 +851,38 @@ void MyFrame::OnSaveResult(wxCommandEvent& event)
 
 void MyFrame::OnEdge2AddA(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_A = drawPane->element.Mask_s.clone();
 }
 void MyFrame::OnEdge2AddB(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_B = drawPane->element.Mask_s.clone();
 }
 void MyFrame::OnMask2AddA(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_A += 0.5*drawPane->element.Mask;
 }
 void MyFrame::OnMask2AddB(wxCommandEvent& event)
 {
+	drawPane->undoStack.push_back(drawPane->element);
+	undo->Enable();
+	drawPane->redoStack.clear();
+	redo->Disable();
+
 	drawPane->element.Addition_B += 0.5*drawPane->element.Mask;
 }
 void MyFrame::OnGenGVF(wxCommandEvent& event)
@@ -907,6 +956,31 @@ void MyFrame::OnClean(wxCommandEvent& event)
 	drawPane->paintNow(true); //execute clean action
 	addlog("Draw Panel Cleaned.", wxColour(*wxBLACK));
 }
+void MyFrame::OnUndo(wxCommandEvent& event)
+{
+	if (drawPane->undoStack.size() > 0)
+	{
+		drawPane->redoStack.push_back(drawPane->element);
+		drawPane->element = drawPane->undoStack[drawPane->undoStack.size() - 1];
+		drawPane->undoStack.pop_back();
+	}
+	(drawPane->undoStack.size() <= 0) ? undo->Disable() : undo->Enable();
+	(drawPane->redoStack.size() <= 0) ? redo->Disable() : redo->Enable();
+
+}
+void MyFrame::OnRedo(wxCommandEvent& event)
+{
+	if (drawPane->redoStack.size() > 0)
+	{
+		drawPane->undoStack.push_back(drawPane->element);
+		drawPane->element = drawPane->redoStack[drawPane->redoStack.size() - 1];
+		drawPane->redoStack.pop_back();
+	}
+	(drawPane->undoStack.size() <= 0) ? undo->Disable() : undo->Enable();
+	(drawPane->redoStack.size() <= 0) ? redo->Disable() : redo->Enable();
+
+}
+
 void MyFrame::OnaddDegree(wxCommandEvent& event) 
 {
 	drawPane->element.RotateFlow(22.5);
@@ -989,6 +1063,7 @@ void MyFrame::OnProcessingBox(wxCommandEvent& event)
 	}
 
 	this->Layout();
+	//dp->Center();
 	drawPane->paintNow(true); //execute action
 }
 void MyFrame::OnControllingBox(wxCommandEvent& event)
@@ -1412,7 +1487,7 @@ void MyFrame::onIdle(wxIdleEvent& evt)
 #pragma endregion 
 
 #pragma region BasicDrawPane
-BasicDrawPane::BasicDrawPane(wxFrame* parent, Size s) :
+BasicDrawPane::BasicDrawPane(wxPanel* parent, Size s, bool canUndo) :
 processing(s),
 element(s),
 wxPanel(parent)
@@ -1431,6 +1506,10 @@ wxPanel(parent)
 	sizeImgOn = false;
 	CLAHE_On = false;
 	colormapping_isAda = false;
+
+	undoStack.clear();
+	redoStack.clear();
+	this->canUndo = canUndo;
 	//element.CheckboardSizeMask();
 }
 void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
@@ -1486,6 +1565,7 @@ void BasicDrawPane::Seeds(int r, bool isoffset, float ratio)
 
 void BasicDrawPane::MouseMove(wxMouseEvent &event)
 {
+
 	Point MousePosition(min(max(event.m_x, 0), element.c_B->cols), min(max(event.m_y, 0), element.c_B->rows));
 
 	if (activateDraw)
@@ -1516,6 +1596,15 @@ void BasicDrawPane::MouseMove(wxMouseEvent &event)
 }
 void BasicDrawPane::MouseLDown(wxMouseEvent &event)
 {
+	if (canUndo)
+	{
+		undoStack.push_back(element);
+		((MyFrame *)GetParent()->GetParent()->GetParent())->undo->Enable();
+		redoStack.clear();
+		((MyFrame *)GetParent()->GetParent()->GetParent())->redo->Disable();
+	}
+
+
 	if (controllingS == "paint_white")
 	{
 		ellipse(element.Addition_A,

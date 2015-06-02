@@ -17,6 +17,9 @@ class BasicDrawPane : public wxPanel
 {
 
 public:
+	BasicDrawPane(wxPanel* parent, Size, bool canUndo);
+	Vector<RD> undoStack;
+	Vector<RD> redoStack;
 	RD element;
 	PP processing;
 	Mat dis;
@@ -36,7 +39,6 @@ public:
 	bool sizeImgOn;
 	bool CLAHE_On;
 	bool colormapping_isAda;
-	BasicDrawPane(wxFrame* parent, Size);
 	void Seeds(int r, bool isoffset, float ratio);
 	void paintEvent(wxPaintEvent& evt);
 	void paintNow(bool);
@@ -47,9 +49,11 @@ public:
 	DECLARE_EVENT_TABLE()
 private:
 	bool activateDraw;
+	bool canUndo;
 	Point LastMousePosition;
 	Point StartMousePosition;
 };
+
 
 class SimpleDrawPanel : public wxPanel
 {
@@ -102,6 +106,10 @@ public:
 	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
 	MyPatternPicker *patternpicker;
 	BasicDrawPane *drawPane;
+	//wxPanel* drawpanel;
+	//wxBoxSizer* dps;
+	//wxBoxSizer* leftside;
+	wxPanel* dp;// drawpane Container
 	wxSlider *slider_sd;
 	wxSlider *slider_s;
 	wxSlider *slider_f;
@@ -113,6 +121,8 @@ public:
 	wxStaticText *slider_k_t;
 	wxStaticText *slider_l_t;
 	wxCheckBox *Segmentation_cb; 
+	wxButton *undo;
+	wxButton *redo;
 	void addlog(wxString info, wxColour& color);
 	void activateRenderLoop(bool on);
 
@@ -159,6 +169,8 @@ protected:
 	void OnStart(wxCommandEvent& event);
 	void OnFill(wxCommandEvent& event); 
 	void OnClean(wxCommandEvent& event);
+	void OnUndo(wxCommandEvent& event);
+	void OnRedo(wxCommandEvent& event);
 	void OnaddDegree(wxCommandEvent& event);
 	void OnsubDegree(wxCommandEvent& event);
 
@@ -242,6 +254,8 @@ enum
 	BUTTON_Start,
 	BUTTON_Fill,
 	BUTTON_Clean,
+	BUTTON_UNDO,
+	BUTTON_REDO,
 	COMBOBOX_Processing,
 	COMBOBOX_Controlling,
 	BUTTON_subDegree,
