@@ -200,6 +200,7 @@ protected:
 
 	void OnSliderAlpha(wxCommandEvent& event);
 	void OnSliderBeta(wxCommandEvent& event);
+
 	void OnOpenSrc(wxCommandEvent& event);
 	void OnOpenVfb(wxCommandEvent& event);
 	void OnOpenETF(wxCommandEvent& event);
@@ -207,6 +208,8 @@ protected:
 	void OnOpenControlImg(wxCommandEvent& event);
 	void OnOpenSizeImg(wxCommandEvent& event);
 	void OnSaveResult(wxCommandEvent& event);
+	void OnSaveRD(wxCommandEvent& event);
+	void OnReadRD(wxCommandEvent& event);
 
 	void OnEdge2AddA(wxCommandEvent& event);
 	void OnEdge2AddB(wxCommandEvent& event);
@@ -236,6 +239,8 @@ enum
 	ID_ONOPENCONTOLIMG,
 	ID_ONOPENSIZEIMG,
 	ID_ONSAVE,
+	ID_ONSAVERD,
+	ID_ONREADRD,
 	wxID_TOGGLE_LOG,
 
 	ID_ONEdge2AddA,

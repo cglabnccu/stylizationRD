@@ -4,7 +4,6 @@
 
 ---
 
-
 ### [Required]
  * <a href="https://msdn.microsoft.com/zh-tw/vstudio/aa718325.aspx" target="_blank">Visual Studio</a>(2013 recommand)
  * <a href="http://www.cmake.org/" target="_blank">CMake</a>(3.0 or higher)
@@ -23,15 +22,10 @@
 
 
 ### [in post process]
-  * ~~Load Size img~~
-  * ~~circle gradinet~~
-  * ~~stripe can see when "STOP"~~ 
   * ETF iteration scope bigger( to Max(W, H) )
 
 ### [Future Work]
   1. more UI friendly
-   * Customize Anisotropic Function degree selection
-   * ???
   2. using faster algorithm
   3. oriental cloud patterns
   4. merge flowfield maker
@@ -43,14 +37,19 @@
 ### [Papers' Examples]
 |Fig.|Workflow |Remark/Notes　　　　　|
 |----------------|:--------|:--------------------- |
-|5(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|--|
-|5(b)| as above |--|
-|5(c)| as above |--|
-|5(d)| as above, adjust **theta0** roughly to 220 degrees|--|
-|6(a)| **Load Flow** `vortex.vfb`, Parameters F k l can reference to Table 1, check the **Customize Anisotropic Function** to YES, and select 0~180 degree. Then press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8, alpha=0.1)|--|
-|6(b)| as above, **Customize Anisotropic Function** select degree 45~135.|--|
+|4(a)| **Load Flow** `source.vfb`, Parameters F k l can reference to Table 1, Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8)|--|
+|4(b)| as above |--|
+|4(c)| as above |--|
+|5(a)| **Load Flow** `vortex.vfb`, Parameters F k l can reference to Table 1, check the **Customize Anisotropic Function** to YES, and select 0~180 degree. Then press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (beta=0.8, alpha=0.1)|--|
+|5(b)| as above, **Customize Anisotropic Function** select degree 0~180.|--|
+|5(c)| as above, **Customize Anisotropic Function** select degree 45~135.|--|
 |8(c)| **Load SrcImg** `controlshape-a.png`, **Load Flow** `vortex.vfb`, **Load Control Img** `controlshape_controlImg.png`. Press **Start**, Pattern Size = 0.1, then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.4 beta=0.5).|Region<br/>1:SPOT(theta0=90)<br/>2:HOLE(theta0=90)<br/>3:SPOT(theta0=90)<br/>4:LINE(theta0=90)<br/>5:inverse LINE(theta0=90)<br/>|
-|12| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
+|12(c)| **Load SrcImg** `cat-source.png`, **Load ETF** `cat-source.png`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink** and click **Edge2AddB** *(Tool>Edge2AddB)*, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
+|12(d)|as above, use **gradient size** *(size type: LINEAR)* brush to modify the sizes|
+|14(c)| **Load SrcImg** `flower.png`, **Load Flow** `vortex.vfb`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SQUARE pattern, then Press **Start** and click **Fill Ink**, use **gradient size** *(size type: inverse Circular)* brush to modify the sizes, after its being stable, select **colormapping** *(Mode: 3)*|
+|14(d)|as above,  use **gradient k** *(size type: inverse Circular)* brush to modify the pattern parameters|
+|15(c)|**Load SrcImg** `Marilyn.png`, **Load Flow** `vortex.vfb`, The Parameters can use **Pattern Picker** *(Tool>Open Pattern Picker)* to select SPINDLE pattern, then Press **Start** and click **Fill Ink**, after its being stable, select **adathresholding** (alpha=0.4 beta=0.0)|
+|15(e)|as above, replace Flow by using ETF of `Marilyn.png`, and choose the SQUARE pattern|
 |17(c)| **Load SrcImg** `Kremlin-source.png`, **Load ETF** `Kremlin-source.png`, **Load Control Img** `Kremlin-controlImg.png`. Press **Start** and click **Edge2AddB** (addB=0.03), then check the **Activate Segmentation** to YES, and assign each region with its own parameters(recommanded pattern provide at Note). After its stable , select **Thresholding** (alpha=0.05 beta=0.4).|Region<br/>1:SPOT<br/>2~3: BLACK<br/>4~8: LINE<br/>   |
 |17(d)| as above.Pattern Size = 0.2 After its stable , select **adaThresholding** (alpha=0.36 beta=0.4).|Regions<br/>1~3: HOLE<br/>4~8: QUADE(theta0=45)<br/>   |
 ---

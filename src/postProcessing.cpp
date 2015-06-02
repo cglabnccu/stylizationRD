@@ -407,6 +407,7 @@ void PP::adaThresholding(Mat &src, Mat &mask, Mat &dis)
 	merge(channels, dis);
 };
 
+
 void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool isAdaThresholding)
 {
 	//Mode :  1-half color bg, 2-shining, 3-inverse shining 
@@ -456,6 +457,12 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool
 					g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
 					r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
 				}
+				else if (mode == 4) //Background
+				{
+					b.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
+					g.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
+					r.at<float>(i, j) = (float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
+				}
 			}
 			else if (src.at<float>(i, j) > center - range)
 			{
@@ -474,12 +481,18 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool
 					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
 					b.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
 				}
-				else
+				else if (mode == 3)
 				{
 					a = 1 - a;
 					r.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[2] / 255.0;
 					g.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[1] / 255.0;
 					b.at<float>(i, j) = (1 - a) + a*(float)oriImg.at<cv::Vec3b>(i, j)[0] / 255.0;
+				}
+				else if (mode == 4)
+				{
+					r.at<float>(i, j) = 0.0;
+					g.at<float>(i, j) = 0.0;
+					b.at<float>(i, j) = 0.0;
 				}
 
 			}
@@ -496,6 +509,13 @@ void PP::Colormapping(Mat &src, Mat &mask, Mat &oriImg, Mat &dis, int mode, bool
 					r.at<float>(i, j) = 1.0;
 					g.at<float>(i, j) = 1.0;
 					b.at<float>(i, j) = 1.0;
+				}
+				else if (mode == 4)
+				{
+					r.at<float>(i, j) = 0.0;
+					g.at<float>(i, j) = 0.0;
+					b.at<float>(i, j) = 0.0;
+
 				}
 			}
 		}

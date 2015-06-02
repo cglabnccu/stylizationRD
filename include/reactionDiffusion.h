@@ -31,6 +31,8 @@ public:
 	RD(Size);
 	void Init(Size);
 	void operator=(const RD &in);
+	void SaveRD(string );
+	void ReadRD(string );
 	void ReadSrc(string);
 	void ReadFlow(string);
 	void ETF(string);
