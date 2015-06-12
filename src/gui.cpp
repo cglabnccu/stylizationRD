@@ -1732,14 +1732,14 @@ void BasicDrawPane::MouseLUp(wxMouseEvent &event)
 		element.Gradient(StartMousePosition, LastMousePosition, gradientTypeS, "size");
 		StartMousePosition = Point(0,0);
 
-		((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size:   ").Append(gradientTypeS).Append(" Gradient"));
+		//((MyFrame *)GetParent())->slider_s_t->SetLabel(wxString("Size:   ").Append(gradientTypeS).Append(" Gradient"));
 	}
 	else if (controllingS == "Gradient_k")
 	{
 		element.Gradient(StartMousePosition, LastMousePosition, gradientTypeS, "k");
 		StartMousePosition = Point(0, 0);
 
-		((MyFrame *)GetParent())->slider_k_t->SetLabel(wxString("k:   ").Append(gradientTypeS).Append(" Gradient"));
+		//((MyFrame *)GetParent())->slider_k_t->SetLabel(wxString("k:   ").Append(gradientTypeS).Append(" Gradient"));
 	}
 }
 
@@ -1766,19 +1766,21 @@ void BasicDrawPane::paintNow(bool render_loop_on)
 //Main Render(iteration) Section
 void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 {
-	if (render_loop_on)
-	{
-		//if (customAnisotropicFunction){
-		int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
-		//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
-		//}
-		//else {
-		//	element.FastGrayScott(0, 0, false, regionOn);
-		//}
+	//if (render_loop_on)
+	//{
+	//	//if (customAnisotropicFunction){
+	//	int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+	//	//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
+	//	//}
+	//	//else {
+	//	//	element.FastGrayScott(0, 0, false, regionOn);
+	//	//}
 
-		////must read 500x500 input image first, and a flow field
-		//element.GrayScottModel();
-	}
+	//	////must read 500x500 input image first, and a flow field
+	//	//element.GrayScottModel();
+	//}
+
+	if (render_loop_on && processingS != "LIC") { int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn); }
 
 	dis = element.c_A->clone();
 
