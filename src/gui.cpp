@@ -287,6 +287,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuTool->Append(ID_ONOPEN_MASK, "&Open Mask Img\tCtrl-M", "Open Mask Img.");
 	menuTool->Append(ID_ONOPEN_MASK_S, "&Open Mask_s Img\tCtrl-S", "Open Mask_s Img.");
 	menuTool->AppendSeparator();
+	menuTool->Append(new wxMenuItem(menuTool, ID_TOGGLE_FLOWGUIDERD, wxString(wxT("&Flow Guide Diffusion")), "Toggle Flow Guide Diffusion.", wxITEM_CHECK))->Check(false);
 	menuTool->Append(ID_ONOPEN_PATTERN_PICKER, "&Open Pattern Picker\tCtrl-P", "Open Pattern Picker.");
 
 	wxMenu *menuHelp = new wxMenu;
@@ -988,7 +989,12 @@ void MyFrame::OnOpenMaskS(wxCommandEvent& event)
 {
 	if (drawPane->element.SrcLoaded) imshow("Mask_S Img", drawPane->element.Mask_s);
 	else addlog("SrcImg didn't Load !", wxColour(*wxRED));
+}	
+void MyFrame::OnToggleFlowGuide(wxCommandEvent& event)
+{
+	drawPane->element.isFlowGuide = !drawPane->element.isFlowGuide;
 }
+
 void MyFrame::OnOpenPatternPicker(wxCommandEvent& event)
 {
 	activateRenderLoop(false);
@@ -1769,7 +1775,11 @@ void BasicDrawPane::render(wxDC& dc, bool render_loop_on)
 	if (render_loop_on)
 	{
 		//if (customAnisotropicFunction){
-		int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		if (!element.isFlowGuide)
+			int steps = element.FastGrayScott(mindegree, maxdegree, false, regionOn);
+		else
+			int steps = element.FlowGuideRD(mindegree, maxdegree, false, regionOn);
+
 		//((MyFrame *)GetParent())->SetStatusText(wxString::Format("%i", steps), 0); //preview does not have StatusText
 		//}
 		//else {

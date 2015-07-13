@@ -222,6 +222,7 @@ protected:
 	
 	void OnOpenMask(wxCommandEvent& event);
 	void OnOpenMaskS(wxCommandEvent& event);
+	void OnToggleFlowGuide(wxCommandEvent& event);
 	void OnOpenPatternPicker(wxCommandEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
@@ -254,6 +255,7 @@ enum
 	ID_ONOPEN_MASK,
 	ID_ONOPEN_MASK_S,
 	ID_ONOPEN_PATTERN_PICKER,
+	ID_TOGGLE_FLOWGUIDERD,
 
 	ID_WXEDIT1,
 	BUTTON_Start,

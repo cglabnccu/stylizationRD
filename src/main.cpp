@@ -49,6 +49,7 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 	EVT_MENU(ID_ONSIZEMASK, MyFrame::OnSIZEMASK)
 	EVT_MENU(ID_ONOPEN_MASK, MyFrame::OnOpenMask)
 	EVT_MENU(ID_ONOPEN_MASK_S, MyFrame::OnOpenMaskS)
+	EVT_MENU(ID_TOGGLE_FLOWGUIDERD, MyFrame::OnToggleFlowGuide)
 	EVT_MENU(ID_ONOPEN_PATTERN_PICKER, MyFrame::OnOpenPatternPicker)
 
 	// Menu - Help

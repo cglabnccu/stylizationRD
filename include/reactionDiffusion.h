@@ -47,6 +47,7 @@ public:
 	void DrawHistogram(Mat &A, Mat &B);
 	void DisplaySeg(Mat &dis, int regionindex);
 	int FastGrayScott(float min_degree, float max_degree, bool isCAF, bool segmentOn);// Eq.6 & 7
+	int FlowGuideRD(float min_degree, float max_degree, bool isCAF, bool segmentOn);
 	//void FastGrayScott(float min_degree, float max_degree, bool segmentOn);// Eq.7
 	int GrayScottModel();     // generate GS-Model
 	void CheckboardSizeMask();// Testing checkboard Size mask
@@ -99,6 +100,8 @@ public:
 	bool FlowLoaded;
 	bool ETFLoaded;
 	bool ControlImgLoad;
+	bool isFlowGuide;
+
 
 	int innerAMPloopsize;
 };
