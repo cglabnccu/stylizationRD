@@ -70,7 +70,7 @@ Image stylization refers to the process of converting input images to a specific
 
 ---
 
-###[Common Q&A]
+### Common Q&A
 <dl>
   <dt>Q: Error LNK2019(Build Error)</dt>
   <dd>Open VS2013 Project settings -> Linker > General > System : change Subsystem to "Windows".</dd>
@@ -79,3 +79,18 @@ Image stylization refers to the process of converting input images to a specific
   <dd>Solution Explorer -> Select "FlowBase" -> Right Click and "Set as StartUp Project"</dd>
 </dl>
 ---
+
+### Citation
+
+```
+@article{chi2016image,
+  title={Image stylization using anisotropic reaction diffusion},
+  author={Chi, Ming-Te and Liu, Wei-Ching and Hsu, Shu-Hsuan},
+  journal={The Visual Computer},
+  volume={32},
+  number={12},
+  pages={1549--1561},
+  year={2016},
+  publisher={Springer}
+}
+```
