@@ -8,7 +8,8 @@ Image stylization refers to the process of converting input images to a specific
 ###### Keywords: Non-photorealistic, rendering, Image stylization, Reaction diffusion, Pattern generation
 
 ### Demo
-[youtube link](https://www.youtube.com/watch?v=fNc89Y-tbjY)  
+[🌐WebGL Version](https://cglabnccu.github.io/stylizationRD/webgl/)
+[▶️YouTube Demo](https://www.youtube.com/watch?v=fNc89Y-tbjY)  
 [![youtube video](http://i.imgur.com/PtCZIMs.jpg?2)](https://www.youtube.com/watch?v=fNc89Y-tbjY)
 
 ### [Required]
