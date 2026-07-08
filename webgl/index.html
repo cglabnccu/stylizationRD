@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<title>Anisotropic Reaction Diffusion — WebGL</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ======================= Menu bar (== C++ wxMenuBar) ======================= -->
+<div id="menubar">
+  <div class="menu" id="menuFile"><button>File</button>
+    <ul>
+      <li data-act="openSrc">Open SrcImg</li>
+      <li data-act="openVfb">Open Flow (.vfb)</li>
+      <li data-act="openETF">Open ETF</li>
+      <li data-act="openTex">Open Texture</li>
+      <li data-act="openCtrl">Open Control Image</li>
+      <li data-act="openSize">Open Size Image</li>
+      <li class="sep"></li>
+      <li data-act="save">Save Result</li>
+    </ul>
+  </div>
+  <div class="menu" id="menuTool"><button>Tool</button>
+    <ul>
+      <li data-act="edge2AddA">Edge2AddA</li>
+      <li data-act="edge2AddB">Edge2AddB</li>
+      <li data-act="mask2AddA">Mask2AddA</li>
+      <li data-act="mask2AddB">Mask2AddB</li>
+      <li class="sep"></li>
+      <li data-act="picker">Open Pattern Picker</li>
+    </ul>
+  </div>
+  <div class="menu" id="menuHelp"><button>Help</button>
+    <ul>
+      <li data-act="about">About</li>
+      <li data-act="log">Log</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ======================= Toolbar (== C++ wxToolBar) ======================= -->
+<div id="toolbar">
+  <button id="btnStart" class="primary">Start</button>
+  <button id="btnFill" disabled>Fill Ink</button>
+  <button id="btnClean">Clean</button>
+  <select id="processingBox">
+    <option>distribution_A</option>
+    <option>distribution_B</option>
+    <option>LIC</option>
+    <option>Motion_Illusion</option>
+    <option>Texture</option>
+    <option>dirTexture</option>
+    <option>PolarTexture</option>
+    <option>adaThresholding</option>
+    <option>Thresholding</option>
+    <option>Color_mapping</option>
+  </select>
+  <select id="controllingBox">
+    <option>paint_to_B</option>
+    <option>paint_black</option>
+    <option>paint_white</option>
+    <option>Gradient_Size</option>
+    <option>Gradient_k</option>
+  </select>
+  <button id="btnUndo" disabled>Undo</button>
+  <button id="btnRedo" disabled>Redo</button>
+  <button id="btnAddDeg" class="hidden">+22.5 degree</button>
+  <button id="btnSubDeg" class="hidden">-22.5 degree</button>
+  <button id="btnExample">載入範例<small>載入後直接按 Start</small></button>
+</div>
+
+<!-- ======================= Main ======================= -->
+<div id="main">
+  <div id="leftside">
+    <div id="view"><canvas id="c" width="256" height="256"></canvas></div>
+    <div id="log"></div>
+  </div>
+
+  <div id="panel">
+    <!-- ==== Paint (== C++ Paint wxStaticBox) ==== -->
+    <fieldset>
+      <legend>Paint</legend>
+      <div class="ctl"><span class="lab" id="brushSize_t">Brush Size : 4</span>
+        <input type="range" id="brushSize" min="1" max="10" step="1" value="4"></div>
+      <div class="ctl"><span class="lab" id="addA_t">addA : 0.500</span>
+        <input type="range" id="addA" min="0" max="1" step="0.001" value="0.5"></div>
+      <div class="ctl"><span class="lab" id="addB_t">addB : 0.500</span>
+        <input type="range" id="addB" min="0" max="1" step="0.001" value="0.5"></div>
+    </fieldset>
+
+    <!-- ==== Pattern (== C++ Pattern wxStaticBox) ==== -->
+    <fieldset>
+      <legend>Pattern</legend>
+      <div class="ctl"><span class="lab" id="s_t">Size : 0.600</span>
+        <input type="range" id="s" min="0" max="1" step="0.001" value="0.6"></div>
+      <div class="ctl hidden" id="gradTypeS_wrap">
+        <select id="gradTypeS"><option>Linear</option><option>Circular</option><option>Inverse Circular</option></select></div>
+      <div class="ctl"><span class="lab" id="sd_t">Spacing : 0.300</span>
+        <input type="range" id="sd" min="0" max="1" step="0.001" value="0.3"></div>
+      <div class="ctl"><span class="lab" id="F_t">F : 0.0375</span>
+        <input type="range" id="F" min="0" max="0.06" step="0.00006" value="0.0375"></div>
+      <div class="ctl"><span class="lab" id="k_t">k : 0.0589</span>
+        <input type="range" id="k" min="0.03" max="0.07" step="0.00004" value="0.0589"></div>
+      <div class="ctl hidden" id="gradTypeK_wrap">
+        <select id="gradTypeK"><option>Linear</option><option>Circular</option><option>Inverse Circular</option></select></div>
+      <div class="ctl"><span class="lab" id="l_t">l : 0</span>
+        <input type="range" id="l" min="0" max="6" step="1" value="0"></div>
+      <div class="ctl"><span class="lab" id="theta0_t">theta0 : 0</span>
+        <input type="range" id="theta0" min="0" max="360" step="1" value="0"></div>
+
+      <label class="cb"><input type="checkbox" id="cafCb"> Customize Anisotropic Function</label>
+      <div class="ctl hidden caf"><span class="lab" id="mindeg_t">min degree : 0</span>
+        <input type="range" id="mindeg" min="0" max="360" step="1" value="0"></div>
+      <div class="ctl hidden caf"><span class="lab" id="maxdeg_t">max degree : 0</span>
+        <input type="range" id="maxdeg" min="0" max="360" step="1" value="0"></div>
+
+      <label class="cb"><input type="checkbox" id="segCb"> Activate Segmentation</label>
+      <div class="ctl hidden seg"><select id="segBox"></select></div>
+      <label class="cb hidden seg"><input type="checkbox" id="dispRegionCb"> Display Region</label>
+    </fieldset>
+
+    <!-- ==== Post Processing (== C++ Post Processing wxStaticBox) ==== -->
+    <fieldset>
+      <legend>Post Processing</legend>
+      <div id="ppHint" style="color:#7d8590; font-size:12px;">在上方工具列選擇 Thresholding、Color_mapping 等後處理模式，參數會顯示在這裡</div>
+      <div class="ctl hidden cm"><span class="lab">Color mapping Mode:</span>
+        <select id="cmMode"><option>Mode - 1</option><option>Mode - 2</option><option>Mode - 3</option><option>Mode - 4</option></select></div>
+      <label class="cb hidden cm"><input type="checkbox" id="cmIsAda"> adaThreshloding</label>
+      <div class="ctl hidden ab"><span class="lab" id="alpha_t">alpha : 0.200</span>
+        <input type="range" id="alpha" min="0" max="1" step="0.001" value="0.2"></div>
+      <div class="ctl hidden ab"><span class="lab" id="beta_t">beta : 0.500</span>
+        <input type="range" id="beta" min="0" max="1" step="0.001" value="0.5"></div>
+    </fieldset>
+  </div>
+</div>
+
+<!-- ======================= Status bar (== C++ wxStatusBar ×4) ======================= -->
+<div id="statusbar">
+  <span id="stSrc">SrcImg: None</span>
+  <span id="stFlow">Flowfield: None</span>
+  <span id="stTex">Texture: None</span>
+  <span id="stCtrl">Control-Img: None</span>
+</div>
+
+<!-- hidden file inputs -->
+<input type="file" id="fileSrc"  accept="image/*" class="hidden">
+<input type="file" id="fileVfb"  accept=".vfb"    class="hidden">
+<input type="file" id="fileETF"  accept="image/*" class="hidden">
+<input type="file" id="fileTex"  accept="image/*" class="hidden">
+<input type="file" id="fileCtrl" accept="image/*" class="hidden">
+<input type="file" id="fileSize" accept="image/*" class="hidden">
+
+<!-- ======================= Pattern Picker (== C++ MyPatternPicker) ======================= -->
+<div id="pickerOverlay">
+  <div id="pickerBox">
+    <div id="pickerImgWrap">
+      <img id="pickerImg" alt="pattern chart (k × l)" draggable="false">
+      <div id="pickerMark"></div>
+    </div>
+    <div id="pickerRight">
+      <b>Preview</b>
+      <canvas id="pickerCanvas" width="128" height="128"></canvas>
+      <div id="pickerVals"></div>
+      <div class="ctl"><span class="lab" id="pickerS_t">Size : 0.600</span>
+        <input type="range" id="pickerS" min="0" max="1" step="0.001" value="0.6"></div>
+      <button id="btnPickSelect" class="primary">SELECT!</button>
+      <button id="btnPickClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="shaders.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
